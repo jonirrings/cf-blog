@@ -2,10 +2,10 @@ import {
   sqliteTable,
   text,
   integer,
-  relations,
   primaryKey,
-  uniqueKey,
+  unique,
 } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
 
 // ==================== 认证相关表 ====================
 
@@ -29,8 +29,9 @@ export const users = sqliteTable('users', {
     .notNull(),
   publisherApplicationReason: text('publisher_application_reason'), // 申请理由
   publisherApplicationReviewedAt: text('publisher_application_reviewed_at'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publisherApplicationReviewedBy: integer('publisher_application_reviewed_by').references(
-    () => users.id
+    (): any => users.id
   ),
   publisherApplicationRejectReason: text('publisher_application_reject_reason'),
 
@@ -81,7 +82,7 @@ export const posts = sqliteTable('posts', {
   status: text('status', { enum: ['draft', 'published'] })
     .default('draft')
     .notNull(),
-  framework: text('framework', { enum: ['next', 'nuxt', 'svelte'] }).notNull(),
+  framework: text('framework', { enum: ['next', 'nuxt', 'svelte', 'astro', 'solid'] }).notNull(),
   authorId: integer('author_id').references(() => authors.id),
 
   // 访问统计（冗余字段，快速查询）
@@ -187,7 +188,7 @@ export const postViewStats = sqliteTable(
     botViews: integer('bot_views').notNull().default(0),
   },
   (t) => ({
-    uniqueKey: uniqueKey(t.postId, t.date),
+    uniqueKey: unique().on(t.postId, t.date),
   })
 );
 

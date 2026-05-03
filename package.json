@@ -7,7 +7,7 @@
     "dev": "pnpm run --parallel dev",
     "build": "pnpm run build:db && pnpm run build:all",
     "build:db": "pnpm -F @cf-blog/db build",
-    "build:all": "pnpm -F next-blog build && pnpm -F nuxt-blog build && pnpm -F svelte-blog build",
+    "build:all": "pnpm -F next-blog build && pnpm -F nuxt-blog build && pnpm -F svelte-blog build && pnpm -F solid-blog build && pnpm -F astro-blog build",
     "build:shell": "pnpm -F shell build",
     "deploy": "wrangler pages deploy dist/ --config wrangler.toml",
     "db:migrate": "pnpm -F @cf-blog/db drizzle-kit generate && wrangler d1 migrations apply cf-blog-db --config wrangler.toml",
