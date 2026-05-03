@@ -4,11 +4,11 @@
  * 统一的国际化配置，支持所有 5 个框架
  */
 
-import i18next from 'i18next';
+import i18next, { type i18n as I18nInstance } from 'i18next';
 import { translations } from './translations';
 
 // 初始化配置
-export const i18n = i18next.createInstance();
+export const i18n: I18nInstance = i18next.createInstance();
 
 i18n.init({
   resources: {
