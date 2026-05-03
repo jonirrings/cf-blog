@@ -70,13 +70,10 @@ export async function verifyRegistrationResponse(
     // 创建 Passkey 记录
     const passkey: NewPasskey = {
       userId,
-      credentialId: id,
+      id,
       publicKey: Buffer.from(JSON.stringify(response)).toString('base64'),
       counter: 0,
-      deviceType: 'singleDevice',
-      backedUp: false,
-      transports: attestationResponse.transports?.join(',') || null,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
 
     return { success: true, passkey };
@@ -233,7 +230,7 @@ export async function savePasskey(db: any, passkey: NewPasskey): Promise<boolean
  */
 export async function deletePasskey(db: any, credentialId: string): Promise<boolean> {
   try {
-    await db.delete(passkeys).where(eq(passkeys.credentialId, credentialId));
+    await db.delete(passkeys).where(eq(passkeys.id, credentialId));
     return true;
   } catch (error) {
     console.error('[Passkey] 删除失败:', error);
@@ -246,7 +243,7 @@ export async function deletePasskey(db: any, credentialId: string): Promise<bool
  */
 export async function getPasskeyByCredentialId(db: any, credentialId: string): Promise<any> {
   return db.query.passkeys.findFirst({
-    where: eq(passkeys.credentialId, credentialId),
+    where: eq(passkeys.id, credentialId),
     with: {
       user: {
         columns: {

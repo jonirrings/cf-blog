@@ -8,6 +8,9 @@
  */
 
 import type { Env } from '../index';
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '@cf-blog/db/schema';
+import { tags as tagsTable, posts as postsTable } from '@cf-blog/db/schema';
 
 export interface GhostExportData {
   meta: {
@@ -99,14 +102,14 @@ export async function importFromGhost(
   let importedPosts = 0;
   let importedTags = 0;
 
-  const db = env.DB;
+  const db = drizzle(env.DB, { schema });
 
   // 导入标签
   if (ghostData.data.tags) {
     for (const tag of ghostData.data.tags) {
       try {
         await db
-          .insert(db.schema.tags)
+          .insert(tagsTable)
           .values({
             name: tag.name,
             slug: tag.slug,
@@ -127,7 +130,7 @@ export async function importFromGhost(
           post.custom_excerpt || post.excerpt || post.html.slice(0, 200).replace(/<[^>]+>/g, '');
 
         await db
-          .insert(db.schema.posts)
+          .insert(postsTable)
           .values({
             title: post.title,
             slug: post.slug,
@@ -160,7 +163,7 @@ export async function importFromGhost(
  * 导出为 Ghost JSON 格式
  */
 export async function exportToGhost(env: Env): Promise<GhostExportData> {
-  const db = env.DB;
+  const db = drizzle(env.DB, { schema });
 
   // 获取所有文章
   const posts = await db.query.posts.findMany({
@@ -173,7 +176,7 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
   const tags = await db.query.tags.findMany();
 
   // 转换为 Ghost 格式
-  const ghostPosts = posts.map((post) => ({
+  const ghostPosts = posts.map((post: any) => ({
     id: post.id.toString(),
     uuid: crypto.randomUUID(),
     title: post.title,
@@ -189,17 +192,17 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
     published_at: post.publishedAt || undefined,
     custom_excerpt: post.excerpt || undefined,
     excerpt: post.excerpt || undefined,
-    tags: post.tags?.map((tag) => ({
-      id: tag.id.toString(),
-      name: tag.name,
-      slug: tag.slug,
+    tags: post.tags?.map((pt: any) => ({
+      id: pt.tags?.id?.toString() ?? pt.tagId?.toString() ?? '',
+      name: pt.tags?.name ?? '',
+      slug: pt.tags?.slug ?? '',
       visibility: 'public' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })),
   }));
 
-  const ghostTags = tags.map((tag) => ({
+  const ghostTags = tags.map((tag: any) => ({
     id: tag.id.toString(),
     name: tag.name,
     slug: tag.slug,

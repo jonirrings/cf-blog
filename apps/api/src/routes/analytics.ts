@@ -19,6 +19,9 @@ import { getHourlyTrend, getDailyTrend, getTopPages, getRefererStats } from '../
 import { batchSyncAnalytics } from '../analytics/sync';
 import { shouldCountVisit } from '../analytics/crawler';
 
+// Cast KVNamespace for type compatibility between different workers-types versions
+type AnalyticsKV = Parameters<typeof recordVisit>[0];
+
 const app = new Hono<{ Bindings: Env }>();
 
 /**
@@ -41,7 +44,7 @@ app.post('/record', async (c) => {
   const userAgent = c.req.header('User-Agent') || '';
   const userId = (c as any).session?.userId;
 
-  const result = await recordVisit(c.env.CACHE_KV, postId, ip, userAgent, userId);
+  const result = await recordVisit(c.env.CACHE_KV as AnalyticsKV, postId, ip, userAgent, userId);
 
   return c.json({
     success: true,
@@ -55,7 +58,7 @@ app.post('/record', async (c) => {
  */
 app.get('/views/:postId', async (c) => {
   const postId = c.req.param('postId');
-  const count = await getVisitCount(c.env.CACHE_KV, postId);
+  const count = await getVisitCount(c.env.CACHE_KV as AnalyticsKV, postId);
   return c.json({ success: true, postId, count });
 });
 
@@ -68,7 +71,7 @@ app.get('/views/batch', async (c) => {
     return c.json({ success: false, error: 'No post IDs provided' }, 400);
   }
 
-  const counts = await getVisitCounts(c.env.CACHE_KV, postIds);
+  const counts = await getVisitCounts(c.env.CACHE_KV as AnalyticsKV, postIds);
   const result = Object.fromEntries(counts);
 
   return c.json({ success: true, counts: result });
@@ -79,7 +82,7 @@ app.get('/views/batch', async (c) => {
  */
 app.get('/trend/hourly', async (c) => {
   const hours = parseInt(c.req.query('hours') || '24', 10);
-  const trend = await getHourlyTrend(c.env.CACHE_KV, Math.min(hours, 168)); // 最多 7 天
+  const trend = await getHourlyTrend(c.env.CACHE_KV as AnalyticsKV, Math.min(hours, 168)); // 最多 7 天
   return c.json({ success: true, trend });
 });
 
@@ -88,7 +91,7 @@ app.get('/trend/hourly', async (c) => {
  */
 app.get('/trend/daily', async (c) => {
   const days = parseInt(c.req.query('days') || '7', 10);
-  const trend = await getDailyTrend(c.env.CACHE_KV, Math.min(days, 30)); // 最多 30 天
+  const trend = await getDailyTrend(c.env.CACHE_KV as AnalyticsKV, Math.min(days, 30)); // 最多 30 天
   return c.json({ success: true, trend });
 });
 
@@ -97,7 +100,7 @@ app.get('/trend/daily', async (c) => {
  */
 app.get('/top', async (c) => {
   const limit = parseInt(c.req.query('limit') || '10', 10);
-  const topPages = await getTopPages(c.env.CACHE_KV, Math.min(limit, 100));
+  const topPages = await getTopPages(c.env.CACHE_KV as AnalyticsKV, Math.min(limit, 100));
   return c.json({ success: true, topPages });
 });
 
@@ -106,7 +109,7 @@ app.get('/top', async (c) => {
  */
 app.get('/referer/:postId', async (c) => {
   const postId = c.req.param('postId');
-  const referers = await getRefererStats(c.env.CACHE_KV, postId);
+  const referers = await getRefererStats(c.env.CACHE_KV as AnalyticsKV, postId);
   return c.json({ success: true, postId, referers });
 });
 
@@ -136,7 +139,7 @@ app.post('/sync', adminMiddleware, async (c) => {
     );
   }
 
-  const results = await batchSyncAnalytics(c.env.CACHE_KV, apiToken, accountId, zoneId, postIds);
+  const results = await batchSyncAnalytics(c.env.CACHE_KV as AnalyticsKV, apiToken, accountId, zoneId, postIds);
 
   return c.json({
     success: true,

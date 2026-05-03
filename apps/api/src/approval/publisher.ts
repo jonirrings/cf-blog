@@ -42,18 +42,20 @@ export async function applyForPublisher(
       .set({
         role: 'publisher',
         isApproved: false, // 需要管理员审批
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId,
-      action: 'PUBLISHER_APPLICATION_SUBMITTED',
-      targetType: 'user',
-      targetId: userId.toString(),
-      details: JSON.stringify({ userEmail: user.email }),
-      timestamp: new Date(),
+      action: 'PUBLISHER_APPLICATION_SUBMITTED' as const,
+      resource: `user:${userId}`,
+      resourceType: 'application',
+      resourceId: userId,
+      success: true,
+      metadata: JSON.stringify({ userEmail: user.email }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };
@@ -80,7 +82,7 @@ export async function getPendingApplications(db: any): Promise<any[]> {
       createdAt: true,
       updatedAt: true,
     },
-    orderBy: (users, { desc }) => [desc(users.updatedAt)],
+    orderBy: (users: typeof import('@cf-blog/db/schema').users, { desc }: { desc: (col: any) => any }) => [desc(users.updatedAt)],
   });
 }
 
@@ -114,18 +116,20 @@ export async function approvePublisherApplication(
       .update(users)
       .set({
         isApproved: true,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: 'PUBLISHER_APPLICATION_APPROVED',
-      targetType: 'user',
-      targetId: userId.toString(),
-      details: JSON.stringify({ targetEmail: user.email }),
-      timestamp: new Date(),
+      action: 'PUBLISHER_APPLICATION_APPROVED' as const,
+      resource: `user:${userId}`,
+      resourceType: 'application',
+      resourceId: userId,
+      success: true,
+      metadata: JSON.stringify({ targetEmail: user.email }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };
@@ -163,18 +167,20 @@ export async function rejectPublisherApplication(
       .set({
         role: 'commenter',
         isApproved: user.isApproved, // 保持原有审批状态
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: 'PUBLISHER_APPLICATION_REJECTED',
-      targetType: 'user',
-      targetId: userId.toString(),
-      details: JSON.stringify({ targetEmail: user.email, reason }),
-      timestamp: new Date(),
+      action: 'PUBLISHER_APPLICATION_REJECTED' as const,
+      resource: `user:${userId}`,
+      resourceType: 'application',
+      resourceId: userId,
+      success: true,
+      metadata: JSON.stringify({ targetEmail: user.email, reason }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };

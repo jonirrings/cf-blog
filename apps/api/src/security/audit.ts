@@ -5,6 +5,7 @@
  */
 
 import { auditLogs, type AuditAction } from '@cf-blog/db/schema';
+import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
 
 /**
  * 记录审计日志
@@ -25,12 +26,14 @@ export async function createAuditLog(
     await db.insert(auditLogs).values({
       userId: data.userId,
       action: data.action,
-      targetType: data.targetType,
-      targetId: data.targetId,
-      details: data.details ? JSON.stringify(data.details) : null,
-      ip: data.ip || null,
+      resource: `${data.targetType}:${data.targetId}`,
+      resourceType: data.targetType,
+      resourceId: typeof data.targetId === 'number' ? data.targetId : parseInt(data.targetId, 10),
+      ipAddress: data.ip || null,
       userAgent: data.userAgent || null,
-      timestamp: new Date(),
+      metadata: data.details ? JSON.stringify(data.details) : null,
+      success: true,
+      timestamp: new Date().toISOString(),
     });
     return true;
   } catch (error) {
@@ -64,55 +67,49 @@ export async function getAuditLogs(
   const offset = (page - 1) * limit;
 
   // 构建查询条件
-  const whereClauses: string[] = [];
-  const params: any[] = [];
+  const conditions = [];
 
   if (action) {
-    whereClauses.push('action = ?');
-    params.push(action);
+    conditions.push(eq(auditLogs.action, action));
   }
 
   if (userId) {
-    whereClauses.push('userId = ?');
-    params.push(userId);
+    conditions.push(eq(auditLogs.userId, userId));
   }
 
   if (targetType) {
-    whereClauses.push('targetType = ?');
-    params.push(targetType);
+    conditions.push(eq(auditLogs.resourceType, targetType));
   }
 
   if (startDate) {
-    whereClauses.push('timestamp >= ?');
-    params.push(startDate.toISOString());
+    conditions.push(gte(auditLogs.timestamp, startDate.toISOString()));
   }
 
   if (endDate) {
-    whereClauses.push('timestamp <= ?');
-    params.push(endDate.toISOString());
+    conditions.push(lte(auditLogs.timestamp, endDate.toISOString()));
   }
 
-  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   // 查询总数
   const totalResult = await db
-    .select({ count: integer('count') })
+    .select({ count: sql<number>`count(*)` })
     .from(auditLogs)
-    .where(whereClause ? sql.raw(whereClause) : undefined)
+    .where(whereClause)
     .get();
 
   // 查询日志
   const logs = await db
     .select()
     .from(auditLogs)
-    .where(whereClause ? sql.raw(whereClause) : undefined)
-    .orderBy(auditLogs.timestamp)
+    .where(whereClause)
+    .orderBy(desc(auditLogs.timestamp))
     .limit(limit)
     .offset(offset);
 
   return {
     logs,
-    total: totalResult?.count || 0,
+    total: totalResult?.count ?? 0,
     page,
     limit,
   };

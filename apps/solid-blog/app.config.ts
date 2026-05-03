@@ -4,9 +4,8 @@ export default defineConfig({
   server: {
     preset: 'static',
   },
-  outDir: '../dist/solid',
-  base: '/solid',
   vite: {
+    base: '/solid',
     build: {
       target: 'esnext',
     },

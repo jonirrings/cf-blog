@@ -29,8 +29,8 @@ async function getJwtKey(kv: KVNamespace): Promise<CryptoKey> {
 /**
  * Base64URL 编码
  */
-function base64UrlEncode(ArrayBuffer): string {
-  const bytes = new Uint8Array(data);
+function base64UrlEncode(buffer: ArrayBuffer | Uint8Array): string {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
@@ -42,7 +42,7 @@ function base64UrlEncode(ArrayBuffer): string {
  * Base64URL 解码
  */
 function base64UrlDecode(str: string): Uint8Array {
-  let binary = atob(
+  const binary = atob(
     str
       .replace(/-/g, '+')
       .replace(/_/g, '/')
@@ -108,7 +108,7 @@ export async function verify(
     const data = new TextEncoder().encode(`${headerEncoded}.${bodyEncoded}`);
     const signature = base64UrlDecode(signatureEncoded);
 
-    const isValid = await crypto.subtle.verify(ALGORITHM, key, signature, data);
+    const isValid = await crypto.subtle.verify(ALGORITHM, key, signature as BufferSource, data);
     if (!isValid) {
       return null;
     }

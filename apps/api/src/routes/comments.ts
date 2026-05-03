@@ -11,8 +11,13 @@
  */
 
 import { Hono } from 'hono';
+import { drizzle } from 'drizzle-orm/d1';
+import { eq, and, desc } from 'drizzle-orm';
+import * as schema from '@cf-blog/db/schema';
+import { comments, users, posts } from '@cf-blog/db/schema';
 import type { Env } from '../index';
-import { authMiddleware, adminMiddleware, requireAuth } from '../auth/middleware';
+import { authMiddleware, adminMiddleware } from '../auth/middleware';
+import type { AuthContext } from '../auth/middleware';
 import { getSession } from '../auth/session';
 import {
   getPendingComments,
@@ -34,11 +39,7 @@ app.get('/', async (c) => {
   const limit = parseInt(c.req.query('limit') || '20');
 
   try {
-    const { drizzle } = await import('drizzle-orm/d1');
-    const { comments, users, posts } = await import('@cf-blog/db/schema');
-    const { eq, and, desc } = await import('drizzle-orm');
-
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 构建查询条件
     const conditions: any[] = [];
@@ -99,18 +100,18 @@ app.get('/pending', authMiddleware, async (c: any) => {
   const session = c.session;
   const postId = c.req.query('postId') ? parseInt(c.req.query('postId')) : undefined;
 
-  const comments = await getPendingComments(c.env.DB, postId, session.userId);
+  const pendingComments = await getPendingComments(c.env.DB, postId, session.userId);
 
   return c.json({
     success: true,
-    comments,
+    comments: pendingComments,
   });
 });
 
 /**
  * POST /api/comments - 创建评论
  */
-app.post('/', requireAuth(), async (c: any) => {
+app.post('/', authMiddleware, async (c: any) => {
   const session = c.session;
 
   try {
@@ -121,14 +122,9 @@ app.post('/', requireAuth(), async (c: any) => {
       return c.json({ error: '缺少必要参数' }, 400);
     }
 
-    const { drizzle } = await import('drizzle-orm/d1');
-    const { comments } = await import('@cf-blog/db/schema');
-    const { eq } = await import('drizzle-orm');
-
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 检查文章是否存在
-    const { posts } = await import('@cf-blog/db/schema');
     const post = await db.query.posts.findFirst({
       where: eq(posts.id, parseInt(postId)),
     });
@@ -138,7 +134,10 @@ app.post('/', requireAuth(), async (c: any) => {
     }
 
     // 验证输入
-    const validatedContent = validateCommentInput(content);
+    const validated = validateCommentInput(content);
+    if (!validated.valid) {
+      return c.json({ error: validated.error }, 400);
+    }
 
     // 创建评论
     const result = await db
@@ -146,7 +145,7 @@ app.post('/', requireAuth(), async (c: any) => {
       .values({
         postId: parseInt(postId),
         userId: session.userId,
-        content: validatedContent,
+        content: validated.sanitized ?? content,
         userApproved: false,
         postApproved: false,
         rejected: false,
@@ -176,12 +175,7 @@ app.post('/:id/approve', authMiddleware, async (c: any) => {
   const commentId = parseInt(c.req.param('id'));
   const isAdmin = session.userRole === 'admin';
 
-  // 检查是否是文章作者
-  const { drizzle } = await import('drizzle-orm/d1');
-  const { comments, posts } = await import('@cf-blog/db/schema');
-  const { eq } = await import('drizzle-orm');
-
-  const db = drizzle(c.env.DB);
+  const db = drizzle(c.env.DB, { schema });
   const comment = await db.query.comments.findFirst({
     where: eq(comments.id, commentId),
     with: { post: { columns: { authorId: true } } },
@@ -220,11 +214,7 @@ app.post('/:id/reject', authMiddleware, async (c: any) => {
   const body = await c.req.json().catch(() => ({}));
   const reason = body.reason;
 
-  const { drizzle } = await import('drizzle-orm/d1');
-  const { comments, posts } = await import('@cf-blog/db/schema');
-  const { eq } = await import('drizzle-orm');
-
-  const db = drizzle(c.env.DB);
+  const db = drizzle(c.env.DB, { schema });
   const comment = await db.query.comments.findFirst({
     where: eq(comments.id, commentId),
     with: { post: { columns: { authorId: true } } },
@@ -257,11 +247,7 @@ app.delete('/:id', authMiddleware, async (c: any) => {
   const session = c.session;
   const commentId = parseInt(c.req.param('id'));
 
-  const { drizzle } = await import('drizzle-orm/d1');
-  const { comments } = await import('@cf-blog/db/schema');
-  const { eq } = await import('drizzle-orm');
-
-  const db = drizzle(c.env.DB);
+  const db = drizzle(c.env.DB, { schema });
   const comment = await db.query.comments.findFirst({
     where: eq(comments.id, commentId),
   });

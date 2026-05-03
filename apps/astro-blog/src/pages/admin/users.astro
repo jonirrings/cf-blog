@@ -78,18 +78,8 @@ const i18nValues = {
     </div>
   </div>
 
-  <script define:i18n={i18nValues}>
-    interface User {
-      id: number;
-      email: string;
-      name: string;
-      role: 'admin' | 'publisher' | 'commenter';
-      isApproved: boolean;
-      publisherApplicationStatus: 'none' | 'pending' | 'approved' | 'rejected';
-      createdAt: string;
-    }
-
-    let users: User[] = [];
+  <script define:vars={{ i18n: i18nValues }}>
+    let users = [];
     let currentFilter = 'all';
 
     async function fetchUsers() {
@@ -126,7 +116,8 @@ const i18nValues = {
     }
 
     function renderUsers() {
-      const tbody = document.getElementById('users-table-body')!;
+      const tbody = document.getElementById('users-table-body');
+      if (!tbody) return;
       const filtered = getFilteredUsers();
 
       if (filtered.length === 0) {
@@ -146,19 +137,19 @@ const i18nValues = {
           </td>
           <td class="px-6 py-4">
             <select
-              value="${user.role}"
-              onchange="handleRoleChange(${user.id}, this.value)"
+              data-action="role-change"
+              data-id="${user.id}"
               class="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
             >
-              <option value="commenter">${i18n.user.roleCommenter}</option>
-              <option value="publisher">${i18n.user.rolePublisher}</option>
-              <option value="admin">${i18n.user.roleAdmin}</option>
+              <option value="commenter" ${user.role === 'commenter' ? 'selected' : ''}>${i18n.user.roleCommenter}</option>
+              <option value="publisher" ${user.role === 'publisher' ? 'selected' : ''}>${i18n.user.rolePublisher}</option>
+              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>${i18n.user.roleAdmin}</option>
             </select>
           </td>
           <td class="px-6 py-4">
             ${user.isApproved
               ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">${i18n.user.statusApproved}</span>`
-              : `<button onclick="handleApproveUser(${user.id})" class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200">${i18n.user.actionApprove}</button>`
+              : `<button data-action="approve-user" data-id="${user.id}" class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200">${i18n.user.actionApprove}</button>`
             }
           </td>
           <td class="px-6 py-4">
@@ -170,12 +161,12 @@ const i18nValues = {
       `).join('');
     }
 
-    function getUserPublisherAppHtml(user: User) {
+    function getUserPublisherAppHtml(user) {
       if (user.publisherApplicationStatus === 'none') return '-';
       if (user.publisherApplicationStatus === 'pending') {
         return `<div class="flex gap-2">
-          <button onclick="handlePublisherApplication(${user.id}, true)" class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
-          <button onclick="handlePublisherApplication(${user.id}, false)" class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
+          <button data-action="publisher-approve" data-id="${user.id}" class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
+          <button data-action="publisher-reject" data-id="${user.id}" class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
         </div>`;
       }
       if (user.publisherApplicationStatus === 'approved') {
@@ -184,7 +175,7 @@ const i18nValues = {
       return `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">${i18n.user.publisherApplicationRejected}</span>`;
     }
 
-    async function handleApproveUser(id: number) {
+    async function handleApproveUser(id) {
       try {
         const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
         const res = await fetch(`${apiBaseUrl}/api/users/${id}/approve`, { method: 'POST' });
@@ -198,7 +189,7 @@ const i18nValues = {
       }
     }
 
-    async function handleRoleChange(id: number, newRole: 'admin' | 'publisher' | 'commenter') {
+    async function handleRoleChange(id, newRole) {
       try {
         const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
         const res = await fetch(`${apiBaseUrl}/api/users/${id}/role`, {
@@ -214,7 +205,7 @@ const i18nValues = {
       }
     }
 
-    async function handlePublisherApplication(id: number, approve: boolean) {
+    async function handlePublisherApplication(id, approve) {
       try {
         const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
         const res = await fetch(`${apiBaseUrl}/api/users/${id}/publisher-application`, {
@@ -235,6 +226,33 @@ const i18nValues = {
         console.error('Publisher application failed:', err);
       }
     }
+
+    // Event delegation for user actions
+    document.getElementById('users-table-body')?.addEventListener('click', (e) => {
+      const target = e.target;
+      const approveBtn = target.closest('[data-action="approve-user"]');
+      if (approveBtn) {
+        handleApproveUser(Number(approveBtn.dataset.id));
+        return;
+      }
+      const publisherApproveBtn = target.closest('[data-action="publisher-approve"]');
+      if (publisherApproveBtn) {
+        handlePublisherApplication(Number(publisherApproveBtn.dataset.id), true);
+        return;
+      }
+      const publisherRejectBtn = target.closest('[data-action="publisher-reject"]');
+      if (publisherRejectBtn) {
+        handlePublisherApplication(Number(publisherRejectBtn.dataset.id), false);
+        return;
+      }
+    });
+
+    document.getElementById('users-table-body')?.addEventListener('change', (e) => {
+      const target = e.target;
+      if (target.matches('[data-action="role-change"]')) {
+        handleRoleChange(Number(target.dataset.id), target.value);
+      }
+    });
 
     // Filter button handlers
     document.querySelectorAll('.filter-btn').forEach(btn => {

@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '@cf-blog/db/schema';
 import { seed as seedData, clear as clearData } from '@cf-blog/db/seed';
 
 const seed = new Hono<{
@@ -18,7 +19,7 @@ const seed = new Hono<{
 // POST /api/seed - 执行种子数据插入
 seed.post('/', async (c) => {
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
     await seedData(db);
     return c.json({
       success: true,
@@ -39,7 +40,7 @@ seed.post('/', async (c) => {
 // DELETE /api/seed - 清除种子数据
 seed.delete('/', async (c) => {
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
     await clearData(db);
     return c.json({
       success: true,

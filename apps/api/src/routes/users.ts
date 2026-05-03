@@ -89,7 +89,7 @@ app.put('/:id/approve', adminMiddleware, async (c: any) => {
 /**
  * POST /api/users/publisher-apply - 申请成为发布者
  */
-app.post('/publisher-apply', requireAuth(), async (c: any) => {
+app.post('/publisher-apply', authMiddleware, async (c: any) => {
   const session = c.session;
 
   const result = await applyForPublisher(c.env.DB, session.userId);

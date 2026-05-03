@@ -83,17 +83,8 @@ const i18nValues = {
     </form>
   </div>
 
-  <script define:i18n={i18nValues}>
-    interface SiteConfig {
-      title: string;
-      description: string;
-      logo: string;
-      footerText: string;
-      enableComments: boolean;
-      enableAnalytics: boolean;
-    }
-
-    let config: SiteConfig = {
+  <script define:vars={{ i18n: i18nValues }}>
+    let config = {
       title: '',
       description: '',
       logo: '',
@@ -111,34 +102,48 @@ const i18nValues = {
         if (data.data) {
           config = { ...config, ...data.data };
           // Populate form
-          (document.getElementById('cfg-title') as HTMLInputElement).value = config.title;
-          (document.getElementById('cfg-desc') as HTMLTextAreaElement).value = config.description;
-          (document.getElementById('cfg-logo') as HTMLInputElement).value = config.logo;
-          (document.getElementById('cfg-footer') as HTMLInputElement).value = config.footerText;
-          (document.getElementById('cfg-comments') as HTMLInputElement).checked = config.enableComments;
-          (document.getElementById('cfg-analytics') as HTMLInputElement).checked = config.enableAnalytics;
+          const titleEl = document.getElementById('cfg-title');
+          const descEl = document.getElementById('cfg-desc');
+          const logoEl = document.getElementById('cfg-logo');
+          const footerEl = document.getElementById('cfg-footer');
+          const commentsEl = document.getElementById('cfg-comments');
+          const analyticsEl = document.getElementById('cfg-analytics');
+          if (titleEl) titleEl.value = config.title;
+          if (descEl) descEl.value = config.description;
+          if (logoEl) logoEl.value = config.logo;
+          if (footerEl) footerEl.value = config.footerText;
+          if (commentsEl) commentsEl.checked = config.enableComments;
+          if (analyticsEl) analyticsEl.checked = config.enableAnalytics;
         }
       } catch (err) {
         console.error('Failed to fetch config:', err);
       }
     }
 
-    async function handleSubmit(e: Event) {
+    async function handleSubmit(e) {
       e.preventDefault();
-      const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+      const saveBtn = document.getElementById('save-btn');
       const saveMessage = document.getElementById('save-message');
 
-      saveBtn.disabled = true;
-      saveBtn.textContent = i18n.common.loading;
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = i18n.common.loading;
+      }
       if (saveMessage) saveMessage.style.display = 'none';
 
       // Gather form data
-      config.title = (document.getElementById('cfg-title') as HTMLInputElement).value;
-      config.description = (document.getElementById('cfg-desc') as HTMLTextAreaElement).value;
-      config.logo = (document.getElementById('cfg-logo') as HTMLInputElement).value;
-      config.footerText = (document.getElementById('cfg-footer') as HTMLInputElement).value;
-      config.enableComments = (document.getElementById('cfg-comments') as HTMLInputElement).checked;
-      config.enableAnalytics = (document.getElementById('cfg-analytics') as HTMLInputElement).checked;
+      const titleEl = document.getElementById('cfg-title');
+      const descEl = document.getElementById('cfg-desc');
+      const logoEl = document.getElementById('cfg-logo');
+      const footerEl = document.getElementById('cfg-footer');
+      const commentsEl = document.getElementById('cfg-comments');
+      const analyticsEl = document.getElementById('cfg-analytics');
+      config.title = titleEl ? titleEl.value : '';
+      config.description = descEl ? descEl.value : '';
+      config.logo = logoEl ? logoEl.value : '';
+      config.footerText = footerEl ? footerEl.value : '';
+      config.enableComments = commentsEl ? commentsEl.checked : true;
+      config.enableAnalytics = analyticsEl ? analyticsEl.checked : true;
 
       try {
         const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
@@ -157,8 +162,10 @@ const i18nValues = {
         console.error('Save failed:', err);
         alert(i18n.settings.saveFailed);
       } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = i18n.common.save;
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = i18n.common.save;
+        }
       }
     }
 

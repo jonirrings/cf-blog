@@ -1,5 +1,5 @@
-import { Component, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
-import { useEditor, EditorContent } from '@tiptap/core';
+import { type Component, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
+import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
@@ -8,12 +8,12 @@ import { useTranslation } from '~/lib/i18n';
 
 export interface JSONContent {
   type?: string;
-  attrs?: Record<string, any>;
+  attrs?: Record<string, unknown>;
   content?: JSONContent[];
   text?: string;
   marks?: Array<{
     type: string;
-    attrs?: Record<string, any>;
+    attrs?: Record<string, unknown>;
   }>;
 }
 
@@ -26,52 +26,53 @@ interface RichTextEditorProps {
 const RichTextEditor: Component<RichTextEditorProps> = (props) => {
   const { t } = useTranslation();
   const [editorContainer, setEditorContainer] = createSignal<HTMLDivElement | null>(null);
-
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: props.placeholder || t('post.contentPlaceholder'),
-      }),
-      Image.configure({
-        allowBase64: true,
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          rel: 'noopener noreferrer',
-          target: '_blank',
-        },
-      }),
-    ],
-    content: props.initialContent,
-    editorProps: {
-      attributes: {
-        class:
-          'prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg',
-      },
-    },
-    onUpdate: ({ editor }) => {
-      props.onContentChange?.(editor.getJSON());
-    },
-  });
+  const [editor, setEditor] = createSignal<Editor | null>(null);
 
   onMount(() => {
     const container = editorContainer();
-    if (container && editor) {
-      editor.mount(container);
-    }
+    if (!container) return;
+
+    const instance = new Editor({
+      element: container,
+      extensions: [
+        StarterKit,
+        Placeholder.configure({
+          placeholder: props.placeholder || t('post.contentPlaceholder'),
+        }),
+        Image.configure({
+          allowBase64: true,
+        }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: {
+            rel: 'noopener noreferrer',
+            target: '_blank',
+          },
+        }),
+      ],
+      content: props.initialContent,
+      editorProps: {
+        attributes: {
+          class:
+            'prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg',
+        },
+      },
+      onUpdate: ({ editor: updatedEditor }) => {
+        props.onContentChange?.(updatedEditor.getJSON() as JSONContent);
+      },
+    });
+
+    setEditor(instance);
   });
 
   onCleanup(() => {
-    if (editor) {
-      editor.destroy();
-    }
+    editor()?.destroy();
   });
 
   createEffect(() => {
-    if (props.initialContent && editor) {
-      editor.commands.setContent(props.initialContent);
+    const currentEditor = editor();
+    if (props.initialContent && currentEditor && !currentEditor.isDestroyed) {
+      currentEditor.commands.setContent(props.initialContent);
     }
   });
 

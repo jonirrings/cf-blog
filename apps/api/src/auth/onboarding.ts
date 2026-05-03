@@ -78,11 +78,11 @@ export async function createAdminUser(
       passwordHash,
       role: 'admin',
       isApproved: true, // 管理员自动审批
+      publisherApplicationStatus: 'none',
       githubId: null,
       avatar: null,
-      bio: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     const result = await db.insert(users).values(newUser).returning({ id: users.id });

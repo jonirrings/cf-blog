@@ -19,8 +19,8 @@
       "types": "./src/client.ts"
     },
     "./seed": {
-      "import": "./src/seed.ts",
-      "types": "./src/seed.ts"
+      "import": "./src/seed/index.ts",
+      "types": "./src/seed/index.ts"
     }
   },
   "scripts": {
@@ -43,6 +43,6 @@
     "@cloudflare/workers-types": "catalog:",
     "drizzle-kit": "^0.21.0",
     "typescript": "catalog:",
-    "wrangler": "^4.87.0"
+    "wrangler": "catalog:"
   }
 }

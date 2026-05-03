@@ -81,7 +81,7 @@ app.get('/markdown/:postId', adminMiddleware, async (c) => {
   const postId = c.req.param('postId');
 
   try {
-    const result = await exportPostAsMarkdown(c.env, postId);
+    const result = await exportPostAsMarkdown(c.env, postId!);
 
     if (!result) {
       return c.json(
@@ -151,7 +151,7 @@ app.get('/zip/:postId', adminMiddleware, async (c) => {
   const postId = c.req.param('postId');
 
   try {
-    const result = await exportPostAsZip(c.env, postId);
+    const result = await exportPostAsZip(c.env, postId!);
 
     if (!result) {
       return c.json(
@@ -163,7 +163,7 @@ app.get('/zip/:postId', adminMiddleware, async (c) => {
       );
     }
 
-    return c.body(result.data, 200, {
+    return c.body(result.data as any, 200, {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${result.filename}"`,
     });
@@ -185,7 +185,7 @@ app.get('/zip', adminMiddleware, async (c) => {
   try {
     const result = await exportBlogAsZip(c.env);
 
-    return c.body(result.data, 200, {
+    return c.body(result.data as any, 200, {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${result.filename}"`,
     });

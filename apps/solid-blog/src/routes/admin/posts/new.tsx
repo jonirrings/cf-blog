@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { type Component, createSignal } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import { useTranslation } from '~/lib/i18n';
 import RichTextEditor from '~/components/RichTextEditor';

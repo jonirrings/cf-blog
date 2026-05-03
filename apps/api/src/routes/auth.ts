@@ -30,6 +30,7 @@ import { authMiddleware } from '../auth/middleware';
 import type { AuthContext } from '../auth/middleware';
 import { eq } from 'drizzle-orm';
 import { users } from '@cf-blog/db/schema';
+import * as schema from '@cf-blog/db/schema';
 import { drizzle } from 'drizzle-orm/d1';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -115,7 +116,7 @@ app.get('/github/callback', async (c) => {
 
   // 重定向到前端页面
   const frontendUrl = c.req.query('redirect') || '/';
-  return c.redirect(frontendUrl, 302, cookie);
+  return c.redirect(frontendUrl, 302);
 });
 
 /**
@@ -214,7 +215,7 @@ app.post('/login', async (c) => {
       return c.json({ error: '邮箱和密码不能为空' }, 400);
     }
 
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
     const user = await db.query.users.findFirst({
       where: eq(users.email, email.toLowerCase()),
     });
@@ -274,7 +275,7 @@ app.post('/register', async (c) => {
       return c.json({ error: '密码长度至少为 6 位' }, 400);
     }
 
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 检查邮箱是否已存在
     const existingUser = await db.query.users.findFirst({

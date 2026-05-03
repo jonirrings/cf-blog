@@ -7,7 +7,21 @@
  * - 定时同步任务
  */
 
-import type { KVNamespace } from '@cloudflare/workers-types';
+// Use a compatible KVNamespace type to avoid type mismatch between different workers-types versions
+type KVNamespace = {
+  get(key: string, options?: Partial<KVNamespaceGetOptions<undefined>>): Promise<string | null>;
+  get(key: string, type: 'text'): Promise<string | null>;
+  get(key: string, type: 'json'): Promise<unknown>;
+  get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer>;
+  get(key: string, type: 'stream'): Promise<ReadableStream>;
+  list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{
+    keys: Array<{ name: string; expiration?: number; metadata?: unknown }>;
+    list_complete: boolean;
+    cursor?: string;
+  }>;
+  put(key: string, value: string | ReadableStream | ArrayBuffer, options?: { expirationTtl?: number; expiration?: number; metadata?: unknown }): Promise<void>;
+  delete(key: string): Promise<void>;
+};
 
 export interface CloudflareAnalyticsResponse {
   success: boolean;
@@ -15,7 +29,7 @@ export interface CloudflareAnalyticsResponse {
   messages: any[];
   result: {
     data: {
-      sum?: number;
+      sum?: { requests?: number };
       dimensions?: {
         datetime?: string;
         url?: string;
@@ -127,7 +141,7 @@ export async function syncAnalytics(
       if (group.dimensions) {
         for (const dim of group.dimensions) {
           if (dim.url?.includes(postId)) {
-            cloudflareCount += group.sum?.requests || 0;
+            cloudflareCount += group.sum?.requests ?? 0;
           }
         }
       }

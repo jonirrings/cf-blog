@@ -64,7 +64,7 @@ export class RoomDO {
 
     // 记录读者
     this.readers.set(sessionId, {
-      userId,
+      userId: userId ?? undefined,
       lastSeen: Date.now(),
     });
 
@@ -96,12 +96,13 @@ export class RoomDO {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case 'room:heartbeat':
+        case 'room:heartbeat': {
           const sessionId = data.sessionId;
           if (sessionId && this.readers.has(sessionId)) {
             this.readers.get(sessionId)!.lastSeen = Date.now();
           }
           break;
+        }
       }
     } catch (error) {
       console.error('[RoomDO] Message parse error:', error);
@@ -128,8 +129,8 @@ export class RoomDO {
       const now = Date.now();
       const timeout = 30000;
 
-      for (const [sessionId] of this.readers.entries()) {
-        if (now - sessionId.hashCode() > timeout) {
+      for (const [sessionId, reader] of this.readers.entries()) {
+        if (now - (reader.lastSeen ?? 0) > timeout) {
           this.readers.delete(sessionId);
         }
       }

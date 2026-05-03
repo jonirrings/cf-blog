@@ -54,7 +54,7 @@ export class PresenceDO {
 
     // 记录连接
     this.connections.set(sessionId, {
-      userId,
+      userId: userId ?? undefined,
       lastSeen: Date.now(),
     });
 
@@ -85,13 +85,14 @@ export class PresenceDO {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case 'presence:heartbeat':
+        case 'presence:heartbeat': {
           // 更新心跳
           const sessionId = data.sessionId;
           if (sessionId && this.connections.has(sessionId)) {
             this.connections.get(sessionId)!.lastSeen = Date.now();
           }
           break;
+        }
 
         case 'presence:subscribe':
           // 订阅更新

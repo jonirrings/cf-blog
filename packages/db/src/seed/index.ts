@@ -4,7 +4,7 @@
  * 用于初始化和测试的数据
  */
 
-import { drizzle } from 'drizzle-orm/d1';
+import type { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../schema';
 
 // 模拟用户数据

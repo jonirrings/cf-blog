@@ -1,10 +1,11 @@
 ---
 import { getLocaleFromRequest, getT } from '../lib/i18n';
+import type { Locale } from '@cf-blog/i18n';
 
 interface Props {
   title: string;
   description?: string;
-  locale?: string;
+  locale?: Locale;
 }
 
 const { title, description, locale: localeProp } = Astro.props;

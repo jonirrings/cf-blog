@@ -29,8 +29,7 @@ export async function createZipArchive(
 
   // 简单地将文件内容拼接（非标准 ZIP，仅示意）
   for (const [filename, content] of files.entries()) {
-    const filenameBytes =
-      typeof content === 'string' ? encoder.encode(filename) : encoder.encode(filename);
+    const filenameBytes = encoder.encode(filename);
     const contentBytes = typeof content === 'string' ? encoder.encode(content) : content;
 
     parts.push(filenameBytes);
@@ -57,7 +56,7 @@ export async function createZipArchive(
  */
 export async function exportBlogAsZip(env: Env): Promise<{
   filename: string;
-  Uint8Array;
+  data: Uint8Array;
   size: number;
 }> {
   const date = new Date().toISOString().slice(0, 10);
@@ -76,7 +75,7 @@ Exported on: ${new Date().toISOString()}
 
 ## Posts
 
-${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join('\n')}
+${markdownPosts.map((p: { slug: string; filename: string }) => `- [${p.slug}](posts/${p.filename})`).join('\n')}
 `;
   files.set('README.md', readme);
 
@@ -84,7 +83,7 @@ ${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join('\n')}
   const index = {
     exported_at: new Date().toISOString(),
     total_posts: markdownPosts.length,
-    posts: markdownPosts.map((p) => ({
+    posts: markdownPosts.map((p: { slug: string; filename: string }) => ({
       slug: p.slug,
       filename: p.filename,
     })),
@@ -92,12 +91,12 @@ ${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join('\n')}
   files.set('index.json', JSON.stringify(index, null, 2));
 
   // 创建 ZIP（简化实现）
-  const zipData = await createZipArchive(files);
+  const data = await createZipArchive(files);
 
   return {
     filename: `blog-export-${date}.zip`,
-    zipData,
-    size: zipData.length,
+    data,
+    size: data.length,
   };
 }
 
@@ -109,7 +108,7 @@ export async function exportPostAsZip(
   postId: string
 ): Promise<{
   filename: string;
-  Uint8Array;
+  data: Uint8Array;
   size: number;
 } | null> {
   const { exportPostAsMarkdown } = await import('./markdown');
@@ -122,11 +121,11 @@ export async function exportPostAsZip(
   const files = new Map<string, string>();
   files.set(`${post.filename}`, post.content);
 
-  const zipData = await createZipArchive(files);
+  const data = await createZipArchive(files);
 
   return {
     filename: `${post.slug}.zip`,
-    zipData,
-    size: zipData.length,
+    data,
+    size: data.length,
   };
 }

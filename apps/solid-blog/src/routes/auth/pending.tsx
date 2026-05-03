@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { type Component, createSignal, onMount, Show } from 'solid-js';
 import { useTranslation } from '~/lib/i18n';
 import { useNavigate } from '@solidjs/router';
 

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import i18n from '@cf-blog/i18n';
 import type { RegisterFormProps } from './types';
 

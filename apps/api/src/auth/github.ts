@@ -63,13 +63,13 @@ export async function exchangeCodeForToken(
     }),
   });
 
-  const data = await response.json();
+  const data = (await response.json()) as Record<string, unknown>;
 
   if (data.error) {
-    return { accessToken: '', error: data.error_description || data.error };
+    return { accessToken: '', error: (data.error_description as string) || (data.error as string) };
   }
 
-  return { accessToken: data.access_token };
+  return { accessToken: data.access_token as string };
 }
 
 /**
@@ -147,7 +147,7 @@ export async function handleGitHubCallback(
 
     if (existingUser) {
       // 用户已存在，创建 Session
-      const sessionToken = await createSession(existingUser, {});
+      const sessionToken = await createSession(existingUser, {} as any);
       return { success: true, sessionToken, isNewUser: false };
     }
 
@@ -158,14 +158,13 @@ export async function handleGitHubCallback(
       email,
       name: githubUser.name || githubUser.login,
       passwordHash: null,
-      salt: null,
       role: 'commenter',
       isApproved: false,
+      publisherApplicationStatus: 'none',
       githubId: githubUser.id.toString(),
       avatar: githubUser.avatar_url,
-      bio: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     const result = await db.insert(users).values(newUser).returning();
@@ -176,7 +175,7 @@ export async function handleGitHubCallback(
     }
 
     // 5. 创建 Session
-    const sessionToken = await createSession(user, {});
+    const sessionToken = await createSession(user, {} as any);
     return { success: true, sessionToken, isNewUser: true };
   } catch (error) {
     console.error('[GitHub OAuth] 回调处理失败:', error);

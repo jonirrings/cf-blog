@@ -1,7 +1,7 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
-import { Outlet, useNavigate } from '@solidjs/router';
+import { type Component, createSignal, onMount, Show, type JSX } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import { useTranslation } from '~/lib/i18n';
-import { supportedLocales } from '@cf-blog/i18n';
+import { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 interface SessionInfo {
   userName: string;
@@ -10,7 +10,7 @@ interface SessionInfo {
   isApproved: boolean;
 }
 
-const AdminLayout: Component = () => {
+const AdminLayout: Component<{ children?: JSX.Element }> = (props) => {
   const { t, locale, changeLocale } = useTranslation();
   const navigate = useNavigate();
   const [session, setSession] = createSignal<SessionInfo | null>(null);
@@ -78,7 +78,7 @@ const AdminLayout: Component = () => {
               <select
                 class="w-full px-3 py-2 border rounded-md text-sm"
                 value={locale()}
-                onChange={(e) => changeLocale(e.currentTarget.value)}
+                onChange={(e) => changeLocale(e.currentTarget.value as Locale)}
               >
                 {supportedLocales.map((loc) => (
                   <option value={loc.code}>
@@ -93,7 +93,7 @@ const AdminLayout: Component = () => {
             </div>
           </aside>
           <main class="ml-64 flex-1 p-6">
-            <Outlet />
+            {props.children}
           </main>
         </div>
       </Show>

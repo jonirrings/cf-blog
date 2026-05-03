@@ -48,6 +48,14 @@ export interface Env {
   // GitHub OAuth
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
+
+  // Cloudflare Analytics API
+  CLOUDFLARE_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_ZONE_ID?: string;
+
+  // JWT Secret
+  JWT_SECRET?: string;
 }
 
 // 创建 Hono 应用

@@ -49,21 +49,8 @@ const i18nValues = {
     </div>
   </div>
 
-  <script define:i18n={i18nValues}>
-    interface Comment {
-      id: number;
-      postId: number;
-      postTitle: string;
-      userId: number;
-      userName: string;
-      content: string;
-      userApproved: boolean;
-      postApproved: boolean;
-      rejected: boolean;
-      createdAt: string;
-    }
-
-    let comments: Comment[] = [];
+  <script define:vars={{ i18n: i18nValues }}>
+    let comments = [];
     let currentFilter = 'pending';
 
     async function fetchComments() {
@@ -100,7 +87,8 @@ const i18nValues = {
     }
 
     function renderComments() {
-      const list = document.getElementById('comments-list')!;
+      const list = document.getElementById('comments-list');
+      if (!list) return;
       const filtered = getFilteredComments();
 
       if (filtered.length === 0) {
@@ -117,8 +105,8 @@ const i18nValues = {
 
         const actionButtons = !comment.rejected && (!comment.userApproved || !comment.postApproved)
           ? `<div class="flex gap-2">
-              <button onclick="handleApprove(${comment.id})" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
-              <button onclick="handleReject(${comment.id})" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
+              <button data-action="approve" data-id="${comment.id}" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
+              <button data-action="reject" data-id="${comment.id}" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
             </div>`
           : '';
 
@@ -151,7 +139,7 @@ const i18nValues = {
       }).join('');
     }
 
-    async function handleApprove(id: number) {
+    async function handleApprove(id) {
       try {
         const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
         const res = await fetch(`${apiBaseUrl}/api/comments/${id}/approve`, {
@@ -170,7 +158,7 @@ const i18nValues = {
       }
     }
 
-    async function handleReject(id: number) {
+    async function handleReject(id) {
       const reason = prompt(i18n.comment.rejectReasonPrompt);
       if (!reason) return;
 
@@ -191,6 +179,21 @@ const i18nValues = {
         alert(i18n.comment.rejectFailed);
       }
     }
+
+    // Event delegation for approve/reject buttons
+    document.getElementById('comments-list')?.addEventListener('click', (e) => {
+      const target = e.target;
+      const approveBtn = target.closest('[data-action="approve"]');
+      if (approveBtn) {
+        handleApprove(Number(approveBtn.dataset.id));
+        return;
+      }
+      const rejectBtn = target.closest('[data-action="reject"]');
+      if (rejectBtn) {
+        handleReject(Number(rejectBtn.dataset.id));
+        return;
+      }
+    });
 
     // Filter button handlers
     document.querySelectorAll('.filter-btn').forEach(btn => {

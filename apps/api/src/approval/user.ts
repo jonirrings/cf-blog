@@ -26,7 +26,7 @@ export async function getPendingUsers(db: any): Promise<any[]> {
       avatar: true,
       createdAt: true,
     },
-    orderBy: (users, { desc }) => [desc(users.createdAt)],
+    orderBy: (users: typeof import('@cf-blog/db/schema').users, { desc }: { desc: (col: any) => any }) => [desc(users.createdAt)],
   });
 }
 
@@ -57,18 +57,20 @@ export async function approveUser(
       .update(users)
       .set({
         isApproved: true,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: 'USER_APPROVED',
-      targetType: 'user',
-      targetId: userId.toString(),
-      details: JSON.stringify({ targetEmail: user.email }),
-      timestamp: new Date(),
+      action: 'USER_APPROVED' as const,
+      resource: `user:${userId}`,
+      resourceType: 'user',
+      resourceId: userId,
+      success: true,
+      metadata: JSON.stringify({ targetEmail: user.email }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };
@@ -101,18 +103,20 @@ export async function rejectUser(
       .update(users)
       .set({
         isApproved: false,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: 'USER_REJECTED',
-      targetType: 'user',
-      targetId: userId.toString(),
-      details: JSON.stringify({ targetEmail: user.email, reason }),
-      timestamp: new Date(),
+      action: 'USER_REJECTED' as const,
+      resource: `user:${userId}`,
+      resourceType: 'user',
+      resourceId: userId,
+      success: true,
+      metadata: JSON.stringify({ targetEmail: user.email, reason }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };

@@ -34,7 +34,7 @@ let formData: FormData = {
   status: 'draft',
 };
 
-let editorContent: JSONContent | undefined = undefined;
+let editorContent: JSONContent | undefined ;
 let saving = false;
 let loading = true;
 

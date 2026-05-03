@@ -7,7 +7,21 @@
  * - 时间窗口去重（1 小时内同一用户只计 1 次）
  */
 
-import type { KVNamespace } from '@cloudflare/workers-types';
+// Use a compatible KVNamespace type to avoid type mismatch between different workers-types versions
+type KVNamespace = {
+  get(key: string, options?: Partial<KVNamespaceGetOptions<undefined>>): Promise<string | null>;
+  get(key: string, type: 'text'): Promise<string | null>;
+  get(key: string, type: 'json'): Promise<unknown>;
+  get(key: string, type: 'arrayBuffer'): Promise<ArrayBuffer>;
+  get(key: string, type: 'stream'): Promise<ReadableStream>;
+  list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{
+    keys: Array<{ name: string; expiration?: number; metadata?: unknown }>;
+    list_complete: boolean;
+    cursor?: string;
+  }>;
+  put(key: string, value: string | ReadableStream | ArrayBuffer, options?: { expirationTtl?: number; expiration?: number; metadata?: unknown }): Promise<void>;
+  delete(key: string): Promise<void>;
+};
 
 export interface VisitRecord {
   postId: string;
@@ -134,18 +148,18 @@ export async function getVisitCounts(
   postIds: string[]
 ): Promise<Map<string, number>> {
   const results = new Map<string, number>();
-  const keys = postIds.map((id) => getVisitCountKey(id));
-  const values = await kv.get(keys);
 
-  postIds.forEach((postId, index) => {
-    const data = values[index];
+  // Fetch each key individually since KVNamespace.get doesn't support batch string array
+  for (const postId of postIds) {
+    const key = getVisitCountKey(postId);
+    const data = await kv.get(key);
     if (data) {
       const count = JSON.parse(data) as VisitCount;
       results.set(postId, count.count);
     } else {
       results.set(postId, 0);
     }
-  });
+  }
 
   return results;
 }

@@ -14,12 +14,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cf-blog/api": "workspace:*",
     "@cf-blog/db": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "typescript": "catalog:",
-    "wrangler": "^4.87.0"
+    "wrangler": "catalog:"
   }
 }

@@ -60,7 +60,7 @@ export class HomeDO {
 
     // 记录访问者
     this.visitors.set(sessionId, {
-      userId,
+      userId: userId ?? undefined,
       lastSeen: Date.now(),
     });
 
@@ -91,12 +91,13 @@ export class HomeDO {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case 'home:heartbeat':
+        case 'home:heartbeat': {
           const sessionId = data.sessionId;
           if (sessionId && this.visitors.has(sessionId)) {
             this.visitors.get(sessionId)!.lastSeen = Date.now();
           }
           break;
+        }
       }
     } catch (error) {
       console.error('[HomeDO] Message parse error:', error);
@@ -123,8 +124,8 @@ export class HomeDO {
       const now = Date.now();
       const timeout = 30000;
 
-      for (const [sessionId] of this.visitors.entries()) {
-        if (now - sessionId.hashCode() > timeout) {
+      for (const [sessionId, visitor] of this.visitors.entries()) {
+        if (now - (visitor.lastSeen ?? 0) > timeout) {
           this.visitors.delete(sessionId);
         }
       }

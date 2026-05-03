@@ -13,6 +13,7 @@ import type { User } from '@cf-blog/db/schema';
 
 // Session 数据类型
 export interface SessionPayload {
+  [key: string]: unknown;
   id: string;
   userId: number;
   userEmail: string;

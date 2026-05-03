@@ -11,7 +11,7 @@
 
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
-import { eq, desc, like, or } from 'drizzle-orm';
+import { eq, desc, and, like, or } from 'drizzle-orm';
 import type { Env } from '../index';
 import * as schema from '@cf-blog/db/schema';
 import { posts, authors, users, tags, postsToTags } from '@cf-blog/db/schema';
@@ -29,10 +29,18 @@ app.get('/', async (c) => {
   const status = c.req.query('status');
 
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 构建查询条件
-    let query = db
+    const conditions = [];
+    if (status) {
+      conditions.push(eq(posts.status, status as 'draft' | 'published'));
+    }
+    if (framework) {
+      conditions.push(eq(posts.framework, framework as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid'));
+    }
+
+    const allPosts = await db
       .select({
         id: posts.id,
         title: posts.title,
@@ -52,17 +60,8 @@ app.get('/', async (c) => {
       })
       .from(posts)
       .leftJoin(authors, eq(posts.authorId, authors.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(posts.createdAt));
-
-    // 应用过滤
-    if (status) {
-      query = query.where(eq(posts.status, status as 'draft' | 'published'));
-    }
-    if (framework) {
-      query = query.where(eq(posts.framework, framework as typeof posts.framework.$inferSelect));
-    }
-
-    const allPosts = await query;
 
     // 客户端分页
     const offset = (page - 1) * limit;
@@ -88,10 +87,10 @@ app.get('/', async (c) => {
 
 // 根据 slug 获取文章
 app.get('/slug/:slug', async (c) => {
-  const slug = c.req.param('slug');
+  const slug = c.req.param('slug')!;
 
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     const result = await db
       .select({
@@ -152,7 +151,7 @@ app.get('/:id', async (c) => {
   const id = parseInt(c.req.param('id'));
 
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     const result = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
 
@@ -162,7 +161,7 @@ app.get('/:id', async (c) => {
 
     return c.json({
       success: true,
-      data: result[0][0],
+      data: result[0],
     });
   } catch (error) {
     console.error('Failed to fetch post:', error);
@@ -176,10 +175,7 @@ app.get('/:id', async (c) => {
 // 创建文章（需要发布者权限）
 app.post('/', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
   try {
-    const session = c.session;
-    if (!session) {
-      return c.json({ success: false, error: 'Unauthorized' }, 401);
-    }
+    const session = c.session!;
 
     const body = await c.req.json();
     const {
@@ -193,7 +189,7 @@ app.post('/', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
       tagIds,
     } = body;
 
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 获取当前用户的作者信息
     const authorResult = await db
@@ -266,14 +262,14 @@ app.post('/', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
 
 // 更新文章（需要发布者权限）
 app.put('/:id', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
-  const id = parseInt(c.req.param('id'));
-  const session = c.session;
+  const id = parseInt(c.req.param('id') ?? '0');
+  const session = c.session!;
 
   try {
     const body = await c.req.json();
     const { title, slug, excerpt, content, coverImage, framework, status, tagIds } = body;
 
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 检查权限：只有作者或管理员可以编辑
     const post = await db.query.posts.findFirst({
@@ -338,11 +334,11 @@ app.put('/:id', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
 
 // 删除文章（仅管理员）
 app.delete('/:id', authMiddleware, adminMiddleware, async (c: AuthContext) => {
-  const id = parseInt(c.req.param('id'));
-  const session = c.session;
+  const id = parseInt(c.req.param('id') ?? '0');
+  const session = c.session!;
 
   try {
-    const db = drizzle(c.env.DB);
+    const db = drizzle(c.env.DB, { schema });
 
     // 检查文章是否存在
     const post = await db.query.posts.findFirst({

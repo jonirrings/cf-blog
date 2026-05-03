@@ -28,9 +28,7 @@ const props = defineProps<{
   placeholder?: string;
 }>();
 
-const emit = defineEmits<{
-  (e: 'contentChange', content: JSONContent): void;
-}>();
+const emit = defineEmits<(e: 'contentChange', content: JSONContent) => void>();
 
 const { t } = useI18n();
 

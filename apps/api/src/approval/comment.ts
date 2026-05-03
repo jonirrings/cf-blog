@@ -47,7 +47,7 @@ export async function getPendingComments(
         columns: { id: true, title: true, authorId: true },
       },
     },
-    orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+    orderBy: (comments: typeof import('@cf-blog/db/schema').comments, { desc }: { desc: (col: any) => any }) => [desc(comments.createdAt)],
   });
 }
 
@@ -87,7 +87,7 @@ export async function userApproveComment(
       .update(comments)
       .set({
         userApproved: true,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(comments.id, commentId));
 
@@ -137,18 +137,19 @@ export async function authorApproveComment(
       .update(comments)
       .set({
         postApproved: true,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(comments.id, commentId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: authorId,
-      action: 'COMMENT_APPROVED_BY_AUTHOR',
-      targetType: 'comment',
-      targetId: commentId.toString(),
-      details: JSON.stringify({ postId: comment.postId }),
-      timestamp: new Date(),
+      action: 'COMMENT_USER_APPROVED' as const,
+      resource: `comment:${commentId}`,
+      resourceType: 'comment',
+      resourceId: commentId,
+      success: true,
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };
@@ -185,18 +186,19 @@ export async function adminApproveComment(
       .set({
         userApproved: true,
         postApproved: true,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(comments.id, commentId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminId,
-      action: 'COMMENT_APPROVED_BY_ADMIN',
-      targetType: 'comment',
-      targetId: commentId.toString(),
-      details: JSON.stringify({ postId: comment.postId }),
-      timestamp: new Date(),
+      action: 'COMMENT_USER_APPROVED' as const,
+      resource: `comment:${commentId}`,
+      resourceType: 'comment',
+      resourceId: commentId,
+      success: true,
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };
@@ -241,18 +243,21 @@ export async function rejectComment(
         rejected: true,
         userApproved: false,
         postApproved: false,
-        updatedAt: new Date(),
+        rejectReason: reason ?? null,
+        updatedAt: new Date().toISOString(),
       })
       .where(eq(comments.id, commentId));
 
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId,
-      action: 'COMMENT_REJECTED',
-      targetType: 'comment',
-      targetId: commentId.toString(),
-      details: JSON.stringify({ postId: comment.postId, reason }),
-      timestamp: new Date(),
+      action: 'COMMENT_REJECTED' as const,
+      resource: `comment:${commentId}`,
+      resourceType: 'comment',
+      resourceId: commentId,
+      success: true,
+      metadata: JSON.stringify({ postId: comment.postId, reason }),
+      timestamp: new Date().toISOString(),
     });
 
     return { success: true };

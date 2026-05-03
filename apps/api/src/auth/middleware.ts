@@ -8,7 +8,7 @@
  * - 审计日志记录
  */
 
-import { Context, Next } from 'hono';
+import type { Context, Next } from 'hono';
 import { getSession, getSessionToken, type SessionPayload } from './session';
 import type { Env } from '../index';
 import { auditLogs } from '@cf-blog/db/schema';
@@ -164,18 +164,21 @@ export async function auditLog(
   db: any,
   session: SessionPayload | null,
   action: string,
-  targetType: string,
-  targetId: number | string,
+  resource: string,
+  resourceType: string,
+  resourceId: number | string,
   details?: Record<string, any>
 ): Promise<void> {
   try {
     await db.insert(auditLogs).values({
-      userId: session?.userId || null,
-      action,
-      targetType,
-      targetId: targetId.toString(),
-      details: details ? JSON.stringify(details) : null,
-      timestamp: new Date(),
+      userId: session?.userId ?? null,
+      action: action as any,
+      resource,
+      resourceType,
+      resourceId: typeof resourceId === 'number' ? resourceId : parseInt(resourceId, 10),
+      success: true,
+      metadata: details ? JSON.stringify(details) : null,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('[AuditLog] 记录失败:', error);
