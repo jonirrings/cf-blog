@@ -1,10 +1,13 @@
 # Cloudflare 多框架博客项目规格说明书
 
 > **项目代号**: cf-blog  
-> **版本**: 1.1  
-> **创建日期**: 2026-05-02  
-> **最后更新**: 2026-05-02  
-> **目标**: 在 Cloudflare Pages 上搭建博客，使用 Drizzle ORM + D1 数据库，支持 Next.js/Nuxt/SvelteKit 三框架切换展示，集成自研认证系统
+> **版本**: 1.5
+> **创建日期**: 2026-05-02
+> **最后更新**: 2026-05-03
+> **目标**: 在 Cloudflare Pages 上搭建博客，使用 Drizzle ORM + D1 数据库，支持 Next.js/Nuxt/SvelteKit/Astro/SolidStart 五框架切换展示，集成自研认证系统
+>
+> **Phase 1 状态**: 基础架构完成
+> **Phase 2 状态**: P0/P1 后端功能 100% 完成，P2 前端框架 100% 完成（五框架功能对齐 + i18n + 认证）
 
 ---
 
@@ -62,9 +65,11 @@
 | **路由层** | Cloudflare Workers | URL 前缀路由分发 + Service Binding |
 | **API 后端** | Hono | 轻量级 Workers 框架，统一 API 服务 |
 | **部署平台** | Cloudflare Pages | 免费额度，支持 Functions |
-| **框架 1** | Next.js 14+ | App Router, Static Export |
+| **框架 1** | Next.js 16+ | App Router, Static Export |
 | **框架 2** | Nuxt 3.x | Nuxt Content, 静态生成 |
 | **框架 3** | SvelteKit 2.x | adapter-static |
+| **框架 4** | Astro 5.x | Islands Architecture |
+| **框架 5** | SolidStart 1.x | Solid 1.9, 静态生成 |
 | **ORM** | Drizzle ORM | SQLite 语法，D1 适配 |
 | **数据库** | Cloudflare D1 | Serverless SQLite（结构化数据） |
 | **缓存** | Cloudflare KV | 网站配置、渲染缓存、用户偏好 |
@@ -142,16 +147,27 @@ cf-blog/
 │   │   ├── drizzle.config.ts
 │   │   └── package.json
 │   │
-│   ├── api-types/          # 共享 API 类型定义
+│   ├── i18n/               # 共享国际化（i18next）
 │   │   ├── src/
-│   │   │   ├── types.ts    # 接口响应类型
-│   │   │   └── index.ts
+│   │   │   ├── translations.ts  # 翻译键和值（zh-CN + en）
+│   │   │   ├── i18n.ts          # i18next 实例
+│   │   │   └── index.ts         # 导出
 │   │   └── package.json
 │   │
-│   └── ui/                 # 可选：共享 UI 组件
+│   ├── auth-ui/            # 共享认证 React 组件
+│   │   ├── src/
+│   │   │   ├── LoginForm.tsx
+│   │   │   ├── RegisterForm.tsx
+│   │   │   ├── GitHubButton.tsx
+│   │   │   ├── PasskeyButton.tsx
+│   │   │   ├── AuthLayout.tsx
+│   │   │   └── types.ts
+│   │   └── package.json
+│   │
+│   └── api-types/          # 共享 API 类型定义
 │       ├── src/
-│       │   ├── Switcher.tsx # 框架切换器
-│       │   └── PostCard.tsx # 博客卡片
+│       │   ├── types.ts    # 接口响应类型
+│       │   └── index.ts
 │       └── package.json
 │
 ├── scripts/
@@ -179,6 +195,103 @@ cf-blog/
 ---
 
 ### 4.1.1 评论可见性规则
+
+**API 实现**:
+- `GET /api/comments/pending` - 获取待审批评论列表
+- `POST /api/comments/:id/approve` - 审批通过评论
+- `POST /api/comments/:id/reject` - 审批拒绝评论
+
+**技术实现**:
+- `userApproveComment()` - 用户审批自己的评论
+- `authorApproveComment()` - 文章作者审批评论
+- `adminApproveComment()` - 管理员审批评论（同时通过两级）
+- `rejectComment()` - 拒绝评论
+- `isCommentPublic()` - 检查评论是否公开
+- `isCommentVisibleToOwner()` - 检查评论是否对评论者可见
+- `isCommentVisibleToAuthor()` - 检查评论是否对作者可见
+
+---
+
+## 7. 安全防御体系
+
+### 7.1 速率限制
+
+**实现位置**: `apps/api/src/security/rateLimit.ts`
+
+**限制策略**:
+| 端点 | 限制 |
+|------|------|
+| API 通用 | 100 次/分钟 |
+| 认证相关 | 10 次/分钟 |
+| 评论 | 10 次/小时 |
+| 上传 | 20 次/小时 |
+| 敏感操作 | 5 次/分钟 |
+
+**技术实现**:
+- 基于 IP 和用户 ID 进行限制
+- 使用 KV 存储请求时间窗口
+- 响应头包含 `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+### 7.2 CSRF 防护
+
+**实现位置**: `apps/api/src/security/csrf.ts`
+
+**防护机制**:
+- Double Submit Cookie 模式
+- CSRF Token 32 位随机生成
+- 定时安全比较防止时序攻击
+
+**使用方法**:
+1. GET 请求自动设置 `X-CSRF-Token` 头
+2. POST/PUT/DELETE 请求需要在 Header 中携带 `X-CSRF-Token`
+3. Cookie 名称：`csrf_token`
+
+### 7.3 XSS 防护
+
+**实现位置**: `apps/api/src/security/sanitize.ts`
+
+**防护机制**:
+- HTML 标签白名单过滤
+- JavaScript 协议过滤
+- 事件处理器过滤
+- 评论输入清理
+
+**评论输入验证**:
+- 最大长度：1000 字符
+- 支持基础 Markdown（粗体、斜体、链接、列表）
+- 禁止标题、代码块、图片
+- 最多 3 个链接
+
+### 7.4 Turnstile 人机验证
+
+**实现位置**: `apps/api/src/security/turnstile.ts`
+
+**验证端点**:
+- 注册/登录
+- 发表评论
+- 申请成为发布者
+
+**技术实现**:
+- Cloudflare Turnstile API
+- 支持 Invisible 模式
+- IP 地址可选传递
+
+### 7.5 审计日志
+
+**实现位置**: `apps/api/src/security/audit.ts`
+
+**记录操作**:
+- 用户创建/审批/拒绝
+- 发布者申请审批
+- 评论审批/拒绝
+- 文章创建/发布/删除
+- 登录/登出
+
+**查询功能**:
+- 按用户/操作/时间范围查询
+- 用户操作历史
+- 目标操作历史
+- 异常活动检测
 
 | 场景 | 可见范围 |
 |------|---------|
@@ -609,19 +722,127 @@ async function getVisibleComments(postId: number, currentUser: User | null) {
 
 ## 6. 认证系统设计
 
-### 5.1 认证流程图
+### 6.1 认证方式总览
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                      认证方式总览                                │
 ├─────────────────────────────────────────────────────────────────┤
-│  OOBE 管理员设置 → 仅首次访问 /setup 页面                         │
+│  OOBE 管理员设置 → 仅首次访问 /api/auth/onboarding               │
 │  GitHub OAuth    → 发布者/评论者 注册和登录                       │
 │  Passkey         → 已绑定用户的快速登录                          │
+│  Session 管理    → JWT + HttpOnly Cookie                         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 OOBE 管理员初始化
+**技术实现**:
+- **JWT**: `jose` 库进行签名和验证
+- **密码哈希**: `@adobe/hashes` Argon2id 算法
+- **Session 时长**: 7 天
+- **Cookie**: HttpOnly + Secure + SameSite=Lax
+
+### 6.2 OOBE 管理员初始化
+
+**API**: `POST /api/auth/onboarding`
+
+**触发条件**: 首次访问系统，`users` 表为空
+
+**技术实现**:
+- 使用 `isOnboardingComplete()` 检查 KV 中的状态
+- 使用 `createAdminUser()` 创建管理员
+- 使用 Argon2id 哈希密码
+- 创建成功后标记 `onboarding_complete = true`
+
+**请求体**:
+```json
+{
+  "email": "admin@example.com",
+  "password": "secure_password_123",
+  "name": "Administrator"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "userId": 1
+}
+```
+
+**错误处理**:
+- 403: OOBE 已完成
+- 400: 验证失败（邮箱格式、密码长度等）
+
+### 6.3 GitHub OAuth 流程
+
+**API**: 
+- `GET /api/auth/github` - 获取授权 URL
+- `GET /api/auth/github/callback` - 回调处理
+
+**技术实现**:
+- 使用 `generateState()` 生成 CSRF 防护 state
+- State 存储到 KV（5 分钟过期）
+- 使用 `handleGitHubCallback()` 处理回调
+- 自动创建/更新用户到 D1
+
+**流程**:
+```
+1. 前端请求 /api/auth/github
+2. 后端返回 authUrl 和 state
+3. 前端重定向到 GitHub 授权页面
+4. 用户授权后回调到 /api/auth/github/callback
+5. 后端验证 state，交换 access_token
+6. 获取 GitHub 用户信息
+7. 创建/更新本地用户
+8. 设置 Session Cookie
+9. 重定向到前端页面
+```
+
+### 6.4 Passkey (WebAuthn) 认证
+
+**API**:
+- `POST /api/auth/passkey/register/start` - 生成注册挑战
+- `POST /api/auth/passkey/register/finish` - 验证注册响应
+- `POST /api/auth/passkey/login/start` - 生成登录挑战
+- `POST /api/auth/passkey/login/finish` - 验证登录响应
+
+**技术实现**:
+- 使用 `@simplewebauthn/server` 进行验证
+- Challenge 存储到 KV（5 分钟过期）
+- Passkey 信息存储到 `passkeys` 表
+
+### 6.5 Session 管理
+
+**API**: `GET /api/auth/session`
+
+**技术实现**:
+- JWT Token 使用 HS256 算法签名
+- Session 信息包含：userId, userName, userRole, isApproved
+- Cookie 名称：`cf-blog-session`
+- Session 时长：7 天
+
+**权限检查**:
+- `isAdmin(session)` - 检查是否为管理员
+- `isPublisher(session)` - 检查是否为发布者
+- `isApproved(session)` - 检查用户是否已审批
+
+### 6.6 角色权限中间件
+
+**中间件**:
+- `authMiddleware` - 需要登录
+- `optionalAuthMiddleware` - 可选登录
+- `adminMiddleware` - 需要管理员
+- `publisherMiddleware` - 需要发布者
+- `approvedMiddleware` - 需要已审批用户
+- `requireAuth()` - 组合：auth + approved
+- `requirePublisher()` - 组合：auth + publisher
+- `requireAdmin()` - 组合：auth + admin
+
+**权限检查函数**:
+- `canEditPost(session, postAuthorId)` - 检查文章编辑权限
+- `canDeletePost(session, postAuthorId)` - 检查文章删除权限
+- `canApproveComment(session, postAuthorId)` - 检查评论审批权限
 
 **触发条件**: 首次访问系统，`users` 表为空
 
@@ -1187,6 +1408,85 @@ export async function getDb() {
 
 ### 7.2 Nuxt (`apps/nuxt-blog/`)
 
+**已实现** (`apps/nuxt-blog/`):
+- [x] Nuxt 3 项目初始化
+- [x] 静态生成配置 (ssr: false, nitro.output)
+- [x] 首页博客列表 (`/pages/index.vue`)
+- [x] 文章详情页 (`/pages/post/[slug].vue`)
+- [x] 框架切换导航
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  compatibilityDate: '2024-01-01',
+  devtools: { enabled: false },
+  ssr: false,
+  nitro: { output: { publicDir: '../dist/nuxt' } },
+});
+```
+
+### 7.3 SvelteKit (`apps/svelte-blog/`)
+
+**已实现** (`apps/svelte-blog/`):
+- [x] SvelteKit 2 项目初始化
+- [x] adapter-static 配置
+- [x] 首页博客列表 (`/src/routes/+page.svelte`)
+- [x] 文章详情页 (`/src/routes/post/[slug]/+page.svelte`)
+- [x] 框架切换导航
+
+```typescript
+// svelte.config.js
+import adapter from '@sveltejs/adapter-static';
+export default {
+  kit: {
+    adapter: adapter({ pages: '../dist/svelte', fallback: 'index.html' }),
+  },
+};
+```
+
+### 7.4 Next.js (`apps/next-blog/`)
+
+**已实现** (`apps/next-blog/`):
+- [x] Next.js 14 项目初始化
+- [x] 静态导出配置 (output: 'export')
+- [x] 首页博客列表 (`/src/app/page.tsx`)
+- [x] 文章详情页 (`/src/app/post/[slug]/page.tsx`)
+- [x] 框架切换导航
+
+```typescript
+// next.config.js
+export default {
+  output: 'export',
+  distDir: '../dist/next',
+  images: { unoptimized: true },
+};
+```
+
+### 7.5 Astro (`apps/astro-blog/`)
+
+**已实现** (`apps/astro-blog/`):
+- [x] Astro 4 项目初始化
+- [x] 静态输出配置 (output: 'static')
+- [x] Base 路径配置 (`/astro`)
+- [x] 首页博客列表 (`/src/pages/index.astro`)
+- [x] 文章详情页 (`/src/pages/post/[slug].astro`)
+- [x] 框架切换导航
+
+```typescript
+// astro.config.mjs
+export default defineConfig({
+  outDir: '../dist/astro',
+  base: '/astro',
+  output: 'static',
+});
+```
+
+**Astro 特点**:
+- 默认零 JavaScript，性能最佳
+- Islands Architecture（孤岛架构）
+- 内置 Markdown 支持
+- 可混用 React/Vue/Svelte 组件
+
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
@@ -1249,6 +1549,56 @@ export async function fetchPosts() {
 packages:
   - 'apps/*'
   - 'packages/*'
+
+catalog:
+  # React ecosystem
+  react: ^19.1.0
+  react-dom: ^19.1.0
+
+  # Next.js
+  next: ^16.2.4
+
+  # Tailwind CSS v4
+  tailwindcss: ^4.2.4
+  '@tailwindcss/postcss': ^4.2.4
+
+  # TypeScript
+  typescript: ^6.0.3
+  '@types/node': ^24.0.0
+
+  # Cloudflare
+  wrangler: ^4.87.0
+
+  # i18next
+  i18next: ^26.0.8
+  i18next-browser-languagedetector: ^8.2.1
+  i18next-http-backend: ^3.0.6
+  react-i18next: ^17.0.6
+
+  # Lucide icons
+  lucide-react: ^0.511.0
+  '@lucide/vue': ^1.14.0
+  '@lucide/svelte': ^0.511.0
+  lucide-solid: ^1.2.0
+  '@lucide/astro': ^0.5.0
+
+  # Testing
+  vitest: ^4.1.5
+  '@vitest/coverage-v8': ^4.1.5
+  '@playwright/test': ^1.59.1
+
+  # Tiptap editor
+  '@tiptap/core': ^3.22.5
+  '@tiptap/extension-image': ^3.22.5
+  '@tiptap/extension-link': ^3.22.5
+  '@tiptap/extension-placeholder': ^3.22.5
+  '@tiptap/pm': ^3.22.5
+  '@tiptap/react': ^3.22.5
+  '@tiptap/starter-kit': ^3.22.5
+  '@tiptap/vue-3': ^3.22.5
+
+  # Build tools
+  tsx: ^4.7.0
 ```
 
 ### 7.2 构建脚本 (`package.json`)
@@ -1344,9 +1694,15 @@ jobs:
 - [ ] 统一样式系统（Tailwind）
 
 ### Phase 4: 完善与部署（第 6 周）
-- [ ] 添加 SEO 优化
-- [ ] 配置 CI/CD
-- [ ] 性能优化
+- [x] 认证 UI（登录/注册页面，支持 GitHub OAuth、Passkey）
+- [x] 管理后台（仪表盘、文章管理、评论审批、用户管理、站点配置）
+- [x] 集成编辑器 (TipTap) — 5 框架统一使用 StarterKit + Placeholder + Image + Link
+- [x] 五框架认证页面 + 管理后台鉴权守卫
+- [x] 五框架 i18n 国际化（中/英双语，共享 @cf-blog/i18n 包）
+- [x] 五框架 Admin Layout（侧边栏导航 + 语言切换器 + 用户信息）
+- [x] pnpm catalog 统一依赖版本管理
+- [x] 配置 CI/CD
+- [x] 种子数据与测试
 - [ ] 上线部署
 
 ---
@@ -1653,19 +2009,41 @@ interface NewPostNotification {
 **API 设计**:
 ```typescript
 // 记录访问
-POST /api/analytics/view
-{ postId, sessionId }
+POST /api/analytics/record
+{ postId }
 
-// 获取统计（作者/管理员）
-GET /api/posts/:slug/stats
+// 获取页面访问数
+GET /api/analytics/views/:postId
 
-// 公开阅读数
-GET /api/posts/:slug/views
+// 批量获取访问数
+GET /api/analytics/views/batch?ids=1,2,3
 
-// 同步 Cloudflare Analytics (定时任务)
+// 小时级趋势
+GET /api/analytics/trend/hourly?hours=24
+
+// 天级趋势
+GET /api/analytics/trend/daily?days=7
+
+// 热门页面
+GET /api/analytics/top?limit=10
+
+// 来源统计
+GET /api/analytics/referer/:postId
+
+// 同步 Cloudflare Analytics (管理员)
 POST /api/analytics/sync
-{ CF_API_TOKEN, CF_ZONE_ID }
+{ postIds: string[] }
 ```
+
+**已实现模块** (`apps/api/src/analytics/`):
+
+| 文件 | 说明 |
+|------|------|
+| `crawler.ts` | 爬虫识别（User-Agent + CF-Bot-Score 双重检测） |
+| `counter.ts` | 访问计数（去重 + 防作弊，1 小时去重窗口） |
+| `stats.ts` | 统计分析（小时/天级趋势、来源分析、热门页面） |
+| `sync.ts` | Cloudflare Analytics 同步校准 |
+| `routes/analytics.ts` | 完整 API 路由 |
 
 **前端展示**:
 - 文章页：`👁️ 1,234 次阅读`
@@ -1759,6 +2137,37 @@ interface NewPostNotification {
 | **Ghost JSON** | 标准 Ghost 格式 | 迁回 Ghost |
 | **ZIP 归档** | Markdown + 图片资源 | 完整备份 |
 
+**已实现 API** (`apps/api/src/routes/importexport.ts`):
+
+```typescript
+// Ghost 导出
+GET /api/importexport/ghost
+
+// Ghost 导入
+POST /api/importexport/ghost
+
+// 单篇 Markdown 导出
+GET /api/importexport/markdown/:postId
+
+// 批量 Markdown 导出
+GET /api/importexport/markdown
+
+// 单篇 ZIP 导出
+GET /api/importexport/zip/:postId
+
+// 全站 ZIP 导出
+GET /api/importexport/zip
+```
+
+**已实现模块** (`apps/api/src/importexport/`):
+
+| 文件 | 说明 |
+|------|------|
+| `ghost.ts` | Ghost JSON 导入/导出，数据格式转换 |
+| `markdown.ts` | Markdown 导出（含 Front Matter），HTML → Markdown 转换 |
+| `zip.ts` | ZIP 归档打包 |
+| `routes/importexport.ts` | 完整 API 路由 |
+
 **Markdown 格式示例**:
 ```markdown
 ---
@@ -1808,41 +2217,51 @@ GET /api/posts/export?format=zip&status=published&framework=next
 
 ### 15.1 选型决策
 
-**推荐方案**: **Novel** (基于 TipTap 的 Notion 风格编辑器)
+**最终方案**: **TipTap** (基础富文本编辑器)
 
 **选择理由**:
 
-| 维度 | Novel 优势 |
-|------|-----------|
-| **编辑体验** | Notion 风格，现代直观 |
+| 维度 | TipTap 优势 |
+|------|------------|
+| **编辑体验** | 所见即所得，简洁直观 |
 | **Markdown 支持** | 输入 `#` 自动变标题，`**` 变粗体 |
-| **所见即所得** | 不需要分屏预览 |
-| **图片处理** | 拖拽上传，自动插入 |
-| **可扩展性** | 基于 TipTap，支持自定义插件 |
-| **AI 集成** | 支持 AI 补全/润色（展示亮点） |
-| **导出格式** | 干净的 Markdown |
-| **体积** | ~50KB (gzip)，可接受 |
+| **可扩展性** | 基于 ProseMirror，支持自定义扩展 |
+| **跨框架统一** | 5 个框架使用同一套扩展（StarterKit + Placeholder + Image + Link） |
+| **体积** | 轻量，按需加载 |
+| **导出格式** | JSON 内容格式，方便存储和渲染 |
 
-### 15.2 编辑器功能
+### 15.2 编辑器扩展配置
 
-**核心功能**:
-- [ ] Markdown 语法自动转换
-- [ ] 图片拖拽上传
-- [ ] 代码块高亮（Prism/Highlight.js）
-- [ ] 表格支持
-- [ ] 数学公式（KaTeX）
-- [ ] 目录导航
-- [ ] 字数统计
-- [ ] **自动保存草稿**（防抖 2 秒 + localStorage 备份）
-- [ ] **手动保存快捷键**（Ctrl/Cmd + S）
-- [ ] **页面关闭前提醒**（有未保存内容时）
-- [ ] **草稿恢复功能**（异常关闭后恢复）
-- [ ] **保存状态指示**（已保存/保存中/失败）
+所有 5 个框架使用相同的 TipTap 扩展集（通过 pnpm catalog 统一版本）:
 
-**可选功能**:
-- [ ] AI 写作助手（续写、润色、翻译）
-- [ ] 版本历史（对比差异）
-- [ ] 协作编辑（多光标，未来扩展）
+```typescript
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+
+const editor = useEditor({
+  extensions: [
+    StarterKit,
+    Placeholder.configure({ placeholder: t('post.contentPlaceholder') }),
+    Image.configure({ allowBase64: true }),
+    Link.configure({ openOnClick: false }),
+  ],
+});
+```
+
+**pnpm catalog 版本管理** (`pnpm-workspace.yaml`):
+```yaml
+catalog:
+  '@tiptap/core': ^3.22.5
+  '@tiptap/extension-image': ^3.22.5
+  '@tiptap/extension-link': ^3.22.5
+  '@tiptap/extension-placeholder': ^3.22.5
+  '@tiptap/pm': ^3.22.5
+  '@tiptap/react': ^3.22.5
+  '@tiptap/starter-kit': ^3.22.5
+  '@tiptap/vue-3': ^3.22.5
+```
 
 ### 15.3 内容存储
 
@@ -1860,9 +2279,48 @@ Markdown → (服务端渲染) → HTML
 
 ---
 
-## 16. 参考资源
+## 16. 架构选型：Workers vs Pages
+
+| 组件 | 平台 | 说明 |
+|------|------|------|
+| **前端四框架** | Cloudflare Pages | 自动托管静态产物，SPA 回退 |
+| **Shell 路由层** | Cloudflare Pages Functions | 路由分发，Service Binding |
+| **API 后端** | Cloudflare Workers | Hono API + Durable Objects + KV |
+
+**通信方式**: Service Binding (`api.fetch(request)`)
+
+### 四框架对比
+
+| 框架 | 类型 | 渲染模式 | 适用场景 | 本项目的角色 |
+|------|------|---------|---------|-------------|
+| **Next.js** | React 框架 | SSG → SSR | 全功能应用 | 展示 React 生态 |
+| **Nuxt** | Vue 框架 | SSG → SSR | 内容/应用 | 展示 Vue 生态 |
+| **SvelteKit** | Svelte 框架 | SSG → SSR | 轻量应用 | 展示 Svelte 生态 |
+| **Astro** | 静态站点生成器 | SSG (默认零 JS) | 内容驱动网站 | 性能标杆，博客首选 |
+
+---
+
+## 17. 后续演进：SSR 支持
+
+### Phase 3: SSR 升级 (可选)
+
+| 框架 | 当前模式 | 目标模式 | 迁移方案 |
+|------|---------|---------|---------|
+| Next.js | 静态导出 | SSR (Edge) | `@cloudflare/next-on-pages` |
+| Nuxt | 静态生成 | SSR (Edge) | `nitro.presets: 'cloudflare-pages'` |
+| SvelteKit | 静态适配 | SSR (Edge) | `@sveltejs/adapter-cloudflare` |
+
+**注意事项**:
+- RSC (React Server Components) 不可用（Edge 运行时限制）
+- SSR 会增加 Cold Start 延迟
+- 免费额度消耗增加
+
+---
+
+## 18. 参考资源
 
 - [Cloudflare Pages](https://developers.cloudflare.com/pages/)
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 - [Cloudflare D1](https://developers.cloudflare.com/d1/)
 - [Drizzle ORM D1 Adapter](https://orm.drizzle.team/docs/get-started-sqlite#cloudflare-d1)
 - [Next.js Static Export](https://nextjs.org/docs/app/building-your-application/deploying/static-exports)

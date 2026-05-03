@@ -1,0 +1,62 @@
+name = "cf-blog-api"
+main = "src/index.ts"
+compatibility_date = "2024-04-05"
+compatibility_flags = ["nodejs_compat"]
+
+# Service Binding 被 Shell 路由层调用
+# 不直接暴露域名
+
+# D1 数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "cf-blog-db"
+database_id = "YOUR_D1_DATABASE_ID"
+
+# KV 命名空间
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "YOUR_CONFIG_KV_ID"
+preview_id = "YOUR_CONFIG_KV_PREVIEW_ID"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "YOUR_CACHE_KV_ID"
+preview_id = "YOUR_CACHE_KV_PREVIEW_ID"
+
+[[kv_namespaces]]
+binding = "USER_KV"
+id = "YOUR_USER_KV_ID"
+preview_id = "YOUR_USER_KV_PREVIEW_ID"
+
+# R2 存储桶
+[[r2_buckets]]
+binding = "IMAGES_R2"
+bucket_name = "cf-blog-images"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "PRESENCE_DO"
+class_name = "PresenceDO"
+
+[[durable_objects.bindings]]
+name = "ROOM_DO"
+class_name = "RoomDO"
+
+[[durable_objects.bindings]]
+name = "HOME_DO"
+class_name = "HomeDO"
+
+# 环境变量
+[vars]
+ENVIRONMENT = "development"
+SITE_URL = "https://blog.jonirrings.com"
+
+# Turnstile
+# [vars]
+# TURNSTILE_SITE_KEY = "1x00000000000000000000AA"
+# TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
+
+# GitHub OAuth
+# [vars]
+# GITHUB_CLIENT_ID = "your_client_id"
+# GITHUB_CLIENT_SECRET = "your_client_secret"

@@ -1,0 +1,45 @@
+{
+  "name": "cf-blog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare multi-framework blog with Next.js/Nuxt/SvelteKit",
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "build": "pnpm run build:db && pnpm run build:all",
+    "build:db": "pnpm -F @cf-blog/db build",
+    "build:all": "pnpm -F next-blog build && pnpm -F nuxt-blog build && pnpm -F svelte-blog build",
+    "build:shell": "pnpm -F shell build",
+    "deploy": "wrangler pages deploy dist/",
+    "db:migrate": "pnpm -F @cf-blog/db drizzle-kit generate && wrangler d1 migrations apply cf-blog-db",
+    "db:migrate:local": "pnpm -F @cf-blog/db drizzle-kit generate && wrangler d1 migrations apply cf-blog-db --local",
+    "db:seed": "tsx scripts/seed-local.ts",
+    "db:seed:clear": "tsx scripts/seed-local.ts clear",
+    "db:seed:remote": "tsx scripts/seed-local.ts --remote",
+    "db:seed:clear:remote": "tsx scripts/seed-local.ts clear --remote",
+    "db:studio": "pnpm -F @cf-blog/db drizzle-kit studio",
+    "lint": "pnpm run --parallel lint",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "typecheck": "pnpm run --parallel typecheck"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@vitest/coverage-v8": "^4.1.5",
+    "i18next": "^26.0.8",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "i18next-http-backend": "^3.0.6",
+    "react-i18next": "^17.0.6",
+    "tsx": "^4.7.0",
+    "typescript": "catalog:",
+    "vitest": "^4.1.5",
+    "wrangler": "^4.87.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.33.2"
+}

@@ -1,0 +1,37 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "cf-blog"
+main = "apps/shell/src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "cf-blog-db"
+database_id = "YOUR_D1_DATABASE_ID"
+
+# KV 命名空间
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "YOUR_CONFIG_KV_ID"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "YOUR_CACHE_KV_ID"
+
+[[kv_namespaces]]
+binding = "USER_KV"
+id = "YOUR_USER_KV_ID"
+
+# R2 存储桶
+[[r2_buckets]]
+binding = "IMAGES_R2"
+bucket_name = "cf-blog-images"
+
+# Durable Objects
+[dev]
+port = 8788
+
+[[migrations]]
+tag = "v1"
+new_classes = ["PresenceDO", "RoomDO", "HomeDO"]
