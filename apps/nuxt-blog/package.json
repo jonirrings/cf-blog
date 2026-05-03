@@ -28,11 +28,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
-    "@tailwindcss/postcss": "catalog:",
+    "@nuxtjs/tailwindcss": "6.14.0",
     "@types/node": "catalog:",
     "nuxt": "^3.16.0",
-    "postcss": "catalog:",
-    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vue": "^3.5.0",
     "vue-router": "^4.4.0"

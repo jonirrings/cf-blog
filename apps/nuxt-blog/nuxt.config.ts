@@ -3,11 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-01-01',
   devtools: { enabled: false },
   ssr: false,
+
   nitro: {
     output: {
       publicDir: '../dist/nuxt',
     },
   },
+
   typescript: {
     tsConfig: {
       compilerOptions: {
@@ -18,6 +20,7 @@ export default defineNuxtConfig({
       },
     },
   },
+
   app: {
     head: {
       title: 'Blog - Nuxt',
@@ -28,4 +31,6 @@ export default defineNuxtConfig({
       ],
     },
   },
+
+  modules: ['@nuxtjs/tailwindcss'],
 });

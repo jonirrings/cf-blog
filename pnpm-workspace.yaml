@@ -10,7 +10,7 @@ allowBuilds:
 
 catalog:
   # React ecosystem
-  
+
   # Linting & Formatting
   '@biomejs/biome': ^2.4.14
 
@@ -51,13 +51,14 @@ catalog:
 
   # Next.js
   next: ^16.2.4
-  postcss: ^8.5.6
+  postcss: ^8.5.13
   react: ^19.1.0
   react-dom: ^19.1.0
   react-i18next: ^17.0.6
 
   # Tailwind CSS v4
   tailwindcss: ^4.2.4
+  '@tailwindcss/vite': ^4.2.4
 
   # Build tools
   tsx: ^4.7.0
@@ -70,3 +71,7 @@ catalog:
 
   # Cloudflare
   wrangler: ^4.87.0
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - esbuild

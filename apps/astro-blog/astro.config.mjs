@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   outDir: '../dist/astro',
@@ -12,6 +13,6 @@ export default defineConfig({
   integrations: [react()],
   // Astro 5: 使用 vite 插件进行 TypeScript 检查
   vite: {
-    plugins: [],
+    plugins: [tailwindcss()],
   },
 });

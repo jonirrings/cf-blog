@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@cf-blog/db": "workspace:*",
+    "@cf-blog/i18n": "workspace:*",
     "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.2.0",
     "@tiptap/core": "catalog:",
@@ -28,7 +29,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vinxi": "^0.5.0"
   }

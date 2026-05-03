@@ -30,13 +30,12 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@astrojs/check": "^0.9.0",
-    "@tailwindcss/postcss": "catalog:",
+    "@biomejs/biome": "catalog:",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "postcss": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }
