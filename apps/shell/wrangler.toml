@@ -1,0 +1,69 @@
+name = "blog-jonirrings"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Service Binding - 连接到 Hono API 后端
+[[services]]
+binding = "API_BACKEND"
+service = "cf-blog-api"
+
+# 自定义域名
+# 在 Cloudflare Dashboard 绑定：blog.jonirrings.com
+# routes = ["blog.jonirrings.com/*"]
+
+# D1 数据库
+[[d1_databases]]
+binding = "DB"
+database_name = "cf-blog-db"
+database_id = "YOUR_D1_DATABASE_ID" # 替换为实际的 database_id
+
+# KV 命名空间 - 配置
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "YOUR_CONFIG_KV_ID"
+preview_id = "YOUR_CONFIG_KV_PREVIEW_ID"
+
+# KV 命名空间 - 缓存
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "YOUR_CACHE_KV_ID"
+preview_id = "YOUR_CACHE_KV_PREVIEW_ID"
+
+# KV 命名空间 - 用户偏好
+[[kv_namespaces]]
+binding = "USER_KV"
+id = "YOUR_USER_KV_ID"
+preview_id = "YOUR_USER_KV_PREVIEW_ID"
+
+# R2 存储桶 - 图片
+[[r2_buckets]]
+binding = "IMAGES_R2"
+bucket_name = "cf-blog-images"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "PRESENCE_DO"
+class_name = "PresenceDO"
+
+[[durable_objects.bindings]]
+name = "ROOM_DO"
+class_name = "RoomDO"
+
+[[durable_objects.bindings]]
+name = "HOME_DO"
+class_name = "HomeDO"
+
+# 环境变量
+[vars]
+ENVIRONMENT = "development"
+
+# Turnstile (需要在 Cloudflare Dashboard 创建)
+# [vars]
+# TURNSTILE_SITE_KEY = "1x00000000000000000000AA"
+# TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
+
+# GitHub OAuth (需要在 GitHub 创建)
+# [vars]
+# GITHUB_CLIENT_ID = "your_client_id"
+# GITHUB_CLIENT_SECRET = "your_client_secret"
