@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import i18n from "@cf-blog/i18n";
+import { PublicNav } from "@/components/PublicNav";
 
 interface Post {
   id: string;
@@ -19,10 +20,7 @@ interface PostParams {
   };
 }
 
-// 静态生成参数 - 构建时生成所有文章页面
 export async function generateStaticParams() {
-  // 由于是静态导出，我们返回空数组
-  // 实际使用时需要从 API 获取文章列表
   return [];
 }
 
@@ -52,11 +50,7 @@ export default async function PostPage({ params }: PostParams) {
   return (
     <main className="min-h-screen p-8">
       <article className="max-w-4xl mx-auto">
-        <nav className="mb-4">
-          <Link href="/" className="text-blue-600 hover:underline">
-            {i18n.t("site.backToHome")}
-          </Link>
-        </nav>
+        <PublicNav />
 
         <header className="mb-8">
           <h1 className="text-4xl font-bold mb-2">{post.title}</h1>

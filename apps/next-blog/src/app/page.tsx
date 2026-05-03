@@ -1,5 +1,6 @@
 import Link from "next/link";
 import i18n from "@cf-blog/i18n";
+import { PublicNav } from "@/components/PublicNav";
 
 interface Post {
   id: string;
@@ -30,23 +31,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Next.js Blog</h1>
-          <p className="text-gray-600">{i18n.t("site.poweredBy")}</p>
-        </header>
-
-        <nav className="mb-8 p-4 bg-gray-100 rounded-lg">
-          <span className="font-semibold mr-4">{i18n.t("site.frameworkSwitch")}</span>
-          <a href="/next/" className="text-blue-600 hover:underline mr-4">
-            {i18n.t("framework.next")}
-          </a>
-          <a href="/nuxt/" className="text-green-600 hover:underline mr-4">
-            {i18n.t("framework.nuxt")}
-          </a>
-          <a href="/svelte/" className="text-orange-600 hover:underline">
-            {i18n.t("framework.svelte")}
-          </a>
-        </nav>
+        <PublicNav />
 
         <section>
           <h2 className="text-2xl font-semibold mb-4">{i18n.t("site.latestPosts")}</h2>
