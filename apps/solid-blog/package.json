@@ -1,0 +1,30 @@
+{
+  "name": "solid-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "preview": "vinxi preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cf-blog/db": "workspace:*",
+    "@solidjs/router": "^0.15.0",
+    "@solidjs/start": "^1.2.0",
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-image": "catalog:",
+    "@tiptap/extension-link": "catalog:",
+    "@tiptap/extension-placeholder": "catalog:",
+    "@tiptap/pm": "catalog:",
+    "@tiptap/starter-kit": "catalog:",
+    "lucide-solid": "^1.14.0",
+    "solid-js": "^1.9.4"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vinxi": "^0.5.0"
+  }
+}

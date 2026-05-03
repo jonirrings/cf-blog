@@ -8,6 +8,7 @@ build/
 .next/
 .nuxt/
 .svelte-kit/
+.astro
 
 # Logs
 *.log
@@ -47,3 +48,5 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+tsconfig.tsbuildinfo
