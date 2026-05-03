@@ -9,9 +9,9 @@
  * - 创建/更新本地用户
  */
 
-import { eq } from 'drizzle-orm';
-import { users, sessions } from '@cf-blog/db/schema';
 import type { NewUser } from '@cf-blog/db/schema';
+import { sessions, users } from '@cf-blog/db/schema';
+import { eq } from 'drizzle-orm';
 import { createSession } from './session';
 
 // GitHub OAuth 配置

@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import type { Locale } from '@cf-blog/i18n';
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { t, locale, setLocale, supportedLocales } = useI18n();
 
 async function handleLocaleChange(newLocale: Locale) {

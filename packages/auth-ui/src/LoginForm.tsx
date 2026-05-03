@@ -1,6 +1,6 @@
+import i18n from '@cf-blog/i18n';
 import type React from 'react';
 import { useState } from 'react';
-import i18n from '@cf-blog/i18n';
 import type { LoginFormProps } from './types';
 
 export function LoginForm({ onLoginSuccess, onRegisterClick, apiBaseUrl }: LoginFormProps) {
@@ -28,7 +28,7 @@ export function LoginForm({ onLoginSuccess, onRegisterClick, apiBaseUrl }: Login
       } else {
         setError(data.error || i18n.t('auth.loginFailed'));
       }
-    } catch (err) {
+    } catch (_err) {
       setError(i18n.t('auth.networkError'));
     } finally {
       setLoading(false);

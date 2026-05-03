@@ -9,9 +9,9 @@
  * - Passkey 管理（添加/删除）
  */
 
-import { eq } from 'drizzle-orm';
-import { users, passkeys } from '@cf-blog/db/schema';
 import type { NewPasskey } from '@cf-blog/db/schema';
+import { passkeys, users } from '@cf-blog/db/schema';
+import { eq } from 'drizzle-orm';
 
 // WebAuthn 配置
 const RP_NAME = 'Blog';

@@ -12,12 +12,12 @@
  */
 
 import { Hono } from 'hono';
-import type { Env } from '../index';
-import { adminMiddleware } from '../auth/middleware';
-import { recordVisit, getVisitCount, getVisitCounts } from '../analytics/counter';
-import { getHourlyTrend, getDailyTrend, getTopPages, getRefererStats } from '../analytics/stats';
-import { batchSyncAnalytics } from '../analytics/sync';
+import { getVisitCount, getVisitCounts, recordVisit } from '../analytics/counter';
 import { shouldCountVisit } from '../analytics/crawler';
+import { getDailyTrend, getHourlyTrend, getRefererStats, getTopPages } from '../analytics/stats';
+import { batchSyncAnalytics } from '../analytics/sync';
+import { adminMiddleware } from '../auth/middleware';
+import type { Env } from '../index';
 
 // Cast KVNamespace for type compatibility between different workers-types versions
 type AnalyticsKV = Parameters<typeof recordVisit>[0];
@@ -139,7 +139,13 @@ app.post('/sync', adminMiddleware, async (c) => {
     );
   }
 
-  const results = await batchSyncAnalytics(c.env.CACHE_KV as AnalyticsKV, apiToken, accountId, zoneId, postIds);
+  const results = await batchSyncAnalytics(
+    c.env.CACHE_KV as AnalyticsKV,
+    apiToken,
+    accountId,
+    zoneId,
+    postIds
+  );
 
   return c.json({
     success: true,

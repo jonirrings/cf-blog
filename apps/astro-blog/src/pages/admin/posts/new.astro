@@ -1,11 +1,12 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { getLocaleFromRequest, getT } from '../../../lib/i18n';
-import RichTextEditor from '../../../components/RichTextEditor';
 
 export const prerender = false;
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const locale = getLocaleFromRequest(Astro.request);
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const t = getT(locale);
 
 // i18n values for client-side script

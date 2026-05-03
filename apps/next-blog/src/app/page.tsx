@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import i18n from '@cf-blog/i18n';
+import Link from 'next/link';
 import { PublicNav } from '@/components/PublicNav';
 
 interface Post {

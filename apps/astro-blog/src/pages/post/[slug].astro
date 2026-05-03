@@ -12,11 +12,15 @@ interface Post {
   updated_at: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const locale = getLocaleFromRequest(Astro.request);
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const t = getT(locale);
 
 // 获取文章详情
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const { slug } = Astro.params;
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 let post: Post | null = null;
 
 try {
@@ -34,6 +38,7 @@ if (!post) {
   return Astro.redirect('/astro/');
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString(locale);
 }

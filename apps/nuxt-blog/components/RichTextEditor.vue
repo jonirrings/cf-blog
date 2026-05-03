@@ -5,20 +5,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, defineProps, defineEmits } from 'vue';
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
+import StarterKit from '@tiptap/starter-kit';
+import { EditorContent } from '@tiptap/vue-3';
+import { onBeforeUnmount, ref, watch } from 'vue';
 
 interface JSONContent {
   type?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: TipTap JSON content attrs
   attrs?: Record<string, any>;
   content?: JSONContent[];
   text?: string;
   marks?: Array<{
     type: string;
+    // biome-ignore lint/suspicious/noExplicitAny: TipTap JSON content attrs
     attrs?: Record<string, any>;
   }>;
 }

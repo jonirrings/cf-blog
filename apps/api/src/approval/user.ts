@@ -8,13 +8,17 @@
  * - 批量审批
  */
 
-import { eq, and } from 'drizzle-orm';
-import { users, auditLogs } from '@cf-blog/db/schema';
+import { auditLogs, users } from '@cf-blog/db/schema';
+import type { BetterSQLite3Database } from 'drizzle-orm/sqlite-core';
+import type * as schema from '@cf-blog/db/schema';
+import { eq } from 'drizzle-orm';
+
+type Db = BetterSQLite3Database<typeof schema>;
 
 /**
  * 获取待审批用户列表
  */
-export async function getPendingUsers(db: any): Promise<any[]> {
+export async function getPendingUsers(db: Db) {
   return db.query.users.findMany({
     where: eq(users.isApproved, false),
     columns: {
@@ -26,7 +30,10 @@ export async function getPendingUsers(db: any): Promise<any[]> {
       avatar: true,
       createdAt: true,
     },
-    orderBy: (users: typeof import('@cf-blog/db/schema').users, { desc }: { desc: (col: any) => any }) => [desc(users.createdAt)],
+    orderBy: (
+      users: typeof import('@cf-blog/db/schema').users,
+      { desc }: { desc: (col: typeof users.createdAt) => unknown }
+    ) => [desc(users.createdAt)],
   });
 }
 
@@ -34,7 +41,7 @@ export async function getPendingUsers(db: any): Promise<any[]> {
  * 审批通过用户
  */
 export async function approveUser(
-  db: any,
+  db: Db,
   userId: number,
   adminUserId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -84,7 +91,7 @@ export async function approveUser(
  * 拒绝用户
  */
 export async function rejectUser(
-  db: any,
+  db: Db,
   userId: number,
   adminUserId: number,
   reason?: string
@@ -130,7 +137,7 @@ export async function rejectUser(
  * 批量审批用户
  */
 export async function bulkApproveUsers(
-  db: any,
+  db: Db,
   userIds: number[],
   adminUserId: number
 ): Promise<{ success: boolean; approved: number; errors: string[] }> {

@@ -1,7 +1,7 @@
-import { type Component, createSignal } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
-import { useTranslation } from '~/lib/i18n';
+import { type Component, createSignal } from 'solid-js';
 import RichTextEditor from '~/components/RichTextEditor';
+import { useTranslation } from '~/lib/i18n';
 
 interface JSONContent {
   type?: string;

@@ -1,7 +1,7 @@
-import { type Component, createSignal, onMount, Show, type JSX } from 'solid-js';
+import { type Locale, supportedLocales } from '@cf-blog/i18n';
 import { useNavigate } from '@solidjs/router';
+import { type Component, createSignal, type JSX, onMount, Show } from 'solid-js';
 import { useTranslation } from '~/lib/i18n';
-import { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 interface SessionInfo {
   userName: string;
@@ -92,9 +92,7 @@ const AdminLayout: Component<{ children?: JSX.Element }> = (props) => {
               <p class="text-sm text-gray-500">{t(`user.role.${session()?.userRole}`)}</p>
             </div>
           </aside>
-          <main class="ml-64 flex-1 p-6">
-            {props.children}
-          </main>
+          <main class="ml-64 flex-1 p-6">{props.children}</main>
         </div>
       </Show>
     </Show>

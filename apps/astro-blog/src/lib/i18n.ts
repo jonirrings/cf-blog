@@ -4,7 +4,7 @@
  * 使用 @cf-blog/i18n 集成
  */
 
-import i18n, { supportedLocales, type Locale } from '@cf-blog/i18n';
+import i18n, { type Locale, supportedLocales } from '@cf-blog/i18n';
 
 /**
  * 获取当前语言（服务端使用）
@@ -49,5 +49,5 @@ export function getT(locale: Locale = 'zh-CN') {
   };
 }
 
-export { i18n, supportedLocales };
 export type { Locale } from '@cf-blog/i18n';
+export { i18n, supportedLocales };

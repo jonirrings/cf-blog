@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
 import i18n from '@cf-blog/i18n';
+import { useState } from 'react';
 import type { GitHubButtonProps } from './types';
 
-export function GitHubButton({ onAuthComplete, apiBaseUrl }: GitHubButtonProps) {
+export function GitHubButton({ onAuthComplete: _onAuthComplete, apiBaseUrl }: GitHubButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {

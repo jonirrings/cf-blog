@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import i18n from '@cf-blog/i18n';
+import { useState } from 'react';
 import type { PasskeyButtonProps } from './types';
 
 export function PasskeyButton({ onAuthComplete, mode, apiBaseUrl }: PasskeyButtonProps) {
@@ -69,9 +69,9 @@ export function PasskeyButton({ onAuthComplete, mode, apiBaseUrl }: PasskeyButto
 
         onAuthComplete?.();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Passkey error:', err);
-      setError(err.message || i18n.t('auth.passkeyFailed'));
+      setError((err instanceof Error ? err.message : null) || i18n.t('auth.passkeyFailed'));
     } finally {
       setLoading(false);
     }

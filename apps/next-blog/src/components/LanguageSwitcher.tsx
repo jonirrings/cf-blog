@@ -1,7 +1,7 @@
 'use client';
 
+import { type Locale, supportedLocales } from '@cf-blog/i18n';
 import { useTranslation } from '@/lib/i18n';
-import { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 export function LanguageSwitcher() {
   const { locale, changeLocale } = useTranslation();

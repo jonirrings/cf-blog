@@ -5,10 +5,10 @@
  * 生产环境请删除此文件
  */
 
-import { Hono } from 'hono';
-import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '@cf-blog/db/schema';
-import { seed as seedData, clear as clearData } from '@cf-blog/db/seed';
+import { clear as clearData, seed as seedData } from '@cf-blog/db/seed';
+import { drizzle } from 'drizzle-orm/d1';
+import { Hono } from 'hono';
 
 const seed = new Hono<{
   Bindings: {

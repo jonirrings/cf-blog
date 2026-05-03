@@ -19,7 +19,11 @@ type KVNamespace = {
     list_complete: boolean;
     cursor?: string;
   }>;
-  put(key: string, value: string | ReadableStream | ArrayBuffer, options?: { expirationTtl?: number; expiration?: number; metadata?: unknown }): Promise<void>;
+  put(
+    key: string,
+    value: string | ReadableStream | ArrayBuffer,
+    options?: { expirationTtl?: number; expiration?: number; metadata?: unknown }
+  ): Promise<void>;
   delete(key: string): Promise<void>;
 };
 

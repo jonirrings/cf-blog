@@ -8,17 +8,21 @@
  * - 二级审批逻辑
  */
 
-import { eq, and, or } from 'drizzle-orm';
-import { comments, users, posts, auditLogs } from '@cf-blog/db/schema';
+import { auditLogs, comments, posts } from '@cf-blog/db/schema';
+import type { BetterSQLite3Database } from 'drizzle-orm/sqlite-core';
+import type * as schema from '@cf-blog/db/schema';
+import { and, eq, or } from 'drizzle-orm';
+
+type Db = BetterSQLite3Database<typeof schema>;
 
 /**
  * 获取待审批评论列表
  */
 export async function getPendingComments(
-  db: any,
+  db: Db,
   postId?: number,
   userId?: number
-): Promise<any[]> {
+) {
   const conditions = [];
 
   // 按文章过滤
@@ -47,7 +51,10 @@ export async function getPendingComments(
         columns: { id: true, title: true, authorId: true },
       },
     },
-    orderBy: (comments: typeof import('@cf-blog/db/schema').comments, { desc }: { desc: (col: any) => any }) => [desc(comments.createdAt)],
+    orderBy: (
+      comments: typeof import('@cf-blog/db/schema').comments,
+      { desc }: { desc: (col: typeof comments.createdAt) => unknown }
+    ) => [desc(comments.createdAt)],
   });
 }
 
@@ -56,7 +63,7 @@ export async function getPendingComments(
  * 用户确认自己的评论可以提交审核
  */
 export async function userApproveComment(
-  db: any,
+  db: Db,
   commentId: number,
   userId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -103,7 +110,7 @@ export async function userApproveComment(
  * 作者确认评论可以公开显示
  */
 export async function authorApproveComment(
-  db: any,
+  db: Db,
   commentId: number,
   authorId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -163,7 +170,7 @@ export async function authorApproveComment(
  * 管理员审批评论（一级审批 - 替代用户审批）
  */
 export async function adminApproveComment(
-  db: any,
+  db: Db,
   commentId: number,
   adminId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -212,7 +219,7 @@ export async function adminApproveComment(
  * 拒绝评论
  */
 export async function rejectComment(
-  db: any,
+  db: Db,
   commentId: number,
   userId: number,
   isAdmin: boolean,
@@ -270,7 +277,7 @@ export async function rejectComment(
 /**
  * 检查评论是否对公众可见
  */
-export function isCommentPublic(comment: any): boolean {
+export function isCommentPublic(comment: { userApproved: boolean; postApproved: boolean; rejected: boolean }): boolean {
   return (
     comment.userApproved === true && comment.postApproved === true && comment.rejected === false
   );
@@ -279,14 +286,14 @@ export function isCommentPublic(comment: any): boolean {
 /**
  * 检查评论是否对评论者可见
  */
-export function isCommentVisibleToOwner(comment: any): boolean {
+export function isCommentVisibleToOwner(comment: { rejected: boolean }): boolean {
   return !comment.rejected; // 只要未被拒绝，评论者都可见
 }
 
 /**
  * 检查评论是否对文章作者可见
  */
-export function isCommentVisibleToAuthor(comment: any): boolean {
+export function isCommentVisibleToAuthor(comment: { rejected: boolean; userApproved: boolean }): boolean {
   if (comment.rejected) return false; // 被拒绝的评论作者不可见
   return comment.userApproved === true; // 用户已审批即可见
 }

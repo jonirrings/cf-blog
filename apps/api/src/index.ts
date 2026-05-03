@@ -14,10 +14,10 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { secureHeaders } from 'hono/secure-headers';
 
+export { HomeDO } from './websocket/HomeDO';
 // Durable Objects 类导出（wrangler 需要）
 export { PresenceDO } from './websocket/PresenceDO';
 export { RoomDO } from './websocket/RoomDO';
-export { HomeDO } from './websocket/HomeDO';
 
 // 类型定义
 export interface Env {
@@ -106,16 +106,16 @@ app.get('/ws/home', async (c) => {
   return stub.fetch(c.req.raw);
 });
 
+import analyticsRoutes from './routes/analytics';
 // API 路由注册
 import authRoutes from './routes/auth';
-import postRoutes from './routes/posts';
 import commentRoutes from './routes/comments';
-import userRoutes from './routes/users';
 import configRoutes from './routes/config';
-import statsRoutes from './routes/stats';
-import analyticsRoutes from './routes/analytics';
 import importExportRoutes from './routes/importexport';
+import postRoutes from './routes/posts';
 import seedRoutes from './routes/seed';
+import statsRoutes from './routes/stats';
+import userRoutes from './routes/users';
 
 app.route('/api/auth', authRoutes);
 app.route('/api/posts', postRoutes);

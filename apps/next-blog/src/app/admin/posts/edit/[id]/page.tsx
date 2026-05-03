@@ -1,12 +1,12 @@
 'use client';
 
-import type React from 'react';
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import type { JSONContent } from '@tiptap/core';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { Editor } from '@/components/editor';
 import { useTranslation } from '@/lib/i18n';
-import type { JSONContent } from '@tiptap/core';
 
 interface Post {
   id: number;

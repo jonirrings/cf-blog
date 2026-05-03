@@ -10,12 +10,12 @@
  */
 
 import { Hono } from 'hono';
-import type { Env } from '../index';
-import { adminMiddleware, authMiddleware } from '../auth/middleware';
-import { getSiteConfig, updateSiteConfig } from '../config/site';
-import { getNavConfig, updateNavConfig, getVisibleNavItems } from '../config/nav';
-import { getUserPreferences, updateUserPreferences } from '../config/user';
 import type { AuthContext } from '../auth/middleware';
+import { adminMiddleware, authMiddleware } from '../auth/middleware';
+import { getNavConfig, getVisibleNavItems, updateNavConfig } from '../config/nav';
+import { getSiteConfig, updateSiteConfig } from '../config/site';
+import { getUserPreferences, updateUserPreferences } from '../config/user';
+import type { Env } from '../index';
 
 const app = new Hono<{ Bindings: Env }>();
 

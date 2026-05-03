@@ -1,12 +1,12 @@
 'use client';
 
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
 import i18n from '@cf-blog/i18n';
 import type { JSONContent } from '@tiptap/core';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 interface EditorProps {
   initialContent?: JSONContent;

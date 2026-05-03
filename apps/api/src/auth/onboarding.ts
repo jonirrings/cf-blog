@@ -7,9 +7,9 @@
  * - 防止重复创建管理员
  */
 
-import { eq } from 'drizzle-orm';
-import { users } from '@cf-blog/db/schema';
 import type { NewUser } from '@cf-blog/db/schema';
+import { users } from '@cf-blog/db/schema';
+import { eq } from 'drizzle-orm';
 
 // 管理员设置状态 KV Key
 const ONBOARDING_COMPLETE_KEY = 'onboarding_complete';

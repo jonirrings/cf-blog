@@ -8,9 +8,9 @@
  * - 在线人数统计同步
  */
 
-import type { RoomDO } from '../websocket/RoomDO';
 import type { HomeDO } from '../websocket/HomeDO';
 import type { PresenceDO } from '../websocket/PresenceDO';
+import type { RoomDO } from '../websocket/RoomDO';
 
 // 广播事件类型
 export type BroadcastEventType =

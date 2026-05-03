@@ -96,6 +96,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' });
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { t, locale } = useI18n();
 
 interface Comment {
@@ -139,10 +140,14 @@ const filters = ref<FilterOption[]>([
   },
 ]);
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const currentFilter = ref<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const comments = ref<Comment[]>([]);
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const loading = ref(true);
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const filteredComments = computed(() => {
   if (currentFilter.value === 'all') return comments.value;
   if (currentFilter.value === 'pending')
@@ -159,6 +164,7 @@ const updateFilterCounts = () => {
   filters.value[2].count = comments.value.filter((c) => c.rejected).length;
 };
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const handleApprove = async (id: number) => {
   try {
     const res = await $fetch(`/api/comments/${id}/approve`, {
@@ -175,6 +181,7 @@ const handleApprove = async (id: number) => {
   }
 };
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const handleReject = async (id: number) => {
   const reason = prompt(t('comment.rejectReason'));
   if (!reason) return;

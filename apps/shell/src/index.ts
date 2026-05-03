@@ -8,8 +8,8 @@
  * - 认证和权限中间件
  */
 
-import { getDb } from '@cf-blog/db/client';
 import apiApp from '@cf-blog/api';
+import { getDb } from '@cf-blog/db/client';
 
 export interface Env {
   // D1 数据库
@@ -41,7 +41,7 @@ export interface Env {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
     const db = getDb(env);
@@ -90,7 +90,7 @@ export default {
 /**
  * CORS 处理
  */
-function handleCors(request: Request): Response {
+function handleCors(_request: Request): Response {
   return new Response(null, {
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -104,7 +104,7 @@ function handleCors(request: Request): Response {
 /**
  * API 路由处理
  */
-async function handleApi(request: Request, env: Env, db: any): Promise<Response> {
+async function handleApi(request: Request, env: Env, db: unknown): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname;
 
@@ -158,7 +158,7 @@ async function handleDurableObjects(request: Request, env: Env): Promise<Respons
 /**
  * 静态资源处理（占位，实际由 Pages 处理）
  */
-async function handleStaticAssets(request: Request, env: Env): Promise<Response> {
+async function handleStaticAssets(_request: Request, _env: Env): Promise<Response> {
   // 在 Pages 部署模式下，静态资源由 Pages 自动处理
   // 本地开发时可能需要手动配置
   return new Response('Static assets should be served by Pages', { status: 404 });

@@ -79,9 +79,12 @@ interface Stats {
   totalViews: number;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const stats = ref<Stats | null>(null);
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const loading = ref(true);
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const statCards = computed(() => {
   const s = stats.value;
   if (!s) return [];

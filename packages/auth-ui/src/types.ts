@@ -1,11 +1,19 @@
+interface AuthUser {
+  id?: number;
+  email?: string;
+  name?: string;
+  role?: string;
+  isApproved?: boolean;
+}
+
 export interface LoginFormProps {
-  onLoginSuccess?: (user: any) => void;
+  onLoginSuccess?: (user: AuthUser) => void;
   onRegisterClick?: () => void;
   apiBaseUrl?: string;
 }
 
 export interface RegisterFormProps {
-  onRegisterSuccess?: (user: any) => void;
+  onRegisterSuccess?: (user: AuthUser) => void;
   onLoginClick?: () => void;
   apiBaseUrl?: string;
 }

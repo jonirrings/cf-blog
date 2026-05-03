@@ -1,15 +1,17 @@
-import { type Component, createSignal, onMount } from 'solid-js';
 import { useNavigate, useParams } from '@solidjs/router';
-import { useTranslation } from '~/lib/i18n';
+import { createSignal, onMount } from 'solid-js';
 import RichTextEditor from '~/components/RichTextEditor';
+import { useTranslation } from '~/lib/i18n';
 
 interface JSONContent {
   type?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: TipTap JSON content attrs
   attrs?: Record<string, any>;
   content?: JSONContent[];
   text?: string;
   marks?: Array<{
     type: string;
+    // biome-ignore lint/suspicious/noExplicitAny: TipTap JSON content attrs
     attrs?: Record<string, any>;
   }>;
 }
@@ -23,7 +25,7 @@ interface FormData {
   status: 'draft' | 'published';
 }
 
-const EditPostPage: Component = () => {
+const EditPostPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const params = useParams();

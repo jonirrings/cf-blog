@@ -8,8 +8,12 @@
  * - 拒绝申请
  */
 
-import { eq, and } from 'drizzle-orm';
-import { users, auditLogs } from '@cf-blog/db/schema';
+import { auditLogs, users } from '@cf-blog/db/schema';
+import type { BetterSQLite3Database } from 'drizzle-orm/sqlite-core';
+import type * as schema from '@cf-blog/db/schema';
+import { and, eq } from 'drizzle-orm';
+
+type Db = BetterSQLite3Database<typeof schema>;
 
 // 申请者状态枚举
 export type PublisherApplicationStatus = 'pending' | 'approved' | 'rejected';
@@ -18,7 +22,7 @@ export type PublisherApplicationStatus = 'pending' | 'approved' | 'rejected';
  * 用户申请成为发布者
  */
 export async function applyForPublisher(
-  db: any,
+  db: Db,
   userId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -68,7 +72,7 @@ export async function applyForPublisher(
 /**
  * 获取待审批的发布者申请列表
  */
-export async function getPendingApplications(db: any): Promise<any[]> {
+export async function getPendingApplications(db: Db) {
   return db.query.users.findMany({
     where: and(eq(users.role, 'publisher'), eq(users.isApproved, false)),
     columns: {
@@ -82,7 +86,10 @@ export async function getPendingApplications(db: any): Promise<any[]> {
       createdAt: true,
       updatedAt: true,
     },
-    orderBy: (users: typeof import('@cf-blog/db/schema').users, { desc }: { desc: (col: any) => any }) => [desc(users.updatedAt)],
+    orderBy: (
+      users: typeof import('@cf-blog/db/schema').users,
+      { desc }: { desc: (col: typeof users.updatedAt) => unknown }
+    ) => [desc(users.updatedAt)],
   });
 }
 
@@ -90,7 +97,7 @@ export async function getPendingApplications(db: any): Promise<any[]> {
  * 审批通过发布者申请
  */
 export async function approvePublisherApplication(
-  db: any,
+  db: Db,
   userId: number,
   adminUserId: number
 ): Promise<{ success: boolean; error?: string }> {
@@ -143,7 +150,7 @@ export async function approvePublisherApplication(
  * 拒绝发布者申请（降级为 commenter）
  */
 export async function rejectPublisherApplication(
-  db: any,
+  db: Db,
   userId: number,
   adminUserId: number,
   reason?: string

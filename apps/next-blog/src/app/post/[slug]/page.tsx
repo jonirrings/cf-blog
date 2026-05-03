@@ -1,6 +1,6 @@
+import i18n from '@cf-blog/i18n';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import i18n from '@cf-blog/i18n';
 import { PublicNav } from '@/components/PublicNav';
 
 interface Post {

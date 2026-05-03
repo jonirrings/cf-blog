@@ -1,4 +1,3 @@
-import React from 'react';
 import type { AuthLayoutProps } from './types';
 
 export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {

@@ -1,5 +1,4 @@
 ---
-import AdminLayout from '../../layouts/AdminLayout.astro';
 import { getLocaleFromRequest, getT } from '../../lib/i18n';
 
 export const prerender = false;
@@ -15,10 +14,13 @@ interface Stats {
   totalViews: number;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const locale = getLocaleFromRequest(Astro.request);
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const t = getT(locale);
 
 // 从 API 获取统计数据
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 let stats: Stats | null = null;
 
 try {

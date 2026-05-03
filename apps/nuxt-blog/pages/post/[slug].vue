@@ -34,13 +34,17 @@ interface Post {
   updated_at: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { t, locale } = useI18n();
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const route = useRoute();
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { post } = await useFetch<Post>(`/api/posts/${route.params.slug}`, {
   baseURL: process.env.API_URL || 'http://localhost:8788',
 });
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString(locale.value === 'zh-CN' ? 'zh-CN' : 'en');
 }

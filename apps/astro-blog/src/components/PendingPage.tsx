@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
 import i18n from '@cf-blog/i18n';
+import { useEffect, useState } from 'react';
 
 interface PendingPageProps {
   /** Current locale for i18n */

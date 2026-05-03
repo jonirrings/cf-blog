@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import type { Locale } from '@cf-blog/i18n';
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { t, locale, setLocale, supportedLocales } = useI18n();
 const route = useRoute();
 
@@ -88,8 +89,8 @@ interface UserInfo {
 }
 
 const userInfo = ref<UserInfo | null>(null);
-const authorized = ref(false);
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const navItems = computed(() => [
   { to: '/admin/dashboard', icon: '📊', label: t('admin.dashboard') },
   { to: '/admin/posts', icon: '📝', label: t('admin.posts') },
@@ -99,7 +100,7 @@ const navItems = computed(() => [
 ]);
 
 function isActive(path: string): boolean {
-  return route.path === path || route.path.startsWith(path + '/');
+  return route.path === path || route.path.startsWith(`${path}/`);
 }
 
 async function handleLocaleChange(newLocale: Locale) {
@@ -132,7 +133,6 @@ onMounted(async () => {
       email: data.user.email || '',
       role: data.user.role,
     };
-    authorized.value = true;
   } catch {
     navigateTo('/auth/login');
   }

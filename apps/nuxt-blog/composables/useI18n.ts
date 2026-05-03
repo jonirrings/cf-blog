@@ -4,7 +4,7 @@
  * 使用 @cf-blog/i18n 集成
  */
 
-import i18n, { supportedLocales, type Locale } from '@cf-blog/i18n';
+import i18n, { type Locale, supportedLocales } from '@cf-blog/i18n';
 
 export const useI18n = () => {
   const locale = ref<Locale>('zh-CN');

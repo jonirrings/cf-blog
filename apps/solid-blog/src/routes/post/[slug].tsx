@@ -1,7 +1,7 @@
+import { useParams } from '@solidjs/router';
 import { createResource, Show } from 'solid-js';
-import { A, useParams } from '@solidjs/router';
-import { useTranslation } from '~/lib/i18n';
 import { PublicNav } from '~/components/PublicNav';
+import { useTranslation } from '~/lib/i18n';
 
 interface Post {
   id: string;

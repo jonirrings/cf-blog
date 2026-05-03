@@ -11,27 +11,27 @@
  * - POST /api/auth/register - 邮箱密码注册
  */
 
+import * as schema from '@cf-blog/db/schema';
+import { users } from '@cf-blog/db/schema';
+import { eq } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/d1';
 import { Hono } from 'hono';
-import type { Env } from '../index';
 import { generateState, getGitHubAuthUrl, handleGitHubCallback } from '../auth/github';
+import type { AuthContext } from '../auth/middleware';
+import { authMiddleware } from '../auth/middleware';
 import {
-  getSession,
-  createSessionCookie,
-  clearSessionCookie,
-  createSession,
-} from '../auth/session';
-import {
-  isOnboardingComplete,
   createAdminUser,
+  isOnboardingComplete,
   markOnboardingComplete,
   validateAdminCreateRequest,
 } from '../auth/onboarding';
-import { authMiddleware } from '../auth/middleware';
-import type { AuthContext } from '../auth/middleware';
-import { eq } from 'drizzle-orm';
-import { users } from '@cf-blog/db/schema';
-import * as schema from '@cf-blog/db/schema';
-import { drizzle } from 'drizzle-orm/d1';
+import {
+  clearSessionCookie,
+  createSession,
+  createSessionCookie,
+  getSession,
+} from '../auth/session';
+import type { Env } from '../index';
 
 const app = new Hono<{ Bindings: Env }>();
 

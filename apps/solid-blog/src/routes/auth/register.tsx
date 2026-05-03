@@ -1,6 +1,6 @@
+import { useNavigate } from '@solidjs/router';
 import { type Component, createSignal } from 'solid-js';
 import { useTranslation } from '~/lib/i18n';
-import { useNavigate } from '@solidjs/router';
 
 const RegisterPage: Component = () => {
   const { t } = useTranslation();

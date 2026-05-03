@@ -1,6 +1,7 @@
 ---
-import { getLocaleFromRequest, getT } from '../lib/i18n';
+// biome-ignore lint/correctness/noUnusedImports: used in template below
 import type { Locale } from '@cf-blog/i18n';
+import { getLocaleFromRequest, getT } from '../lib/i18n';
 
 interface Props {
   title: string;
@@ -8,8 +9,11 @@ interface Props {
   locale?: Locale;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const { title, description, locale: localeProp } = Astro.props;
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const locale = localeProp || getLocaleFromRequest(Astro.request);
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const t = getT(locale);
 ---
 

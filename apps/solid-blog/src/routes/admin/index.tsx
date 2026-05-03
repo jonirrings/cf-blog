@@ -1,4 +1,4 @@
-import { type Component, createSignal, onMount, createMemo } from 'solid-js';
+import { type Component, createMemo, createSignal, onMount } from 'solid-js';
 import { useTranslation } from '~/lib/i18n';
 
 interface Stats {

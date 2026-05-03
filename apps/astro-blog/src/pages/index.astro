@@ -10,10 +10,13 @@ interface Post {
   created_at: string;
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const locale = getLocaleFromRequest(Astro.request);
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 const t = getT(locale);
 
 // 获取文章列表
+// biome-ignore lint/correctness/noUnusedVariables: used in template below
 let posts: Post[] = [];
 try {
   const api_url = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';

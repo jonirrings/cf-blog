@@ -9,14 +9,14 @@
  * - DELETE /api/posts/:id - 删除文章（admin only）
  */
 
-import { Hono } from 'hono';
-import { drizzle } from 'drizzle-orm/d1';
-import { eq, desc, and, like, or } from 'drizzle-orm';
-import type { Env } from '../index';
 import * as schema from '@cf-blog/db/schema';
-import { posts, authors, users, tags, postsToTags } from '@cf-blog/db/schema';
-import { authMiddleware, publisherMiddleware, adminMiddleware } from '../auth/middleware';
+import { authors, posts, postsToTags, tags, users } from '@cf-blog/db/schema';
+import { and, desc, eq, like, or } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/d1';
+import { Hono } from 'hono';
 import type { AuthContext } from '../auth/middleware';
+import { adminMiddleware, authMiddleware, publisherMiddleware } from '../auth/middleware';
+import type { Env } from '../index';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -37,7 +37,9 @@ app.get('/', async (c) => {
       conditions.push(eq(posts.status, status as 'draft' | 'published'));
     }
     if (framework) {
-      conditions.push(eq(posts.framework, framework as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid'));
+      conditions.push(
+        eq(posts.framework, framework as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid')
+      );
     }
 
     const allPosts = await db

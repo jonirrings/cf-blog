@@ -511,4 +511,4 @@ export async function clear(db: ReturnType<typeof drizzle>) {
   console.log('✅ 数据清除完成！');
 }
 
-export { users, authors, tags, posts, postsToTags, comments };
+export { authors, comments, posts, postsToTags, tags, users };

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import { AuthLayout, GitHubButton, LoginForm, PasskeyButton } from '@cf-blog/auth-ui';
 import i18n from '@cf-blog/i18n';
-import { AuthLayout, LoginForm, GitHubButton, PasskeyButton } from '@cf-blog/auth-ui';
+import { useEffect } from 'react';
 
 interface LoginPageProps {
   /** Current locale for i18n */

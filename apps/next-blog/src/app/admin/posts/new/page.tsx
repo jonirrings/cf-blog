@@ -1,12 +1,12 @@
 'use client';
 
+import type { JSONContent } from '@tiptap/core';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Editor } from '@/components/editor';
 import { useTranslation } from '@/lib/i18n';
-import type { JSONContent } from '@tiptap/core';
 
 interface FormData {
   title: string;

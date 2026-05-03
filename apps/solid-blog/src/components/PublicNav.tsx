@@ -1,6 +1,6 @@
+import { type Locale, supportedLocales } from '@cf-blog/i18n';
 import { A } from '@solidjs/router';
 import { useTranslation } from '~/lib/i18n';
-import { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 const frameworks = [
   { href: '/next/', labelKey: 'framework.next', color: 'text-blue-600' },

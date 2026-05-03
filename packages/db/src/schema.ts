@@ -1,11 +1,5 @@
-import {
-  sqliteTable,
-  text,
-  integer,
-  primaryKey,
-  unique,
-} from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
+import { integer, primaryKey, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
 
 // ==================== 认证相关表 ====================
 
@@ -29,7 +23,7 @@ export const users = sqliteTable('users', {
     .notNull(),
   publisherApplicationReason: text('publisher_application_reason'), // 申请理由
   publisherApplicationReviewedAt: text('publisher_application_reviewed_at'),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: circular reference in self-referencing FK
   publisherApplicationReviewedBy: integer('publisher_application_reviewed_by').references(
     (): any => users.id
   ),

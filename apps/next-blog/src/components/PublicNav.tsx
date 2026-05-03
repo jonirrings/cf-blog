@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslation } from '@/lib/i18n';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from '@/lib/i18n';
 
 const frameworks = [
   { href: '/next/', labelKey: 'framework.next', color: 'text-blue-600' },

@@ -1,6 +1,6 @@
+import i18n from '@cf-blog/i18n';
 import type React from 'react';
 import { useState } from 'react';
-import i18n from '@cf-blog/i18n';
 import type { RegisterFormProps } from './types';
 
 export function RegisterForm({ onRegisterSuccess, onLoginClick, apiBaseUrl }: RegisterFormProps) {
@@ -42,7 +42,7 @@ export function RegisterForm({ onRegisterSuccess, onLoginClick, apiBaseUrl }: Re
       } else {
         setError(data.error || i18n.t('auth.registerFailed'));
       }
-    } catch (err) {
+    } catch (_err) {
       setError(i18n.t('auth.networkError'));
     } finally {
       setLoading(false);
