@@ -4,7 +4,7 @@
  * 记录所有敏感操作的审计日志
  */
 
-import { auditLogs, type AuditAction } from "@cf-blog/db/schema";
+import { auditLogs, type AuditAction } from '@cf-blog/db/schema';
 
 /**
  * 记录审计日志
@@ -19,7 +19,7 @@ export async function createAuditLog(
     details?: Record<string, any>;
     ip?: string;
     userAgent?: string;
-  },
+  }
 ): Promise<boolean> {
   try {
     await db.insert(auditLogs).values({
@@ -34,7 +34,7 @@ export async function createAuditLog(
     });
     return true;
   } catch (error) {
-    console.error("[AuditLog] 记录失败:", error);
+    console.error('[AuditLog] 记录失败:', error);
     return false;
   }
 }
@@ -52,7 +52,7 @@ export async function getAuditLogs(
     targetType?: string;
     startDate?: Date;
     endDate?: Date;
-  } = {},
+  } = {}
 ): Promise<{
   logs: any[];
   total: number;
@@ -68,35 +68,35 @@ export async function getAuditLogs(
   const params: any[] = [];
 
   if (action) {
-    whereClauses.push("action = ?");
+    whereClauses.push('action = ?');
     params.push(action);
   }
 
   if (userId) {
-    whereClauses.push("userId = ?");
+    whereClauses.push('userId = ?');
     params.push(userId);
   }
 
   if (targetType) {
-    whereClauses.push("targetType = ?");
+    whereClauses.push('targetType = ?');
     params.push(targetType);
   }
 
   if (startDate) {
-    whereClauses.push("timestamp >= ?");
+    whereClauses.push('timestamp >= ?');
     params.push(startDate.toISOString());
   }
 
   if (endDate) {
-    whereClauses.push("timestamp <= ?");
+    whereClauses.push('timestamp <= ?');
     params.push(endDate.toISOString());
   }
 
-  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
   // 查询总数
   const totalResult = await db
-    .select({ count: integer("count") })
+    .select({ count: integer('count') })
     .from(auditLogs)
     .where(whereClause ? sql.raw(whereClause) : undefined)
     .get();

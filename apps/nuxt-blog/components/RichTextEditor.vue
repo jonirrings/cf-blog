@@ -5,12 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount, defineProps, defineEmits } from "vue";
-import { useEditor, EditorContent } from "@tiptap/vue-3";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
+import { ref, watch, onBeforeUnmount, defineProps, defineEmits } from 'vue';
+import { useEditor, EditorContent } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
 
 interface JSONContent {
   type?: string;
@@ -29,7 +29,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "contentChange", content: JSONContent): void;
+  (e: 'contentChange', content: JSONContent): void;
 }>();
 
 const { t } = useI18n();
@@ -38,7 +38,7 @@ const editor = useEditor({
   extensions: [
     StarterKit,
     Placeholder.configure({
-      placeholder: props.placeholder || t("post.contentPlaceholder"),
+      placeholder: props.placeholder || t('post.contentPlaceholder'),
     }),
     Image.configure({
       allowBase64: true,
@@ -46,20 +46,21 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
-        rel: "noopener noreferrer",
-        target: "_blank",
+        rel: 'noopener noreferrer',
+        target: '_blank',
       },
     }),
   ],
   content: props.initialContent,
+  immediatelyRender: false,
   editorProps: {
     attributes: {
       class:
-        "prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg",
+        'prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg',
     },
   },
   onUpdate: ({ editor }) => {
-    emit("contentChange", editor.getJSON());
+    emit('contentChange', editor.getJSON());
   },
 });
 
@@ -70,7 +71,7 @@ watch(
       editor.value.commands.setContent(newContent);
     }
   },
-  { deep: true },
+  { deep: true }
 );
 
 onBeforeUnmount(() => {

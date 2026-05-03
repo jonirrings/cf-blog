@@ -1,10 +1,10 @@
-import { Component } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import i18n from "@cf-blog/i18n";
+import { Component } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import i18n from '@cf-blog/i18n';
 
 export interface JSONContent {
   type?: string;
@@ -29,7 +29,7 @@ export const RichTextEditor: Component<RichTextEditorProps> = (props) => {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: props.placeholder || i18n.t("post.contentPlaceholder"),
+        placeholder: props.placeholder || i18n.t('post.contentPlaceholder'),
       }),
       Image.configure({
         allowBase64: true,
@@ -37,8 +37,8 @@ export const RichTextEditor: Component<RichTextEditorProps> = (props) => {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          rel: "noopener noreferrer",
-          target: "_blank",
+          rel: 'noopener noreferrer',
+          target: '_blank',
         },
       }),
     ],
@@ -46,13 +46,13 @@ export const RichTextEditor: Component<RichTextEditorProps> = (props) => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg",
+          'prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg',
       },
     },
     onUpdate: ({ editor }) => {
       const jsonContent = editor.getJSON();
       // Store in hidden input for form submission
-      const hiddenInput = document.getElementById("content-hidden-input") as HTMLInputElement;
+      const hiddenInput = document.getElementById('content-hidden-input') as HTMLInputElement;
       if (hiddenInput) {
         hiddenInput.value = JSON.stringify(jsonContent);
       }
@@ -67,7 +67,7 @@ export const RichTextEditor: Component<RichTextEditorProps> = (props) => {
         type="hidden"
         id="content-hidden-input"
         name="content"
-        value={props.initialContent ? JSON.stringify(props.initialContent) : ""}
+        value={props.initialContent ? JSON.stringify(props.initialContent) : ''}
       />
     </div>
   );

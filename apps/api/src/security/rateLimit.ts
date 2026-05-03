@@ -39,16 +39,16 @@ export function getClientIP(request: Request): string {
   }
 
   // 从 Header 获取
-  const headers = ["x-forwarded-for", "x-real-ip", "true-client-ip", "x-client-ip"];
+  const headers = ['x-forwarded-for', 'x-real-ip', 'true-client-ip', 'x-client-ip'];
 
   for (const header of headers) {
     const ip = request.headers.get(header);
     if (ip) {
-      return ip.split(",")[0].trim();
+      return ip.split(',')[0].trim();
     }
   }
 
-  return "unknown";
+  return 'unknown';
 }
 
 /**
@@ -65,7 +65,7 @@ export async function checkRateLimit(
   kv: KVNamespace,
   identifier: string,
   endpoint: string,
-  config: RateLimitConfig,
+  config: RateLimitConfig
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   const key = getRateLimitKey(identifier, endpoint);
   const now = Date.now();
@@ -112,7 +112,7 @@ export async function checkRateLimit(
  */
 export function rateLimitMiddleware(
   kv: KVNamespace,
-  config: RateLimitConfig = RateLimitPresets.api,
+  config: RateLimitConfig = RateLimitPresets.api
 ) {
   return async (c: any, next: any) => {
     const ip = getClientIP(c.req.raw);
@@ -121,19 +121,19 @@ export function rateLimitMiddleware(
     const result = await checkRateLimit(kv, ip, endpoint, config);
 
     // 添加响应头
-    c.header("X-RateLimit-Limit", config.maxRequests.toString());
-    c.header("X-RateLimit-Remaining", result.remaining.toString());
-    c.header("X-RateLimit-Reset", Math.floor(result.resetAt / 1000).toString());
+    c.header('X-RateLimit-Limit', config.maxRequests.toString());
+    c.header('X-RateLimit-Remaining', result.remaining.toString());
+    c.header('X-RateLimit-Reset', Math.floor(result.resetAt / 1000).toString());
 
     if (!result.allowed) {
       return c.json(
         {
           success: false,
-          error: "Too Many Requests",
-          message: "请求过于频繁，请稍后再试",
+          error: 'Too Many Requests',
+          message: '请求过于频繁，请稍后再试',
           retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000),
         },
-        429,
+        429
       );
     }
 
@@ -148,7 +148,7 @@ export async function checkUserRateLimit(
   kv: KVNamespace,
   userId: number,
   endpoint: string,
-  config: RateLimitConfig,
+  config: RateLimitConfig
 ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
   return checkRateLimit(kv, `user:${userId}`, endpoint, config);
 }

@@ -9,15 +9,15 @@
  * - 创建/更新本地用户
  */
 
-import { eq } from "drizzle-orm";
-import { users, sessions } from "@cf-blog/db/schema";
-import type { NewUser } from "@cf-blog/db/schema";
-import { createSession } from "./session";
+import { eq } from 'drizzle-orm';
+import { users, sessions } from '@cf-blog/db/schema';
+import type { NewUser } from '@cf-blog/db/schema';
+import { createSession } from './session';
 
 // GitHub OAuth 配置
-const GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize";
-const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
-const GITHUB_USER_URL = "https://api.github.com/user";
+const GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize';
+const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token';
+const GITHUB_USER_URL = 'https://api.github.com/user';
 
 /**
  * 生成 GitHub OAuth 授权 URL
@@ -27,7 +27,7 @@ export function getGitHubAuthUrl(clientId: string, redirectUri: string, state: s
     client_id: clientId,
     redirect_uri: redirectUri,
     state,
-    scope: "read:user user:email",
+    scope: 'read:user user:email',
   });
 
   return `${GITHUB_AUTH_URL}?${params.toString()}`;
@@ -47,13 +47,13 @@ export async function exchangeCodeForToken(
   code: string,
   clientId: string,
   clientSecret: string,
-  redirectUri: string,
+  redirectUri: string
 ): Promise<{ accessToken: string; error?: string }> {
   const response = await fetch(GITHUB_TOKEN_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
     body: JSON.stringify({
       client_id: clientId,
@@ -66,7 +66,7 @@ export async function exchangeCodeForToken(
   const data = await response.json();
 
   if (data.error) {
-    return { accessToken: "", error: data.error_description || data.error };
+    return { accessToken: '', error: data.error_description || data.error };
   }
 
   return { accessToken: data.access_token };
@@ -86,18 +86,18 @@ export async function getGitHubUser(accessToken: string): Promise<{
   const response = await fetch(GITHUB_USER_URL, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
-      Accept: "application/json",
+      Accept: 'application/json',
     },
   });
 
   if (!response.ok) {
     return {
       id: 0,
-      login: "",
+      login: '',
       name: null,
       email: null,
       avatar_url: null,
-      error: "获取用户信息失败",
+      error: '获取用户信息失败',
     };
   }
 
@@ -113,7 +113,7 @@ export async function handleGitHubCallback(
   code: string,
   clientId: string,
   clientSecret: string,
-  redirectUri: string,
+  redirectUri: string
 ): Promise<{
   success: boolean;
   sessionToken?: string;
@@ -126,7 +126,7 @@ export async function handleGitHubCallback(
       code,
       clientId,
       clientSecret,
-      redirectUri,
+      redirectUri
     );
 
     if (tokenError) {
@@ -159,7 +159,7 @@ export async function handleGitHubCallback(
       name: githubUser.name || githubUser.login,
       passwordHash: null,
       salt: null,
-      role: "commenter",
+      role: 'commenter',
       isApproved: false,
       githubId: githubUser.id.toString(),
       avatar: githubUser.avatar_url,
@@ -172,14 +172,14 @@ export async function handleGitHubCallback(
     const user = result[0];
 
     if (!user) {
-      return { success: false, error: "创建用户失败" };
+      return { success: false, error: '创建用户失败' };
     }
 
     // 5. 创建 Session
     const sessionToken = await createSession(user, {});
     return { success: true, sessionToken, isNewUser: true };
   } catch (error) {
-    console.error("[GitHub OAuth] 回调处理失败:", error);
-    return { success: false, error: "服务器错误" };
+    console.error('[GitHub OAuth] 回调处理失败:', error);
+    return { success: false, error: '服务器错误' };
   }
 }

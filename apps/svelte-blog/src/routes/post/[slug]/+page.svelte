@@ -1,42 +1,42 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { t, locale } from '$lib/i18n';
+import { onMount } from 'svelte';
+import { page } from '$app/stores';
+import { t, locale } from '$lib/i18n';
 
-  interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    content: string;
-    excerpt: string | null;
-    created_at: string;
-    updated_at: string;
-  }
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-  let post = $state<Post | null>(null);
-  let loading = $state(true);
-  let currentLocale = $state<string>('zh-CN');
+let post = $state<Post | null>(null);
+let loading = $state(true);
+let currentLocale = $state<string>('zh-CN');
 
-  $derived(slug = $page.params.slug);
+$derived((slug = $page.params.slug));
 
-  onMount(async () => {
-    locale.subscribe((val) => {
-      currentLocale = val;
-    });
-    try {
-      const res = await fetch(`/api/posts/${slug}`);
-      const { data } = await res.json();
-      post = data || null;
-    } catch (error) {
-      console.error('Failed to fetch post:', error);
-    } finally {
-      loading = false;
-    }
+onMount(async () => {
+  locale.subscribe((val) => {
+    currentLocale = val;
   });
-
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString(currentLocale === 'zh-CN' ? 'zh-CN' : 'en');
+  try {
+    const res = await fetch(`/api/posts/${slug}`);
+    const { data } = await res.json();
+    post = data || null;
+  } catch (error) {
+    console.error('Failed to fetch post:', error);
+  } finally {
+    loading = false;
   }
+});
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString(currentLocale === 'zh-CN' ? 'zh-CN' : 'en');
+}
 </script>
 
 <article>

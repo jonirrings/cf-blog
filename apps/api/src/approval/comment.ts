@@ -8,8 +8,8 @@
  * - 二级审批逻辑
  */
 
-import { eq, and, or } from "drizzle-orm";
-import { comments, users, posts, auditLogs } from "@cf-blog/db/schema";
+import { eq, and, or } from 'drizzle-orm';
+import { comments, users, posts, auditLogs } from '@cf-blog/db/schema';
 
 /**
  * 获取待审批评论列表
@@ -17,7 +17,7 @@ import { comments, users, posts, auditLogs } from "@cf-blog/db/schema";
 export async function getPendingComments(
   db: any,
   postId?: number,
-  userId?: number,
+  userId?: number
 ): Promise<any[]> {
   const conditions = [];
 
@@ -58,7 +58,7 @@ export async function getPendingComments(
 export async function userApproveComment(
   db: any,
   commentId: number,
-  userId: number,
+  userId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const comment = await db.query.comments.findFirst({
@@ -66,20 +66,20 @@ export async function userApproveComment(
     });
 
     if (!comment) {
-      return { success: false, error: "评论不存在" };
+      return { success: false, error: '评论不存在' };
     }
 
     // 只能审批自己的评论
     if (comment.userId !== userId) {
-      return { success: false, error: "无权审批此评论" };
+      return { success: false, error: '无权审批此评论' };
     }
 
     if (comment.userApproved) {
-      return { success: false, error: "评论已通过用户审批" };
+      return { success: false, error: '评论已通过用户审批' };
     }
 
     if (comment.rejected) {
-      return { success: false, error: "评论已被拒绝" };
+      return { success: false, error: '评论已被拒绝' };
     }
 
     // 更新用户审批状态
@@ -93,8 +93,8 @@ export async function userApproveComment(
 
     return { success: true };
   } catch (error) {
-    console.error("[CommentApproval] 用户审批失败:", error);
-    return { success: false, error: "审批失败" };
+    console.error('[CommentApproval] 用户审批失败:', error);
+    return { success: false, error: '审批失败' };
   }
 }
 
@@ -105,7 +105,7 @@ export async function userApproveComment(
 export async function authorApproveComment(
   db: any,
   commentId: number,
-  authorId: number,
+  authorId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const comment = await db.query.comments.findFirst({
@@ -116,20 +116,20 @@ export async function authorApproveComment(
     });
 
     if (!comment) {
-      return { success: false, error: "评论不存在" };
+      return { success: false, error: '评论不存在' };
     }
 
     // 只有文章作者可以审批
     if (comment.post.authorId !== authorId) {
-      return { success: false, error: "无权审批此评论" };
+      return { success: false, error: '无权审批此评论' };
     }
 
     if (comment.postApproved) {
-      return { success: false, error: "评论已通过作者审批" };
+      return { success: false, error: '评论已通过作者审批' };
     }
 
     if (comment.rejected) {
-      return { success: false, error: "评论已被拒绝" };
+      return { success: false, error: '评论已被拒绝' };
     }
 
     // 更新作者审批状态
@@ -144,8 +144,8 @@ export async function authorApproveComment(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: authorId,
-      action: "COMMENT_APPROVED_BY_AUTHOR",
-      targetType: "comment",
+      action: 'COMMENT_APPROVED_BY_AUTHOR',
+      targetType: 'comment',
       targetId: commentId.toString(),
       details: JSON.stringify({ postId: comment.postId }),
       timestamp: new Date(),
@@ -153,8 +153,8 @@ export async function authorApproveComment(
 
     return { success: true };
   } catch (error) {
-    console.error("[CommentApproval] 作者审批失败:", error);
-    return { success: false, error: "审批失败" };
+    console.error('[CommentApproval] 作者审批失败:', error);
+    return { success: false, error: '审批失败' };
   }
 }
 
@@ -164,7 +164,7 @@ export async function authorApproveComment(
 export async function adminApproveComment(
   db: any,
   commentId: number,
-  adminId: number,
+  adminId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const comment = await db.query.comments.findFirst({
@@ -172,11 +172,11 @@ export async function adminApproveComment(
     });
 
     if (!comment) {
-      return { success: false, error: "评论不存在" };
+      return { success: false, error: '评论不存在' };
     }
 
     if (comment.rejected) {
-      return { success: false, error: "评论已被拒绝" };
+      return { success: false, error: '评论已被拒绝' };
     }
 
     // 管理员审批同时通过用户审批和作者审批
@@ -192,8 +192,8 @@ export async function adminApproveComment(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminId,
-      action: "COMMENT_APPROVED_BY_ADMIN",
-      targetType: "comment",
+      action: 'COMMENT_APPROVED_BY_ADMIN',
+      targetType: 'comment',
       targetId: commentId.toString(),
       details: JSON.stringify({ postId: comment.postId }),
       timestamp: new Date(),
@@ -201,8 +201,8 @@ export async function adminApproveComment(
 
     return { success: true };
   } catch (error) {
-    console.error("[CommentApproval] 管理员审批失败:", error);
-    return { success: false, error: "审批失败" };
+    console.error('[CommentApproval] 管理员审批失败:', error);
+    return { success: false, error: '审批失败' };
   }
 }
 
@@ -214,7 +214,7 @@ export async function rejectComment(
   commentId: number,
   userId: number,
   isAdmin: boolean,
-  reason?: string,
+  reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const comment = await db.query.comments.findFirst({
@@ -225,13 +225,13 @@ export async function rejectComment(
     });
 
     if (!comment) {
-      return { success: false, error: "评论不存在" };
+      return { success: false, error: '评论不存在' };
     }
 
     // 检查权限：管理员 或 文章作者
     const canReject = isAdmin || comment.post.authorId === userId;
     if (!canReject) {
-      return { success: false, error: "无权拒绝此评论" };
+      return { success: false, error: '无权拒绝此评论' };
     }
 
     // 更新拒绝状态
@@ -248,8 +248,8 @@ export async function rejectComment(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId,
-      action: "COMMENT_REJECTED",
-      targetType: "comment",
+      action: 'COMMENT_REJECTED',
+      targetType: 'comment',
       targetId: commentId.toString(),
       details: JSON.stringify({ postId: comment.postId, reason }),
       timestamp: new Date(),
@@ -257,8 +257,8 @@ export async function rejectComment(
 
     return { success: true };
   } catch (error) {
-    console.error("[CommentApproval] 拒绝失败:", error);
-    return { success: false, error: "拒绝失败" };
+    console.error('[CommentApproval] 拒绝失败:', error);
+    return { success: false, error: '拒绝失败' };
   }
 }
 

@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -20,7 +20,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@cf-blog/db": ["../../packages/db/src"]
+      "@cf-blog/db": ["../../packages/db/src"],
+      "@cf-blog/i18n": ["../../packages/i18n/src"],
+      "@cf-blog/auth-ui": ["../../packages/auth-ui/src"]
     }
   },
   "include": [

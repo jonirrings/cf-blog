@@ -1,99 +1,116 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
+import { onMount } from 'svelte';
 
-  interface Comment {
-    id: number;
-    postId: number;
-    postTitle: string;
-    userId: number;
-    userName: string;
-    content: string;
-    userApproved: boolean;
-    postApproved: boolean;
-    rejected: boolean;
-    createdAt: string;
-  }
+interface Comment {
+  id: number;
+  postId: number;
+  postTitle: string;
+  userId: number;
+  userName: string;
+  content: string;
+  userApproved: boolean;
+  postApproved: boolean;
+  rejected: boolean;
+  createdAt: string;
+}
 
-  interface FilterOption {
-    value: 'pending' | 'approved' | 'rejected';
-    label: string;
-    count: number;
-    activeClass: string;
-  }
+interface FilterOption {
+  value: 'pending' | 'approved' | 'rejected';
+  label: string;
+  count: number;
+  activeClass: string;
+}
 
-  let filters: FilterOption[] = [
-    { value: 'pending', label: t('comment.status.pending'), count: 0, activeClass: 'bg-yellow-100 text-yellow-600' },
-    { value: 'approved', label: t('comment.status.approved'), count: 0, activeClass: 'bg-green-100 text-green-600' },
-    { value: 'rejected', label: t('comment.status.rejected'), count: 0, activeClass: 'bg-red-100 text-red-600' },
-  ];
+let filters: FilterOption[] = [
+  {
+    value: 'pending',
+    label: t('comment.status.pending'),
+    count: 0,
+    activeClass: 'bg-yellow-100 text-yellow-600',
+  },
+  {
+    value: 'approved',
+    label: t('comment.status.approved'),
+    count: 0,
+    activeClass: 'bg-green-100 text-green-600',
+  },
+  {
+    value: 'rejected',
+    label: t('comment.status.rejected'),
+    count: 0,
+    activeClass: 'bg-red-100 text-red-600',
+  },
+];
 
-  let currentFilter: 'pending' | 'approved' | 'rejected' = 'pending';
-  let comments: Comment[] = [];
-  let loading = $state(true);
+let currentFilter: 'pending' | 'approved' | 'rejected' = 'pending';
+let comments: Comment[] = [];
+let loading = $state(true);
 
-  $derived(filteredComments = comments.filter((comment) => {
+$derived(
+  (filteredComments = comments.filter((comment) => {
     if (currentFilter === 'pending') return !comment.userApproved || !comment.postApproved;
     if (currentFilter === 'approved') return comment.userApproved && comment.postApproved;
     if (currentFilter === 'rejected') return comment.rejected;
     return true;
-  }));
+  }))
+);
 
-  function updateFilterCounts() {
-    filters[0].count = comments.filter((c) => !c.userApproved || !c.postApproved).length;
-    filters[1].count = comments.filter((c) => c.userApproved && c.postApproved).length;
-    filters[2].count = comments.filter((c) => c.rejected).length;
-  }
+function updateFilterCounts() {
+  filters[0].count = comments.filter((c) => !c.userApproved || !c.postApproved).length;
+  filters[1].count = comments.filter((c) => c.userApproved && c.postApproved).length;
+  filters[2].count = comments.filter((c) => c.rejected).length;
+}
 
-  const handleApprove = async (id: number) => {
-    try {
-      const res = await fetch(`/api/comments/${id}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approveType: 'user' }),
-      });
-      if (res.ok) {
-        comments = comments.map((c) => (c.id === id ? { ...c, userApproved: true } : c));
-        updateFilterCounts();
-      }
-    } catch (err) {
-      console.error('Approve failed:', err);
-      alert(t('comment.approveFailed'));
-    }
-  };
-
-  const handleReject = async (id: number) => {
-    const reason = prompt(t('comment.rejectReason') || '');
-    if (!reason) return;
-
-    try {
-      const res = await fetch(`/api/comments/${id}/reject`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (res.ok) {
-        comments = comments.map((c) => (c.id === id ? { ...c, rejected: true } : c));
-        updateFilterCounts();
-      }
-    } catch (err) {
-      console.error('Reject failed:', err);
-      alert(t('comment.rejectFailed'));
-    }
-  };
-
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/comments');
-      const data = await res.json();
-      comments = data.data?.list || [];
+const handleApprove = async (id: number) => {
+  try {
+    const res = await fetch(`/api/comments/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approveType: 'user' }),
+    });
+    if (res.ok) {
+      comments = comments.map((c) => (c.id === id ? { ...c, userApproved: true } : c));
       updateFilterCounts();
-    } catch (err) {
-      console.error('Failed to fetch comments:', err);
-    } finally {
-      loading = false;
     }
-  });
+  } catch (err) {
+    console.error('Approve failed:', err);
+    alert(t('comment.approveFailed'));
+  }
+};
+
+const handleReject = async (id: number) => {
+  const reason = prompt(t('comment.rejectReason') || '');
+  if (!reason) return;
+
+  try {
+    const res = await fetch(`/api/comments/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    });
+    if (res.ok) {
+      comments = comments.map((c) => (c.id === id ? { ...c, rejected: true } : c));
+      updateFilterCounts();
+    }
+  } catch (err) {
+    console.error('Reject failed:', err);
+    alert(t('comment.rejectFailed'));
+  }
+};
+
+onMount(async () => {
+  try {
+    const res = await fetch('/api/comments');
+    const data = await res.json();
+    comments = data.data?.list || [];
+    updateFilterCounts();
+  } catch (err) {
+    console.error('Failed to fetch comments:', err);
+  } finally {
+    loading = false;
+  }
+});
 </script>
 
 <div>

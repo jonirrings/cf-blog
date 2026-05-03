@@ -10,9 +10,9 @@
 // 用户偏好类型
 export interface UserPreferences {
   // 界面设置
-  theme: "light" | "dark" | "system";
+  theme: 'light' | 'dark' | 'system';
   language: string;
-  fontSize: "small" | "medium" | "large";
+  fontSize: 'small' | 'medium' | 'large';
 
   // 通知设置
   notifications: {
@@ -38,9 +38,9 @@ export interface UserPreferences {
 
 // 默认用户偏好
 const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: "system",
-  language: "zh-CN",
-  fontSize: "medium",
+  theme: 'system',
+  language: 'zh-CN',
+  fontSize: 'medium',
   notifications: {
     email: false,
     browser: true,
@@ -70,7 +70,7 @@ function getUserConfigKey(userId: number): string {
  */
 export async function getUserPreferences(
   kv: KVNamespace,
-  userId: number,
+  userId: number
 ): Promise<UserPreferences> {
   const key = getUserConfigKey(userId);
   const config = await kv.get(key);
@@ -86,7 +86,7 @@ export async function getUserPreferences(
 export async function updateUserPreferences(
   kv: KVNamespace,
   userId: number,
-  preferences: Partial<UserPreferences>,
+  preferences: Partial<UserPreferences>
 ): Promise<UserPreferences> {
   const key = getUserConfigKey(userId);
   const current = await getUserPreferences(kv, userId);
@@ -100,7 +100,7 @@ export async function updateUserPreferences(
  */
 function mergePreferences(
   current: UserPreferences,
-  update: Partial<UserPreferences>,
+  update: Partial<UserPreferences>
 ): UserPreferences {
   const merged: UserPreferences = { ...current };
 

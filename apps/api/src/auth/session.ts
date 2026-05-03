@@ -8,8 +8,8 @@
  * - Session 数据序列化/反序列化
  */
 
-import { SignJWT, jwtVerify } from "jose";
-import type { User } from "@cf-blog/db/schema";
+import { SignJWT, jwtVerify } from 'jose';
+import type { User } from '@cf-blog/db/schema';
 
 // Session 数据类型
 export interface SessionPayload {
@@ -17,14 +17,14 @@ export interface SessionPayload {
   userId: number;
   userEmail: string;
   userName: string;
-  userRole: "admin" | "publisher" | "commenter";
+  userRole: 'admin' | 'publisher' | 'commenter';
   isApproved: boolean;
   expiresAt: number; // 时间戳
   createdAt: number;
 }
 
 // Cookie 配置
-const COOKIE_NAME = "cf-blog-session";
+const COOKIE_NAME = 'cf-blog-session';
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 天
 const MAX_AGE = 7 * 24 * 60 * 60; // 7 天（秒）
 
@@ -32,7 +32,7 @@ const MAX_AGE = 7 * 24 * 60 * 60; // 7 天（秒）
  * 获取 JWT Secret（从环境变量）
  */
 function getSecret(env: { JWT_SECRET?: string }): Uint8Array {
-  const secret = env.JWT_SECRET || "dev-secret-key-change-in-production";
+  const secret = env.JWT_SECRET || 'dev-secret-key-change-in-production';
   return new TextEncoder().encode(secret);
 }
 
@@ -41,7 +41,7 @@ function getSecret(env: { JWT_SECRET?: string }): Uint8Array {
  */
 export async function createSession(
   user: User & { email: string; name: string },
-  env: { JWT_SECRET?: string },
+  env: { JWT_SECRET?: string }
 ): Promise<string> {
   const now = Date.now();
   const payload: SessionPayload = {
@@ -49,14 +49,14 @@ export async function createSession(
     userId: user.id,
     userEmail: user.email,
     userName: user.name,
-    userRole: user.role as "admin" | "publisher" | "commenter",
+    userRole: user.role as 'admin' | 'publisher' | 'commenter',
     isApproved: user.isApproved,
     expiresAt: now + SESSION_DURATION,
     createdAt: now,
   };
 
   const token = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(Math.floor((now + SESSION_DURATION) / 1000))
     .sign(getSecret(env));
@@ -69,7 +69,7 @@ export async function createSession(
  */
 export async function verifySession(
   token: string,
-  env: { JWT_SECRET?: string },
+  env: { JWT_SECRET?: string }
 ): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret(env));
@@ -83,7 +83,7 @@ export async function verifySession(
  * 从请求中获取 Session Token
  */
 export function getSessionToken(request: Request): string | null {
-  const cookie = request.headers.get("Cookie");
+  const cookie = request.headers.get('Cookie');
   if (!cookie) return null;
 
   const match = cookie.match(new RegExp(`${COOKIE_NAME}=([^;]+)`));
@@ -95,7 +95,7 @@ export function getSessionToken(request: Request): string | null {
  */
 export async function getSession(
   request: Request,
-  env: { JWT_SECRET?: string },
+  env: { JWT_SECRET?: string }
 ): Promise<SessionPayload | null> {
   const token = getSessionToken(request);
   if (!token) return null;
@@ -108,14 +108,14 @@ export async function getSession(
 export function createSessionCookie(token: string, isSecure = false): string {
   const attributes = [
     `${COOKIE_NAME}=${token}`,
-    "Path=/",
+    'Path=/',
     `Max-Age=${MAX_AGE}`,
-    isSecure ? "Secure" : "",
-    "HttpOnly",
-    "SameSite=Lax",
+    isSecure ? 'Secure' : '',
+    'HttpOnly',
+    'SameSite=Lax',
   ].filter(Boolean);
 
-  return attributes.join("; ");
+  return attributes.join('; ');
 }
 
 /**
@@ -136,14 +136,14 @@ export function isSessionExpired(session: SessionPayload): boolean {
  * 检查用户是否为管理员
  */
 export function isAdmin(session: SessionPayload | null): boolean {
-  return session?.userRole === "admin";
+  return session?.userRole === 'admin';
 }
 
 /**
  * 检查用户是否为发布者
  */
 export function isPublisher(session: SessionPayload | null): boolean {
-  return session?.userRole === "publisher" || session?.userRole === "admin";
+  return session?.userRole === 'publisher' || session?.userRole === 'admin';
 }
 
 /**

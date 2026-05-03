@@ -4,16 +4,16 @@
  * 使用 @cf-blog/i18n 集成
  */
 
-import i18n, { supportedLocales, type Locale } from "@cf-blog/i18n";
+import i18n, { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 export const useI18n = () => {
-  const locale = ref<Locale>("zh-CN");
+  const locale = ref<Locale>('zh-CN');
   const ready = ref(false);
 
   // 初始化语言
   onMounted(() => {
-    const savedLocale = useCookie("locale").value as Locale | null;
-    if (savedLocale && ["zh-CN", "en"].includes(savedLocale)) {
+    const savedLocale = useCookie('locale').value as Locale | null;
+    if (savedLocale && ['zh-CN', 'en'].includes(savedLocale)) {
       i18n.changeLanguage(savedLocale);
       locale.value = savedLocale;
     }
@@ -25,9 +25,9 @@ export const useI18n = () => {
   const setLocale = async (newLocale: Locale) => {
     await i18n.changeLanguage(newLocale);
     locale.value = newLocale;
-    useCookie("locale", {
+    useCookie('locale', {
       maxAge: 60 * 60 * 24 * 365,
-      path: "/",
+      path: '/',
     }).value = newLocale;
   };
 

@@ -8,8 +8,8 @@
  * - 认证和权限中间件
  */
 
-import { getDb } from "@cf-blog/db/client";
-import apiApp from "@cf-blog/api";
+import { getDb } from '@cf-blog/db/client';
+import apiApp from '@cf-blog/api';
 
 export interface Env {
   // D1 数据库
@@ -47,43 +47,43 @@ export default {
     const db = getDb(env);
 
     // CORS 预检请求
-    if (request.method === "OPTIONS") {
+    if (request.method === 'OPTIONS') {
       return handleCors(request);
     }
 
     // 健康检查
-    if (path === "/health") {
-      return json({ status: "ok", timestamp: new Date().toISOString() });
+    if (path === '/health') {
+      return json({ status: 'ok', timestamp: new Date().toISOString() });
     }
 
     // API 路由
-    if (path.startsWith("/api/")) {
+    if (path.startsWith('/api/')) {
       return handleApi(request, env, db);
     }
 
     // Durable Objects 路由
-    if (path.startsWith("/presence/") || path.startsWith("/room/") || path.startsWith("/home/")) {
+    if (path.startsWith('/presence/') || path.startsWith('/room/') || path.startsWith('/home/')) {
       return handleDurableObjects(request, env);
     }
 
     // 静态资源路由 (由 Pages 处理，这里只做占位)
     if (
-      path.startsWith("/next/") ||
-      path.startsWith("/nuxt/") ||
-      path.startsWith("/svelte/") ||
-      path.startsWith("/astro/") ||
-      path.startsWith("/solid/")
+      path.startsWith('/next/') ||
+      path.startsWith('/nuxt/') ||
+      path.startsWith('/svelte/') ||
+      path.startsWith('/astro/') ||
+      path.startsWith('/solid/')
     ) {
       return handleStaticAssets(request, env);
     }
 
     // 根路径重定向到 /next/
-    if (path === "/") {
-      return Response.redirect(new URL("/next/", url));
+    if (path === '/') {
+      return Response.redirect(new URL('/next/', url));
     }
 
     // 404
-    return new Response("Not Found", { status: 404 });
+    return new Response('Not Found', { status: 404 });
   },
 };
 
@@ -93,10 +93,10 @@ export default {
 function handleCors(request: Request): Response {
   return new Response(null, {
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-CSRF-Token",
-      "Access-Control-Max-Age": "86400",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token',
+      'Access-Control-Max-Age': '86400',
     },
   });
 }
@@ -109,8 +109,8 @@ async function handleApi(request: Request, env: Env, db: any): Promise<Response>
   const path = url.pathname;
 
   // 健康检查 API
-  if (path === "/api/health") {
-    return json({ status: "ok", database: "connected" });
+  if (path === '/api/health') {
+    return json({ status: 'ok', database: 'connected' });
   }
 
   // 使用 Hono 处理 API 请求
@@ -118,8 +118,8 @@ async function handleApi(request: Request, env: Env, db: any): Promise<Response>
     const response = await apiApp.fetch(request, env);
     return response;
   } catch (error) {
-    console.error("API Error:", error);
-    return json({ error: "Internal Server Error" }, { status: 500 });
+    console.error('API Error:', error);
+    return json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -131,28 +131,28 @@ async function handleDurableObjects(request: Request, env: Env): Promise<Respons
   const path = url.pathname;
 
   // Presence DO - 全局在线人数
-  if (path.startsWith("/presence/")) {
-    const id = env.PRESENCE_DO.idFromName("global");
+  if (path.startsWith('/presence/')) {
+    const id = env.PRESENCE_DO.idFromName('global');
     const stub = env.PRESENCE_DO.get(id);
     return stub.fetch(request);
   }
 
   // Room DO - 文章房间
-  if (path.startsWith("/room/")) {
-    const postId = url.searchParams.get("postId") || "default";
+  if (path.startsWith('/room/')) {
+    const postId = url.searchParams.get('postId') || 'default';
     const id = env.ROOM_DO.idFromName(postId);
     const stub = env.ROOM_DO.get(id);
     return stub.fetch(request);
   }
 
   // Home DO - 首页房间
-  if (path.startsWith("/home/")) {
-    const id = env.HOME_DO.idFromName("home");
+  if (path.startsWith('/home/')) {
+    const id = env.HOME_DO.idFromName('home');
     const stub = env.HOME_DO.get(id);
     return stub.fetch(request);
   }
 
-  return new Response("Not Found", { status: 404 });
+  return new Response('Not Found', { status: 404 });
 }
 
 /**
@@ -161,7 +161,7 @@ async function handleDurableObjects(request: Request, env: Env): Promise<Respons
 async function handleStaticAssets(request: Request, env: Env): Promise<Response> {
   // 在 Pages 部署模式下，静态资源由 Pages 自动处理
   // 本地开发时可能需要手动配置
-  return new Response("Static assets should be served by Pages", { status: 404 });
+  return new Response('Static assets should be served by Pages', { status: 404 });
 }
 
 /**
@@ -172,7 +172,7 @@ function json(data: unknown, init: ResponseInit = {}): Response {
     ...init,
     headers: {
       ...init.headers,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 }

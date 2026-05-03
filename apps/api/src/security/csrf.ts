@@ -7,7 +7,7 @@
  * - Double Submit Cookie 模式
  */
 
-import { timingSafeEqual } from "crypto";
+import { timingSafeEqual } from 'crypto';
 
 /**
  * 生成 CSRF Token
@@ -16,15 +16,15 @@ export function generateCSRFToken(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 /**
  * 从 Cookie 中获取 CSRF Token
  */
 export function getCSRFTokenFromCookie(request: Request): string | null {
-  const cookie = request.headers.get("Cookie");
+  const cookie = request.headers.get('Cookie');
   if (!cookie) return null;
 
   const match = cookie.match(/csrf_token=([^;]+)/);
@@ -35,7 +35,7 @@ export function getCSRFTokenFromCookie(request: Request): string | null {
  * 从请求头中获取 CSRF Token
  */
 export function getCSRFTokenFromHeader(request: Request): string | null {
-  return request.headers.get("X-CSRF-Token");
+  return request.headers.get('X-CSRF-Token');
 }
 
 /**
@@ -67,31 +67,26 @@ export function verifyCSRFToken(token: string, expectedToken: string): boolean {
 export function createCSRFCookie(token: string, isSecure = false): string {
   const attributes = [
     `csrf_token=${token}`,
-    "Path=/",
-    "SameSite=Strict",
-    isSecure ? "Secure" : "",
-    "HttpOnly",
+    'Path=/',
+    'SameSite=Strict',
+    isSecure ? 'Secure' : '',
+    'HttpOnly',
   ].filter(Boolean);
 
-  return attributes.join("; ");
+  return attributes.join('; ');
 }
 
 /**
  * CSRF 防护中间件
  */
-export function csrfMiddleware(
-  options: {
-    excludePaths?: string[];
-    cookieSecure?: boolean;
-  } = {},
-) {
-  const { excludePaths = ["/api/auth/github/callback"], cookieSecure = false } = options;
+export function csrfMiddleware(options: { excludePaths?: string[]; cookieSecure?: boolean } = {}) {
+  const { excludePaths = ['/api/auth/github/callback'], cookieSecure = false } = options;
 
   return async (c: any, next: any) => {
     const method = c.req.method;
 
     // 只对变更操作进行验证
-    if (["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
       // 检查是否在排除列表中
       const isExcluded = excludePaths.some((path) => c.req.path.startsWith(path));
       if (!isExcluded) {
@@ -102,10 +97,10 @@ export function csrfMiddleware(
           return c.json(
             {
               success: false,
-              error: "Forbidden",
-              message: "CSRF Token 缺失",
+              error: 'Forbidden',
+              message: 'CSRF Token 缺失',
             },
-            403,
+            403
           );
         }
 
@@ -113,22 +108,22 @@ export function csrfMiddleware(
           return c.json(
             {
               success: false,
-              error: "Forbidden",
-              message: "CSRF Token 无效",
+              error: 'Forbidden',
+              message: 'CSRF Token 无效',
             },
-            403,
+            403
           );
         }
       }
     }
 
     // 为响应添加 CSRF Token（用于首次加载）
-    if (method === "GET") {
+    if (method === 'GET') {
       const existingToken = getCSRFTokenFromCookie(c.req.raw);
       if (!existingToken) {
         const newToken = generateCSRFToken();
-        c.header("Set-Cookie", createCSRFCookie(newToken, cookieSecure));
-        c.header("X-CSRF-Token", newToken);
+        c.header('Set-Cookie', createCSRFCookie(newToken, cookieSecure));
+        c.header('X-CSRF-Token', newToken);
       }
     }
 
@@ -141,7 +136,7 @@ export function csrfMiddleware(
  */
 export function validateDoubleSubmitCookie(
   cookieToken: string | null,
-  bodyToken: string | null,
+  bodyToken: string | null
 ): boolean {
   if (!cookieToken || !bodyToken) {
     return false;

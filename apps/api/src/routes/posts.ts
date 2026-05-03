@@ -9,24 +9,24 @@
  * - DELETE /api/posts/:id - 删除文章（admin only）
  */
 
-import { Hono } from "hono";
-import { drizzle } from "drizzle-orm/d1";
-import { eq, desc, like, or } from "drizzle-orm";
-import type { Env } from "../index";
-import * as schema from "@cf-blog/db/schema";
-import { posts, authors, users, tags, postsToTags } from "@cf-blog/db/schema";
-import { authMiddleware, publisherMiddleware, adminMiddleware } from "../auth/middleware";
-import type { AuthContext } from "../auth/middleware";
+import { Hono } from 'hono';
+import { drizzle } from 'drizzle-orm/d1';
+import { eq, desc, like, or } from 'drizzle-orm';
+import type { Env } from '../index';
+import * as schema from '@cf-blog/db/schema';
+import { posts, authors, users, tags, postsToTags } from '@cf-blog/db/schema';
+import { authMiddleware, publisherMiddleware, adminMiddleware } from '../auth/middleware';
+import type { AuthContext } from '../auth/middleware';
 
 const app = new Hono<{ Bindings: Env }>();
 
 // 获取文章列表
-app.get("/", async (c) => {
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = parseInt(c.req.query("limit") || "10");
-  const tag = c.req.query("tag");
-  const framework = c.req.query("framework");
-  const status = c.req.query("status");
+app.get('/', async (c) => {
+  const page = parseInt(c.req.query('page') || '1');
+  const limit = parseInt(c.req.query('limit') || '10');
+  const tag = c.req.query('tag');
+  const framework = c.req.query('framework');
+  const status = c.req.query('status');
 
   try {
     const db = drizzle(c.env.DB);
@@ -56,7 +56,7 @@ app.get("/", async (c) => {
 
     // 应用过滤
     if (status) {
-      query = query.where(eq(posts.status, status as "draft" | "published"));
+      query = query.where(eq(posts.status, status as 'draft' | 'published'));
     }
     if (framework) {
       query = query.where(eq(posts.framework, framework as typeof posts.framework.$inferSelect));
@@ -78,17 +78,17 @@ app.get("/", async (c) => {
       },
     });
   } catch (error) {
-    console.error("Failed to fetch posts:", error);
+    console.error('Failed to fetch posts:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });
 
 // 根据 slug 获取文章
-app.get("/slug/:slug", async (c) => {
-  const slug = c.req.param("slug");
+app.get('/slug/:slug', async (c) => {
+  const slug = c.req.param('slug');
 
   try {
     const db = drizzle(c.env.DB);
@@ -122,7 +122,7 @@ app.get("/slug/:slug", async (c) => {
       .limit(1);
 
     if (!result || result.length === 0) {
-      return c.json({ success: false, error: "Post not found" }, 404);
+      return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
     const post = result[0];
@@ -139,17 +139,17 @@ app.get("/slug/:slug", async (c) => {
       },
     });
   } catch (error) {
-    console.error("Failed to fetch post by slug:", error);
+    console.error('Failed to fetch post by slug:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });
 
 // 获取文章详情（按 ID）
-app.get("/:id", async (c) => {
-  const id = parseInt(c.req.param("id"));
+app.get('/:id', async (c) => {
+  const id = parseInt(c.req.param('id'));
 
   try {
     const db = drizzle(c.env.DB);
@@ -157,7 +157,7 @@ app.get("/:id", async (c) => {
     const result = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
 
     if (!result || result.length === 0) {
-      return c.json({ success: false, error: "Post not found" }, 404);
+      return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
     return c.json({
@@ -165,20 +165,20 @@ app.get("/:id", async (c) => {
       data: result[0][0],
     });
   } catch (error) {
-    console.error("Failed to fetch post:", error);
+    console.error('Failed to fetch post:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });
 
 // 创建文章（需要发布者权限）
-app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
+app.post('/', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
   try {
     const session = c.session;
     if (!session) {
-      return c.json({ success: false, error: "Unauthorized" }, 401);
+      return c.json({ success: false, error: 'Unauthorized' }, 401);
     }
 
     const body = await c.req.json();
@@ -188,8 +188,8 @@ app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
       excerpt,
       content,
       coverImage,
-      framework = "next",
-      status = "draft",
+      framework = 'next',
+      status = 'draft',
       tagIds,
     } = body;
 
@@ -226,7 +226,7 @@ app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
         title,
         slug,
         excerpt: excerpt || null,
-        content: content || "",
+        content: content || '',
         coverImage: coverImage || null,
         framework,
         status,
@@ -235,7 +235,7 @@ app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
         uniqueViewCount: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        publishedAt: status === "published" ? new Date().toISOString() : null,
+        publishedAt: status === 'published' ? new Date().toISOString() : null,
       })
       .returning();
 
@@ -247,7 +247,7 @@ app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
         tagIds.map((tagId: number) => ({
           postId: newPost.id,
           tagId,
-        })),
+        }))
       );
     }
 
@@ -256,17 +256,17 @@ app.post("/", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
       data: newPost,
     });
   } catch (error) {
-    console.error("Failed to create post:", error);
+    console.error('Failed to create post:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });
 
 // 更新文章（需要发布者权限）
-app.put("/:id", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
-  const id = parseInt(c.req.param("id"));
+app.put('/:id', authMiddleware, publisherMiddleware, async (c: AuthContext) => {
+  const id = parseInt(c.req.param('id'));
   const session = c.session;
 
   try {
@@ -281,11 +281,11 @@ app.put("/:id", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
     });
 
     if (!post) {
-      return c.json({ success: false, error: "Post not found" }, 404);
+      return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
-    if (session.userRole !== "admin" && post.authorId !== session.userId) {
-      return c.json({ success: false, error: "Forbidden" }, 403);
+    if (session.userRole !== 'admin' && post.authorId !== session.userId) {
+      return c.json({ success: false, error: 'Forbidden' }, 403);
     }
 
     // 更新文章
@@ -300,7 +300,7 @@ app.put("/:id", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
         framework: framework || undefined,
         status: status || undefined,
         updatedAt: new Date().toISOString(),
-        publishedAt: status === "published" ? new Date().toISOString() : null,
+        publishedAt: status === 'published' ? new Date().toISOString() : null,
       })
       .where(eq(posts.id, id))
       .returning();
@@ -318,7 +318,7 @@ app.put("/:id", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
           tagIds.map((tagId: number) => ({
             postId: id,
             tagId,
-          })),
+          }))
         );
       }
     }
@@ -328,17 +328,17 @@ app.put("/:id", authMiddleware, publisherMiddleware, async (c: AuthContext) => {
       updatedPost,
     });
   } catch (error) {
-    console.error("Failed to update post:", error);
+    console.error('Failed to update post:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });
 
 // 删除文章（仅管理员）
-app.delete("/:id", authMiddleware, adminMiddleware, async (c: AuthContext) => {
-  const id = parseInt(c.req.param("id"));
+app.delete('/:id', authMiddleware, adminMiddleware, async (c: AuthContext) => {
+  const id = parseInt(c.req.param('id'));
   const session = c.session;
 
   try {
@@ -350,7 +350,7 @@ app.delete("/:id", authMiddleware, adminMiddleware, async (c: AuthContext) => {
     });
 
     if (!post) {
-      return c.json({ success: false, error: "Post not found" }, 404);
+      return c.json({ success: false, error: 'Post not found' }, 404);
     }
 
     // 先删除标签关联
@@ -361,13 +361,13 @@ app.delete("/:id", authMiddleware, adminMiddleware, async (c: AuthContext) => {
 
     return c.json({
       success: true,
-      message: "Post deleted successfully",
+      message: 'Post deleted successfully',
     });
   } catch (error) {
-    console.error("Failed to delete post:", error);
+    console.error('Failed to delete post:', error);
     return c.json(
-      { success: false, error: error instanceof Error ? error.message : "Unknown error" },
-      500,
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });

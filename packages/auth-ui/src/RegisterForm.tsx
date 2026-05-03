@@ -50,9 +50,7 @@ export function RegisterForm({ onRegisterSuccess, onLoginClick, apiBaseUrl }: Re
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>
-      )}
+      {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>}
 
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">

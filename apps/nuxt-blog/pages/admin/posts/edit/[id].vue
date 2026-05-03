@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t } = useI18n();
 const route = useRoute();
@@ -134,12 +134,12 @@ interface JSONContent {
 }
 
 const formData = ref({
-  title: "",
-  slug: "",
-  excerpt: "",
-  content: "",
-  framework: "next" as "next" | "nuxt" | "svelte" | "astro" | "solid",
-  status: "draft" as "draft" | "published",
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  framework: 'next' as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid',
+  status: 'draft' as 'draft' | 'published',
 });
 
 const editorContent = ref<JSONContent | undefined>(undefined);
@@ -153,12 +153,12 @@ onMounted(async () => {
     const { data } = await res.json();
     if (data) {
       formData.value = {
-        title: data.title || "",
-        slug: data.slug || "",
-        excerpt: data.excerpt || "",
-        content: data.content || "",
-        framework: data.framework || "nuxt",
-        status: data.status || "draft",
+        title: data.title || '',
+        slug: data.slug || '',
+        excerpt: data.excerpt || '',
+        content: data.content || '',
+        framework: data.framework || 'nuxt',
+        status: data.status || 'draft',
       };
       // 解析内容为 JSON
       try {
@@ -166,14 +166,14 @@ onMounted(async () => {
       } catch {
         // 如果不是 JSON，使用默认内容
         editorContent.value = {
-          type: "doc",
-          content: [{ type: "paragraph", content: [{ type: "text", text: data.content }] }],
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: data.content }] }],
         };
       }
     }
   } catch (err) {
-    console.error("Failed to load post:", err);
-    alert(t("post.loadFailed"));
+    console.error('Failed to load post:', err);
+    alert(t('post.loadFailed'));
   } finally {
     loading.value = false;
   }
@@ -188,13 +188,13 @@ const handleSubmit = async () => {
   saving.value = true;
   try {
     await $fetch(`/api/posts/${postId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: formData.value,
     });
-    router.push("/admin/posts");
+    router.push('/admin/posts');
   } catch (error) {
-    alert(t("post.updateFailed"));
+    alert(t('post.updateFailed'));
   } finally {
     saving.value = false;
   }

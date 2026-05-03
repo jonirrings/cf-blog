@@ -16,9 +16,14 @@
     }
   },
   "scripts": {
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "fmt": "biome format --write .",
+    "check": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   }
 }

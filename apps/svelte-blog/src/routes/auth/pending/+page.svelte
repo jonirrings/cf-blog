@@ -1,41 +1,41 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { t } from '$lib/i18n';
-  import { goto } from '$app/navigation';
+import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
+import { goto } from '$app/navigation';
 
-  interface SessionUser {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    isApproved: boolean;
-  }
+interface SessionUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  isApproved: boolean;
+}
 
-  let session: SessionUser | null = null;
-  let loading = $state(true);
+let session: SessionUser | null = null;
+let loading = $state(true);
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/auth/session');
-      const data = await res.json();
+onMount(async () => {
+  try {
+    const res = await fetch('/api/auth/session');
+    const data = await res.json();
 
-      if (!data.success || !data.session) {
-        goto('/svelte/auth/login');
-        return;
-      }
-
-      session = data.session;
-
-      if (data.session.isApproved) {
-        goto('/svelte/admin');
-      }
-    } catch {
+    if (!data.success || !data.session) {
       goto('/svelte/auth/login');
       return;
-    } finally {
-      loading = false;
     }
-  });
+
+    session = data.session;
+
+    if (data.session.isApproved) {
+      goto('/svelte/admin');
+    }
+  } catch {
+    goto('/svelte/auth/login');
+    return;
+  } finally {
+    loading = false;
+  }
+});
 </script>
 
 <main class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">

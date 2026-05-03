@@ -1,50 +1,50 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { goto } from '$app/navigation';
+import { t } from '$lib/i18n';
+import { goto } from '$app/navigation';
 
-  let email = $state('');
-  let password = $state('');
-  let error = $state('');
-  let loading = $state(false);
+let email = $state('');
+let password = $state('');
+let error = $state('');
+let loading = $state(false);
 
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
-    error = '';
-    loading = true;
+async function handleSubmit(e: Event) {
+  e.preventDefault();
+  error = '';
+  loading = true;
 
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
 
-      if (data.success) {
-        if (data.user?.isApproved) {
-          goto('/svelte/admin');
-        } else {
-          goto('/svelte/auth/pending');
-        }
+    if (data.success) {
+      if (data.user?.isApproved) {
+        goto('/svelte/admin');
       } else {
-        error = data.message || t('auth.loginFailed');
+        goto('/svelte/auth/pending');
       }
-    } catch {
-      error = t('auth.networkError');
-    } finally {
-      loading = false;
+    } else {
+      error = data.message || t('auth.loginFailed');
     }
+  } catch {
+    error = t('auth.networkError');
+  } finally {
+    loading = false;
   }
+}
 
-  function handleGitHubLogin() {
-    // GitHub OAuth placeholder
-    window.location.href = '/api/auth/github';
-  }
+function handleGitHubLogin() {
+  // GitHub OAuth placeholder
+  window.location.href = '/api/auth/github';
+}
 
-  function handlePasskeyLogin() {
-    // Passkey/WebAuthn placeholder
-    alert(t('auth.passkeyUnsupported'));
-  }
+function handlePasskeyLogin() {
+  // Passkey/WebAuthn placeholder
+  alert(t('auth.passkeyUnsupported'));
+}
 </script>
 
 <main class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">

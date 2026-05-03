@@ -1,61 +1,61 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
+import { onMount } from 'svelte';
 
-  interface SiteConfig {
-    title: string;
-    description: string;
-    logo: string;
-    footerText: string;
-    enableComments: boolean;
-    enableAnalytics: boolean;
+interface SiteConfig {
+  title: string;
+  description: string;
+  logo: string;
+  footerText: string;
+  enableComments: boolean;
+  enableAnalytics: boolean;
+}
+
+let config: SiteConfig = {
+  title: '',
+  description: '',
+  logo: '',
+  footerText: '',
+  enableComments: true,
+  enableAnalytics: true,
+};
+
+let loading = $state(false);
+let saved = $state(false);
+
+const handleSubmit = async () => {
+  loading = true;
+  saved = false;
+
+  try {
+    const res = await fetch('/api/config/site', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    });
+    if (res.ok) {
+      saved = true;
+      setTimeout(() => (saved = false), 3000);
+    }
+  } catch (err) {
+    console.error('Save failed:', err);
+    alert(t('settings.error'));
+  } finally {
+    loading = false;
   }
+};
 
-  let config: SiteConfig = {
-    title: '',
-    description: '',
-    logo: '',
-    footerText: '',
-    enableComments: true,
-    enableAnalytics: true,
-  };
-
-  let loading = $state(false);
-  let saved = $state(false);
-
-  const handleSubmit = async () => {
-    loading = true;
-    saved = false;
-
-    try {
-      const res = await fetch('/api/config/site', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      });
-      if (res.ok) {
-        saved = true;
-        setTimeout(() => (saved = false), 3000);
-      }
-    } catch (err) {
-      console.error('Save failed:', err);
-      alert(t('settings.error'));
-    } finally {
-      loading = false;
+onMount(async () => {
+  try {
+    const res = await fetch('/api/config/site');
+    const data = await res.json();
+    if (data.data) {
+      config = { ...config, ...data.data };
     }
-  };
-
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/config/site');
-      const data = await res.json();
-      if (data.data) {
-        config = { ...config, ...data.data };
-      }
-    } catch (err) {
-      console.error('Failed to fetch config:', err);
-    }
-  });
+  } catch (err) {
+    console.error('Failed to fetch config:', err);
+  }
+});
 </script>
 
 <div>

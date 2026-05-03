@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Locale } from "@cf-blog/i18n";
+import type { Locale } from '@cf-blog/i18n';
 
 const { t, locale, setLocale, supportedLocales } = useI18n();
 

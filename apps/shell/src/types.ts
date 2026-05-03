@@ -42,7 +42,7 @@ export interface SessionData {
   userId: number;
   userEmail: string;
   userName: string;
-  userRole: "admin" | "publisher" | "commenter";
+  userRole: 'admin' | 'publisher' | 'commenter';
   expiresAt: string;
   createdAt: string;
 }

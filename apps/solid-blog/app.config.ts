@@ -1,14 +1,14 @@
-import { defineConfig } from "@solidjs/start/config";
+import { defineConfig } from '@solidjs/start/config';
 
 export default defineConfig({
   server: {
-    preset: "static",
+    preset: 'static',
   },
-  outDir: "../dist/solid",
-  base: "/solid",
+  outDir: '../dist/solid',
+  base: '/solid',
   vite: {
     build: {
-      target: "esnext",
+      target: 'esnext',
     },
   },
 });

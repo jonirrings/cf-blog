@@ -104,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t } = useI18n();
 
@@ -118,10 +118,10 @@ interface SiteConfig {
 }
 
 const config = ref<SiteConfig>({
-  title: "Nuxt Blog",
-  description: "",
-  logo: "",
-  footerText: "© 2026 Cloudflare Blog. All rights reserved.",
+  title: 'Nuxt Blog',
+  description: '',
+  logo: '',
+  footerText: '© 2026 Cloudflare Blog. All rights reserved.',
   enableComments: true,
   enableAnalytics: true,
 });
@@ -134,8 +134,8 @@ const handleSubmit = async () => {
   saved.value = false;
 
   try {
-    const res = await $fetch("/api/config/site", {
-      method: "PUT",
+    const res = await $fetch('/api/config/site', {
+      method: 'PUT',
       body: config.value,
     });
     if (res.success) {
@@ -143,8 +143,8 @@ const handleSubmit = async () => {
       setTimeout(() => (saved.value = false), 3000);
     }
   } catch (err) {
-    console.error("Save failed:", err);
-    alert(t("form.error"));
+    console.error('Save failed:', err);
+    alert(t('form.error'));
   } finally {
     loading.value = false;
   }
@@ -152,12 +152,12 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
   try {
-    const res = await $fetch("/api/config/site");
+    const res = await $fetch('/api/config/site');
     if (res.data) {
       config.value = { ...config.value, ...res.data };
     }
   } catch (err) {
-    console.error("Failed to fetch config:", err);
+    console.error('Failed to fetch config:', err);
   }
 });
 </script>

@@ -7,14 +7,14 @@
  * - 生成目录索引
  */
 
-import type { Env } from "../index";
-import { exportAllPostsAsMarkdown } from "./markdown";
+import type { Env } from '../index';
+import { exportAllPostsAsMarkdown } from './markdown';
 
 /**
  * 简单的 ZIP 生成器（使用 Web Compression Streams API）
  */
 export async function createZipArchive(
-  files: Map<string, string | Uint8Array>,
+  files: Map<string, string | Uint8Array>
 ): Promise<Uint8Array> {
   // 注意：Cloudflare Workers 不支持 CompressionStream 的 ZIP 格式
   // 这里使用简单的实现，实际生产环境建议使用 jszip 等库
@@ -24,19 +24,19 @@ export async function createZipArchive(
   const parts: Uint8Array[] = [];
 
   // ZIP 文件头
-  const zipHeader = encoder.encode("PK");
+  const zipHeader = encoder.encode('PK');
   parts.push(zipHeader);
 
   // 简单地将文件内容拼接（非标准 ZIP，仅示意）
   for (const [filename, content] of files.entries()) {
     const filenameBytes =
-      typeof content === "string" ? encoder.encode(filename) : encoder.encode(filename);
-    const contentBytes = typeof content === "string" ? encoder.encode(content) : content;
+      typeof content === 'string' ? encoder.encode(filename) : encoder.encode(filename);
+    const contentBytes = typeof content === 'string' ? encoder.encode(content) : content;
 
     parts.push(filenameBytes);
-    parts.push(encoder.encode("\n---CONTENT---\n"));
+    parts.push(encoder.encode('\n---CONTENT---\n'));
     parts.push(contentBytes);
-    parts.push(encoder.encode("\n---END---\n\n"));
+    parts.push(encoder.encode('\n---END---\n\n'));
   }
 
   // 合并所有部分
@@ -76,9 +76,9 @@ Exported on: ${new Date().toISOString()}
 
 ## Posts
 
-${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join("\n")}
+${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join('\n')}
 `;
-  files.set("README.md", readme);
+  files.set('README.md', readme);
 
   // 生成 JSON 索引
   const index = {
@@ -89,7 +89,7 @@ ${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join("\n")}
       filename: p.filename,
     })),
   };
-  files.set("index.json", JSON.stringify(index, null, 2));
+  files.set('index.json', JSON.stringify(index, null, 2));
 
   // 创建 ZIP（简化实现）
   const zipData = await createZipArchive(files);
@@ -106,13 +106,13 @@ ${markdownPosts.map((p) => `- [${p.slug}](posts/${p.filename})`).join("\n")}
  */
 export async function exportPostAsZip(
   env: Env,
-  postId: string,
+  postId: string
 ): Promise<{
   filename: string;
   Uint8Array;
   size: number;
 } | null> {
-  const { exportPostAsMarkdown } = await import("./markdown");
+  const { exportPostAsMarkdown } = await import('./markdown');
   const post = await exportPostAsMarkdown(env, postId);
 
   if (!post) {

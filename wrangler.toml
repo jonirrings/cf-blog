@@ -9,6 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "cf-blog-db"
 database_id = "YOUR_D1_DATABASE_ID"
+migrations_dir = "packages/db/drizzle"
 
 # KV 命名空间
 [[kv_namespaces]]
@@ -29,9 +30,27 @@ binding = "IMAGES_R2"
 bucket_name = "cf-blog-images"
 
 # Durable Objects
-[dev]
-port = 8788
+[[durable_objects.bindings]]
+name = "PRESENCE_DO"
+class_name = "PresenceDO"
+
+[[durable_objects.bindings]]
+name = "ROOM_DO"
+class_name = "RoomDO"
+
+[[durable_objects.bindings]]
+name = "HOME_DO"
+class_name = "HomeDO"
 
 [[migrations]]
 tag = "v1"
 new_classes = ["PresenceDO", "RoomDO", "HomeDO"]
+
+# 生产环境变量（敏感信息使用 wrangler secret put）
+[vars]
+ENVIRONMENT = "production"
+SITE_URL = "https://blog.jonirrings.com"
+
+# 开发服务器（仅用于 shell 本地调试，日常开发用 wrangler.dev.toml）
+[dev]
+port = 8788

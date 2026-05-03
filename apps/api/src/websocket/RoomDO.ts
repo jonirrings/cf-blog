@@ -19,7 +19,7 @@ export class RoomDO {
   private env: any;
   private readers: Map<string, { userId?: string; lastSeen: number }> = new Map();
   private heartbeatInterval?: NodeJS.Timeout;
-  private postId: string = "unknown";
+  private postId: string = 'unknown';
 
   constructor(state: DurableObjectState, env: any) {
     this.state = state;
@@ -28,28 +28,28 @@ export class RoomDO {
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    this.postId = url.searchParams.get("postId") || "default";
+    this.postId = url.searchParams.get('postId') || 'default';
 
     // WebSocket 升级请求
-    if (request.headers.get("Upgrade") === "websocket") {
+    if (request.headers.get('Upgrade') === 'websocket') {
       return this.handleWebSocket(request);
     }
 
     // HTTP API - 获取阅读人数
-    if (url.pathname === "/room/readers" && request.method === "GET") {
+    if (url.pathname === '/room/readers' && request.method === 'GET') {
       return new Response(JSON.stringify({ postId: this.postId, count: this.readers.size }), {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // HTTP API - 广播事件（内部调用）
-    if (url.pathname === "/room/broadcast" && request.method === "POST") {
+    if (url.pathname === '/room/broadcast' && request.method === 'POST') {
       const body = await request.json<any>();
       this.broadcastEvent(body);
       return new Response(JSON.stringify({ success: true }));
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response('Not Found', { status: 404 });
   }
 
   private async handleWebSocket(request: Request): Promise<Response> {
@@ -59,8 +59,8 @@ export class RoomDO {
 
     // 解析连接信息
     const url = new URL(request.url);
-    const sessionId = url.searchParams.get("sessionId") || `anon-${Date.now()}`;
-    const userId = url.searchParams.get("userId");
+    const sessionId = url.searchParams.get('sessionId') || `anon-${Date.now()}`;
+    const userId = url.searchParams.get('userId');
 
     // 记录读者
     this.readers.set(sessionId, {
@@ -76,7 +76,7 @@ export class RoomDO {
 
     // 发送初始数据
     const initialData = JSON.stringify({
-      type: "room:init",
+      type: 'room:init',
       postId: this.postId,
       readerCount: this.readers.size,
       sessionId,
@@ -90,13 +90,13 @@ export class RoomDO {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    if (typeof message !== "string") return;
+    if (typeof message !== 'string') return;
 
     try {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case "room:heartbeat":
+        case 'room:heartbeat':
           const sessionId = data.sessionId;
           if (sessionId && this.readers.has(sessionId)) {
             this.readers.get(sessionId)!.lastSeen = Date.now();
@@ -104,7 +104,7 @@ export class RoomDO {
           break;
       }
     } catch (error) {
-      console.error("[RoomDO] Message parse error:", error);
+      console.error('[RoomDO] Message parse error:', error);
     }
   }
 
@@ -145,7 +145,7 @@ export class RoomDO {
 
   public broadcastEvent(event: { type: string; payload?: any }): void {
     const message = JSON.stringify({
-      type: "room:event",
+      type: 'room:event',
       event: event.type,
       payload: event.payload,
       timestamp: new Date().toISOString(),
@@ -161,7 +161,7 @@ export class RoomDO {
 
   private broadcastReaderCount(): void {
     const message = JSON.stringify({
-      type: "room:readerCount",
+      type: 'room:readerCount',
       count: this.readers.size,
       postId: this.postId,
       timestamp: new Date().toISOString(),

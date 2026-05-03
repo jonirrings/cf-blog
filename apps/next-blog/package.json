@@ -7,7 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "fmt": "biome format --write .",
+    "check": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -17,20 +20,22 @@
     "@tiptap/extension-image": "catalog:",
     "@tiptap/extension-link": "catalog:",
     "@tiptap/extension-placeholder": "catalog:",
+    "@tiptap/pm": "catalog:",
     "@tiptap/react": "catalog:",
     "@tiptap/starter-kit": "catalog:",
     "clsx": "^2.1.1",
     "lucide-react": "catalog:",
     "next": "catalog:",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }

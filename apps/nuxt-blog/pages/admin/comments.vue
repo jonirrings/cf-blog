@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t, locale } = useI18n();
 
@@ -112,7 +112,7 @@ interface Comment {
 }
 
 interface FilterOption {
-  value: "all" | "pending" | "approved" | "rejected";
+  value: 'all' | 'pending' | 'approved' | 'rejected';
   label: string;
   count: number;
   activeClass: string;
@@ -120,36 +120,36 @@ interface FilterOption {
 
 const filters = ref<FilterOption[]>([
   {
-    value: "pending",
-    label: t("comment.status.pending"),
+    value: 'pending',
+    label: t('comment.status.pending'),
     count: 0,
-    activeClass: "bg-yellow-100 text-yellow-600",
+    activeClass: 'bg-yellow-100 text-yellow-600',
   },
   {
-    value: "approved",
-    label: t("comment.status.approved"),
+    value: 'approved',
+    label: t('comment.status.approved'),
     count: 0,
-    activeClass: "bg-green-100 text-green-600",
+    activeClass: 'bg-green-100 text-green-600',
   },
   {
-    value: "rejected",
-    label: t("comment.status.rejected"),
+    value: 'rejected',
+    label: t('comment.status.rejected'),
     count: 0,
-    activeClass: "bg-red-100 text-red-600",
+    activeClass: 'bg-red-100 text-red-600',
   },
 ]);
 
-const currentFilter = ref<"all" | "pending" | "approved" | "rejected">("pending");
+const currentFilter = ref<'all' | 'pending' | 'approved' | 'rejected'>('pending');
 const comments = ref<Comment[]>([]);
 const loading = ref(true);
 
 const filteredComments = computed(() => {
-  if (currentFilter.value === "all") return comments.value;
-  if (currentFilter.value === "pending")
+  if (currentFilter.value === 'all') return comments.value;
+  if (currentFilter.value === 'pending')
     return comments.value.filter((c) => !c.userApproved || !c.postApproved);
-  if (currentFilter.value === "approved")
+  if (currentFilter.value === 'approved')
     return comments.value.filter((c) => c.userApproved && c.postApproved);
-  if (currentFilter.value === "rejected") return comments.value.filter((c) => c.rejected);
+  if (currentFilter.value === 'rejected') return comments.value.filter((c) => c.rejected);
   return comments.value;
 });
 
@@ -162,47 +162,47 @@ const updateFilterCounts = () => {
 const handleApprove = async (id: number) => {
   try {
     const res = await $fetch(`/api/comments/${id}/approve`, {
-      method: "POST",
-      body: { approveType: "user" },
+      method: 'POST',
+      body: { approveType: 'user' },
     });
     if (res.success) {
       comments.value = comments.value.map((c) => (c.id === id ? { ...c, userApproved: true } : c));
       updateFilterCounts();
     }
   } catch (err) {
-    console.error("Approve failed:", err);
-    alert(t("comment.approveFailed"));
+    console.error('Approve failed:', err);
+    alert(t('comment.approveFailed'));
   }
 };
 
 const handleReject = async (id: number) => {
-  const reason = prompt(t("comment.rejectReason"));
+  const reason = prompt(t('comment.rejectReason'));
   if (!reason) return;
 
   try {
     const res = await $fetch(`/api/comments/${id}/reject`, {
-      method: "POST",
+      method: 'POST',
       body: { reason },
     });
     if (res.success) {
       comments.value = comments.value.map((c) =>
-        c.id === id ? { ...c, rejected: true, rejectReason: reason } : c,
+        c.id === id ? { ...c, rejected: true, rejectReason: reason } : c
       );
       updateFilterCounts();
     }
   } catch (err) {
-    console.error("Reject failed:", err);
-    alert(t("comment.rejectFailed"));
+    console.error('Reject failed:', err);
+    alert(t('comment.rejectFailed'));
   }
 };
 
 onMounted(async () => {
   try {
-    const res = await $fetch("/api/comments");
+    const res = await $fetch('/api/comments');
     comments.value = res.data?.list || [];
     updateFilterCounts();
   } catch (err) {
-    console.error("Failed to fetch comments:", err);
+    console.error('Failed to fetch comments:', err);
   } finally {
     loading.value = false;
   }

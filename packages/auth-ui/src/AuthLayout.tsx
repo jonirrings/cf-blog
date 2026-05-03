@@ -9,9 +9,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           {subtitle && <p className="mt-2 text-sm text-gray-600">{subtitle}</p>}
         </div>
-        <div className="bg-white py-8 px-6 rounded-lg shadow-lg">
-          {children}
-        </div>
+        <div className="bg-white py-8 px-6 rounded-lg shadow-lg">{children}</div>
       </div>
     </div>
   );

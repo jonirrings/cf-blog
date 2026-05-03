@@ -1,53 +1,53 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { goto } from '$app/navigation';
+import { t } from '$lib/i18n';
+import { goto } from '$app/navigation';
 
-  let name = $state('');
-  let email = $state('');
-  let password = $state('');
-  let passwordConfirm = $state('');
-  let error = $state('');
-  let loading = $state(false);
+let name = $state('');
+let email = $state('');
+let password = $state('');
+let passwordConfirm = $state('');
+let error = $state('');
+let loading = $state(false);
 
-  function validate(): string | null {
-    if (!name.trim()) return t('form.required');
-    if (!email.trim()) return t('form.required');
-    if (password.length < 6) return t('auth.passwordMinLength');
-    if (password !== passwordConfirm) return t('auth.passwordMismatch');
-    return null;
+function validate(): string | null {
+  if (!name.trim()) return t('form.required');
+  if (!email.trim()) return t('form.required');
+  if (password.length < 6) return t('auth.passwordMinLength');
+  if (password !== passwordConfirm) return t('auth.passwordMismatch');
+  return null;
+}
+
+async function handleSubmit(e: Event) {
+  e.preventDefault();
+  error = '';
+
+  const validationError = validate();
+  if (validationError) {
+    error = validationError;
+    return;
   }
 
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
-    error = '';
+  loading = true;
 
-    const validationError = validate();
-    if (validationError) {
-      error = validationError;
-      return;
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      goto('/svelte/auth/pending');
+    } else {
+      error = data.message || t('auth.registerFailed');
     }
-
-    loading = true;
-
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        goto('/svelte/auth/pending');
-      } else {
-        error = data.message || t('auth.registerFailed');
-      }
-    } catch {
-      error = t('auth.networkError');
-    } finally {
-      loading = false;
-    }
+  } catch {
+    error = t('auth.networkError');
+  } finally {
+    loading = false;
   }
+}
 </script>
 
 <main class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">

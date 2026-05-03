@@ -10,4 +10,10 @@ export { PasskeyButton } from './PasskeyButton';
 export { GitHubButton } from './GitHubButton';
 export { AuthLayout } from './AuthLayout';
 
-export type { LoginFormProps, RegisterFormProps, PasskeyButtonProps, GitHubButtonProps, AuthLayoutProps } from './types';
+export type {
+  LoginFormProps,
+  RegisterFormProps,
+  PasskeyButtonProps,
+  GitHubButtonProps,
+  AuthLayoutProps,
+} from './types';

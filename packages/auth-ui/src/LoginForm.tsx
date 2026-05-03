@@ -36,9 +36,7 @@ export function LoginForm({ onLoginSuccess, onRegisterClick, apiBaseUrl }: Login
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>
-      )}
+      {error && <div className="bg-red-50 text-red-600 p-3 rounded text-sm">{error}</div>}
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">

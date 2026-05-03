@@ -8,8 +8,8 @@
  * - 批量审批
  */
 
-import { eq, and } from "drizzle-orm";
-import { users, auditLogs } from "@cf-blog/db/schema";
+import { eq, and } from 'drizzle-orm';
+import { users, auditLogs } from '@cf-blog/db/schema';
 
 /**
  * 获取待审批用户列表
@@ -36,7 +36,7 @@ export async function getPendingUsers(db: any): Promise<any[]> {
 export async function approveUser(
   db: any,
   userId: number,
-  adminUserId: number,
+  adminUserId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // 检查用户是否存在
@@ -45,11 +45,11 @@ export async function approveUser(
     });
 
     if (!user) {
-      return { success: false, error: "用户不存在" };
+      return { success: false, error: '用户不存在' };
     }
 
     if (user.isApproved) {
-      return { success: false, error: "用户已审批通过" };
+      return { success: false, error: '用户已审批通过' };
     }
 
     // 更新用户状态
@@ -64,8 +64,8 @@ export async function approveUser(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: "USER_APPROVED",
-      targetType: "user",
+      action: 'USER_APPROVED',
+      targetType: 'user',
       targetId: userId.toString(),
       details: JSON.stringify({ targetEmail: user.email }),
       timestamp: new Date(),
@@ -73,8 +73,8 @@ export async function approveUser(
 
     return { success: true };
   } catch (error) {
-    console.error("[UserApproval] 审批失败:", error);
-    return { success: false, error: "审批失败" };
+    console.error('[UserApproval] 审批失败:', error);
+    return { success: false, error: '审批失败' };
   }
 }
 
@@ -85,7 +85,7 @@ export async function rejectUser(
   db: any,
   userId: number,
   adminUserId: number,
-  reason?: string,
+  reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await db.query.users.findFirst({
@@ -93,7 +93,7 @@ export async function rejectUser(
     });
 
     if (!user) {
-      return { success: false, error: "用户不存在" };
+      return { success: false, error: '用户不存在' };
     }
 
     // 更新用户状态（标记为拒绝）
@@ -108,8 +108,8 @@ export async function rejectUser(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: "USER_REJECTED",
-      targetType: "user",
+      action: 'USER_REJECTED',
+      targetType: 'user',
       targetId: userId.toString(),
       details: JSON.stringify({ targetEmail: user.email, reason }),
       timestamp: new Date(),
@@ -117,8 +117,8 @@ export async function rejectUser(
 
     return { success: true };
   } catch (error) {
-    console.error("[UserApproval] 拒绝失败:", error);
-    return { success: false, error: "拒绝失败" };
+    console.error('[UserApproval] 拒绝失败:', error);
+    return { success: false, error: '拒绝失败' };
   }
 }
 
@@ -128,7 +128,7 @@ export async function rejectUser(
 export async function bulkApproveUsers(
   db: any,
   userIds: number[],
-  adminUserId: number,
+  adminUserId: number
 ): Promise<{ success: boolean; approved: number; errors: string[] }> {
   const errors: string[] = [];
   let approved = 0;
@@ -153,5 +153,5 @@ export async function bulkApproveUsers(
  * 检查用户是否有审批权限
  */
 export function canApproveUsers(userRole: string | null): boolean {
-  return userRole === "admin";
+  return userRole === 'admin';
 }

@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t } = useI18n();
 
@@ -96,105 +96,105 @@ interface Post {
   id: number;
   title: string;
   slug: string;
-  framework: "next" | "nuxt" | "svelte" | "astro" | "solid";
-  status: "draft" | "published";
+  framework: 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid';
+  status: 'draft' | 'published';
   viewCount: number;
 }
 
 interface FilterOption {
-  value: "all" | "published" | "draft";
+  value: 'all' | 'published' | 'draft';
   label: string;
   count: number;
   activeClass: string;
 }
 
 const filters = ref<FilterOption[]>([
-  { value: "all", label: t("filter.all"), count: 0, activeClass: "bg-blue-100 text-blue-600" },
+  { value: 'all', label: t('filter.all'), count: 0, activeClass: 'bg-blue-100 text-blue-600' },
   {
-    value: "published",
-    label: t("post.status.published"),
+    value: 'published',
+    label: t('post.status.published'),
     count: 0,
-    activeClass: "bg-green-100 text-green-600",
+    activeClass: 'bg-green-100 text-green-600',
   },
   {
-    value: "draft",
-    label: t("post.status.draft"),
+    value: 'draft',
+    label: t('post.status.draft'),
     count: 0,
-    activeClass: "bg-yellow-100 text-yellow-600",
+    activeClass: 'bg-yellow-100 text-yellow-600',
   },
 ]);
 
-const currentFilter = ref<"all" | "published" | "draft">("all");
+const currentFilter = ref<'all' | 'published' | 'draft'>('all');
 const posts = ref<Post[]>([]);
 const loading = ref(true);
 
 const filteredPosts = computed(() => {
-  if (currentFilter.value === "all") return posts.value;
+  if (currentFilter.value === 'all') return posts.value;
   return posts.value.filter((p) => p.status === currentFilter.value);
 });
 
 const frameworkClass = (framework: string) => {
   const classes: Record<string, string> = {
-    next: "px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800",
-    nuxt: "px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800",
-    svelte: "px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800",
-    astro: "px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800",
-    solid: "px-2 py-1 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800",
+    next: 'px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800',
+    nuxt: 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800',
+    svelte: 'px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800',
+    astro: 'px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800',
+    solid: 'px-2 py-1 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800',
   };
   return (
-    classes[framework] || "px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"
+    classes[framework] || 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'
   );
 };
 
 const statusClass = (status: string) => {
   const classes: Record<string, string> = {
-    published: "px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800",
-    draft: "px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800",
+    published: 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800',
+    draft: 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800',
   };
   return (
-    classes[status] || "px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"
+    classes[status] || 'px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800'
   );
 };
 
 const deletePost = async (id: number) => {
-  if (!confirm(t("post.deleteConfirm"))) return;
+  if (!confirm(t('post.deleteConfirm'))) return;
   try {
-    await $fetch(`/api/posts/${id}`, { method: "DELETE" });
+    await $fetch(`/api/posts/${id}`, { method: 'DELETE' });
     posts.value = posts.value.filter((p) => p.id !== id);
   } catch (err) {
-    alert(t("form.error"));
+    alert(t('form.error'));
   }
 };
 
 const updateFilterCounts = () => {
   filters.value[0].count = posts.value.length;
-  filters.value[1].count = posts.value.filter((p) => p.status === "published").length;
-  filters.value[2].count = posts.value.filter((p) => p.status === "draft").length;
+  filters.value[1].count = posts.value.filter((p) => p.status === 'published').length;
+  filters.value[2].count = posts.value.filter((p) => p.status === 'draft').length;
 };
 
 onMounted(async () => {
   try {
-    const res = await $fetch("/api/posts");
+    const res = await $fetch('/api/posts');
     posts.value = res.data?.list || [];
     updateFilterCounts();
   } catch (err) {
-    console.error("Failed to fetch posts:", err);
+    console.error('Failed to fetch posts:', err);
     // Fallback to sample data
     posts.value = [
       {
         id: 1,
-        title: t("post.sample1.title"),
-        slug: "welcome-to-cf-blog",
-        framework: "next",
-        status: "published",
+        title: t('post.sample1.title'),
+        slug: 'welcome-to-cf-blog',
+        framework: 'next',
+        status: 'published',
         viewCount: 100,
       },
       {
         id: 2,
-        title: t("post.sample2.title"),
-        slug: "nextjs-ssg-guide",
-        framework: "next",
-        status: "published",
+        title: t('post.sample2.title'),
+        slug: 'nextjs-ssg-guide',
+        framework: 'next',
+        status: 'published',
         viewCount: 50,
       },
     ];

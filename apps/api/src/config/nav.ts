@@ -16,17 +16,17 @@ export interface NavItem {
   icon?: string;
   order: number;
   visible: boolean;
-  role?: "admin" | "publisher" | "commenter"; // 可选，限制特定角色可见
+  role?: 'admin' | 'publisher' | 'commenter'; // 可选，限制特定角色可见
 }
 
 // 默认导航配置
 const DEFAULT_NAV_ITEMS: NavItem[] = [
-  { id: "home", label: "首页", href: "/", external: false, order: 1, visible: true },
-  { id: "posts", label: "文章", href: "/posts", external: false, order: 2, visible: true },
-  { id: "about", label: "关于", href: "/about", external: false, order: 3, visible: true },
+  { id: 'home', label: '首页', href: '/', external: false, order: 1, visible: true },
+  { id: 'posts', label: '文章', href: '/posts', external: false, order: 2, visible: true },
+  { id: 'about', label: '关于', href: '/about', external: false, order: 3, visible: true },
 ];
 
-const CONFIG_KEY = "nav_config";
+const CONFIG_KEY = 'nav_config';
 
 /**
  * 获取导航配置
@@ -52,7 +52,7 @@ export async function updateNavConfig(kv: KVNamespace, items: NavItem[]): Promis
 /**
  * 添加导航项
  */
-export async function addNavItem(kv: KVNamespace, item: Omit<NavItem, "id">): Promise<NavItem> {
+export async function addNavItem(kv: KVNamespace, item: Omit<NavItem, 'id'>): Promise<NavItem> {
   const items = await getNavConfig(kv);
   const newItem: NavItem = {
     ...item,
@@ -69,7 +69,7 @@ export async function addNavItem(kv: KVNamespace, item: Omit<NavItem, "id">): Pr
 export async function updateNavItem(
   kv: KVNamespace,
   id: string,
-  update: Partial<NavItem>,
+  update: Partial<NavItem>
 ): Promise<NavItem | null> {
   const items = await getNavConfig(kv);
   const index = items.findIndex((item) => item.id === id);
@@ -106,7 +106,7 @@ export function getVisibleNavItems(items: NavItem[], userRole?: string): NavItem
     .filter((item) => item.visible)
     .filter((item) => {
       if (!item.role) return true; // 无角色限制
-      return userRole === item.role || userRole === "admin"; // 管理员可见所有
+      return userRole === item.role || userRole === 'admin'; // 管理员可见所有
     })
     .sort((a, b) => a.order - b.order);
 }

@@ -215,7 +215,7 @@ export type TranslationKey =
   | 'user.publisherApplication.approved'
   | 'user.publisherApplication.rejected'
   // 设置
-  | 'settings.error'
+  | 'settings.error';
 
 export type TranslationValue = string | { [key: string]: TranslationValue };
 

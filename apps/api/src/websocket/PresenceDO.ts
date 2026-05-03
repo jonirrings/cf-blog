@@ -28,18 +28,18 @@ export class PresenceDO {
     const url = new URL(request.url);
 
     // WebSocket 升级请求
-    if (request.headers.get("Upgrade") === "websocket") {
+    if (request.headers.get('Upgrade') === 'websocket') {
       return this.handleWebSocket(request);
     }
 
     // HTTP API - 获取在线人数
-    if (url.pathname === "/presence/count" && request.method === "GET") {
+    if (url.pathname === '/presence/count' && request.method === 'GET') {
       return new Response(JSON.stringify({ count: this.connections.size }), {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response('Not Found', { status: 404 });
   }
 
   private async handleWebSocket(request: Request): Promise<Response> {
@@ -49,8 +49,8 @@ export class PresenceDO {
 
     // 解析连接信息
     const url = new URL(request.url);
-    const sessionId = url.searchParams.get("sessionId") || `anon-${Date.now()}`;
-    const userId = url.searchParams.get("userId");
+    const sessionId = url.searchParams.get('sessionId') || `anon-${Date.now()}`;
+    const userId = url.searchParams.get('userId');
 
     // 记录连接
     this.connections.set(sessionId, {
@@ -66,7 +66,7 @@ export class PresenceDO {
 
     // 发送初始在线人数
     const initialData = JSON.stringify({
-      type: "presence:init",
+      type: 'presence:init',
       count: this.connections.size,
       sessionId,
     });
@@ -79,13 +79,13 @@ export class PresenceDO {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    if (typeof message !== "string") return;
+    if (typeof message !== 'string') return;
 
     try {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case "presence:heartbeat":
+        case 'presence:heartbeat':
           // 更新心跳
           const sessionId = data.sessionId;
           if (sessionId && this.connections.has(sessionId)) {
@@ -93,18 +93,18 @@ export class PresenceDO {
           }
           break;
 
-        case "presence:subscribe":
+        case 'presence:subscribe':
           // 订阅更新
           ws.send(
             JSON.stringify({
-              type: "presence:update",
+              type: 'presence:update',
               count: this.connections.size,
-            }),
+            })
           );
           break;
       }
     } catch (error) {
-      console.error("[PresenceDO] Message parse error:", error);
+      console.error('[PresenceDO] Message parse error:', error);
     }
   }
 
@@ -151,7 +151,7 @@ export class PresenceDO {
 
   private broadcastPresence(): void {
     const message = JSON.stringify({
-      type: "presence:update",
+      type: 'presence:update',
       count: this.connections.size,
       timestamp: new Date().toISOString(),
     });

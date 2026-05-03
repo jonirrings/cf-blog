@@ -1,34 +1,34 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { t } from '$lib/i18n';
+import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
 
-  interface Stats {
-    totalPosts: number;
-    publishedPosts: number;
-    draftPosts: number;
-    totalComments: number;
-    pendingComments: number;
-    totalUsers: number;
-    pendingUsers: number;
-    totalViews: number;
-  }
+interface Stats {
+  totalPosts: number;
+  publishedPosts: number;
+  draftPosts: number;
+  totalComments: number;
+  pendingComments: number;
+  totalUsers: number;
+  pendingUsers: number;
+  totalViews: number;
+}
 
-  let stats: Stats | null = null;
-  let loading = $state(true);
+let stats: Stats | null = null;
+let loading = $state(true);
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      if (data.success && data.data) {
-        stats = data.data;
-      }
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
-    } finally {
-      loading = false;
+onMount(async () => {
+  try {
+    const res = await fetch('/api/stats');
+    const data = await res.json();
+    if (data.success && data.data) {
+      stats = data.data;
     }
-  });
+  } catch (err) {
+    console.error('Failed to fetch stats:', err);
+  } finally {
+    loading = false;
+  }
+});
 </script>
 
 <div>

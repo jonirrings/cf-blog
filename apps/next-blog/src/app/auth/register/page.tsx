@@ -1,50 +1,50 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
+      setError(t('auth.passwordMismatch'));
       return;
     }
     if (password.length < 6) {
-      setError(t("auth.passwordMinLength"));
+      setError(t('auth.passwordMinLength'));
       return;
     }
 
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name: name || email.split("@")[0] }),
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name: name || email.split('@')[0] }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        router.push("/auth/pending");
+        router.push('/auth/pending');
       } else {
-        setError(data.error || t("auth.registerFailed"));
+        setError(data.error || t('auth.registerFailed'));
       }
     } catch (err) {
-      setError(t("auth.networkError"));
+      setError(t('auth.networkError'));
     } finally {
       setLoading(false);
     }
@@ -55,14 +55,14 @@ export default function RegisterPage() {
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{t("auth.registerTitle")}</h1>
-            <p className="text-gray-500 mt-2">{t("auth.registerSubtitle")}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('auth.registerTitle')}</h1>
+            <p className="text-gray-500 mt-2">{t('auth.registerSubtitle')}</p>
           </div>
 
           <div className="space-y-4 mb-6">
             <button
               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-              onClick={() => alert("GitHub register not implemented")}
+              onClick={() => alert('GitHub register not implemented')}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -71,12 +71,12 @@ export default function RegisterPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              {t("auth.github")}
+              {t('auth.github')}
             </button>
 
             <button
               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              onClick={() => alert("Passkey register not implemented")}
+              onClick={() => alert('Passkey register not implemented')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -86,7 +86,7 @@ export default function RegisterPage() {
                   d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
                 />
               </svg>
-              {t("auth.passkey")}
+              {t('auth.passkey')}
             </button>
           </div>
 
@@ -99,14 +99,14 @@ export default function RegisterPage() {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">{t("auth.useEmailRegister")}</span>
+              <span className="px-2 bg-white text-gray-500">{t('auth.useEmailRegister')}</span>
             </div>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("auth.nickname")}
+                {t('auth.nickname')}
               </label>
               <input
                 type="text"
@@ -122,7 +122,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("auth.email")}
+                {t('auth.email')}
               </label>
               <input
                 type="email"
@@ -138,7 +138,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("auth.password")}
+                {t('auth.password')}
               </label>
               <input
                 type="password"
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                {t("auth.passwordConfirm")}
+                {t('auth.passwordConfirm')}
               </label>
               <input
                 type="password"
@@ -176,14 +176,14 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t("auth.registering") : t("auth.register")}
+              {loading ? t('auth.registering') : t('auth.register')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
-            {t("auth.hasAccount")}{" "}
+            {t('auth.hasAccount')}{' '}
             <Link href="/auth/login" className="text-blue-600 hover:underline">
-              {t("auth.login")}
+              {t('auth.login')}
             </Link>
           </p>
         </div>

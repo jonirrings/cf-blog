@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface Session {
   id: string;
   userId: number;
   userName: string;
-  userRole: "admin" | "publisher" | "commenter";
+  userRole: 'admin' | 'publisher' | 'commenter';
   isApproved: boolean;
 }
 
@@ -24,23 +24,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     async function checkSession() {
       try {
-        const res = await fetch("/api/auth/session");
+        const res = await fetch('/api/auth/session');
         const { session: data } = await res.json();
 
         if (!data) {
-          router.push("/auth/login");
+          router.push('/auth/login');
           return;
         }
 
-        if (data.userRole !== "admin") {
-          router.push("/next/");
+        if (data.userRole !== 'admin') {
+          router.push('/next/');
           return;
         }
 
         setSession(data);
       } catch (err) {
-        console.error("Session check failed:", err);
-        router.push("/auth/login");
+        console.error('Session check failed:', err);
+        router.push('/auth/login');
       } finally {
         setLoading(false);
       }
@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">{t("common.loading")}</div>
+        <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     );
   }
@@ -62,11 +62,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navigation = [
-    { name: t("admin.dashboard"), href: "/admin/dashboard", icon: "📊" },
-    { name: t("admin.posts"), href: "/admin/posts", icon: "📝" },
-    { name: t("admin.comments"), href: "/admin/comments", icon: "💬" },
-    { name: t("admin.users"), href: "/admin/users", icon: "👥" },
-    { name: t("admin.settings"), href: "/admin/settings", icon: "⚙️" },
+    { name: t('admin.dashboard'), href: '/admin/dashboard', icon: '📊' },
+    { name: t('admin.posts'), href: '/admin/posts', icon: '📝' },
+    { name: t('admin.comments'), href: '/admin/comments', icon: '💬' },
+    { name: t('admin.users'), href: '/admin/users', icon: '👥' },
+    { name: t('admin.settings'), href: '/admin/settings', icon: '⚙️' },
   ];
 
   return (
@@ -76,9 +76,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b">
-            <h1 className="text-lg font-bold text-gray-900">{t("admin.title")}</h1>
+            <h1 className="text-lg font-bold text-gray-900">{t('admin.title')}</h1>
             <Link href="/next/" className="text-sm text-gray-500 hover:text-gray-700">
-              {t("admin.backToBlog")}
+              {t('admin.backToBlog')}
             </Link>
           </div>
 
@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.name}
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+                    isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <span>{item.icon}</span>

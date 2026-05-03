@@ -1,46 +1,46 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { t, locale, setLocaleWithCookie, supportedLocales } from '$lib/i18n';
+import { onMount } from 'svelte';
+import { t, locale, setLocaleWithCookie, supportedLocales } from '$lib/i18n';
 
-  interface SessionUser {
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-  }
+interface SessionUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
-  let session: SessionUser | null = null;
-  let loading = $state(true);
+let session: SessionUser | null = null;
+let loading = $state(true);
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/auth/session');
-      const data = await res.json();
-      if (data.success && data.session) {
-        session = data.session;
-        if (session.role !== 'admin') {
-          window.location.href = '/svelte/';
-          return;
-        }
-      } else {
-        window.location.href = '/svelte/auth/login';
+onMount(async () => {
+  try {
+    const res = await fetch('/api/auth/session');
+    const data = await res.json();
+    if (data.success && data.session) {
+      session = data.session;
+      if (session.role !== 'admin') {
+        window.location.href = '/svelte/';
         return;
       }
-    } catch {
+    } else {
       window.location.href = '/svelte/auth/login';
       return;
-    } finally {
-      loading = false;
     }
-  });
+  } catch {
+    window.location.href = '/svelte/auth/login';
+    return;
+  } finally {
+    loading = false;
+  }
+});
 
-  const navItems = [
-    { href: '/svelte/admin', label: () => t('admin.dashboard'), icon: '📊' },
-    { href: '/svelte/admin/posts', label: () => t('admin.posts'), icon: '📝' },
-    { href: '/svelte/admin/comments', label: () => t('admin.comments'), icon: '💬' },
-    { href: '/svelte/admin/users', label: () => t('admin.users'), icon: '👥' },
-    { href: '/svelte/admin/settings', label: () => t('admin.settings'), icon: '⚙️' },
-  ];
+const navItems = [
+  { href: '/svelte/admin', label: () => t('admin.dashboard'), icon: '📊' },
+  { href: '/svelte/admin/posts', label: () => t('admin.posts'), icon: '📝' },
+  { href: '/svelte/admin/comments', label: () => t('admin.comments'), icon: '💬' },
+  { href: '/svelte/admin/users', label: () => t('admin.users'), icon: '👥' },
+  { href: '/svelte/admin/settings', label: () => t('admin.settings'), icon: '⚙️' },
+];
 </script>
 
 {#if loading}

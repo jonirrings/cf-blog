@@ -1,5 +1,5 @@
-import { Component, createSignal, onMount } from "solid-js";
-import { useTranslation } from "~/lib/i18n";
+import { Component, createSignal, onMount } from 'solid-js';
+import { useTranslation } from '~/lib/i18n';
 
 interface SiteConfig {
   title: string;
@@ -14,10 +14,10 @@ const SettingsPage: Component = () => {
   const { t } = useTranslation();
 
   const [config, setConfig] = createSignal<SiteConfig>({
-    title: "",
-    description: "",
-    logo: "",
-    footerText: "",
+    title: '',
+    description: '',
+    logo: '',
+    footerText: '',
     enableComments: true,
     enableAnalytics: true,
   });
@@ -27,13 +27,13 @@ const SettingsPage: Component = () => {
 
   onMount(async () => {
     try {
-      const res = await fetch("/api/config/site");
+      const res = await fetch('/api/config/site');
       const data = await res.json();
       if (data.data) {
         setConfig({ ...config(), ...data.data });
       }
     } catch (err) {
-      console.error("Failed to fetch config:", err);
+      console.error('Failed to fetch config:', err);
     }
   });
 
@@ -43,9 +43,9 @@ const SettingsPage: Component = () => {
     setSaved(false);
 
     try {
-      const res = await fetch("/api/config/site", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/config/site', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config()),
       });
       if (res.ok) {
@@ -53,8 +53,8 @@ const SettingsPage: Component = () => {
         setTimeout(() => setSaved(false), 3000);
       }
     } catch (err) {
-      console.error("Save failed:", err);
-      alert(t("form.error"));
+      console.error('Save failed:', err);
+      alert(t('form.error'));
     } finally {
       setLoading(false);
     }
@@ -62,22 +62,22 @@ const SettingsPage: Component = () => {
 
   return (
     <>
-      <h1 class="text-2xl font-bold text-gray-900 mb-6">{t("admin.settings")}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">{t('admin.settings')}</h1>
 
       <form onSubmit={handleSubmit} class="space-y-6">
         {/* Save notification */}
         {saved() && (
-          <div class="bg-green-50 text-green-700 p-4 rounded-lg">{t("settings.saved")}</div>
+          <div class="bg-green-50 text-green-700 p-4 rounded-lg">{t('settings.saved')}</div>
         )}
 
         {/* Basic info */}
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">{t("settings.basicInfo")}</h2>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{t('settings.basicInfo')}</h2>
 
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                {t("settings.siteTitle")}
+                {t('settings.siteTitle')}
               </label>
               <input
                 type="text"
@@ -89,7 +89,7 @@ const SettingsPage: Component = () => {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                {t("settings.siteDesc")}
+                {t('settings.siteDesc')}
               </label>
               <textarea
                 value={config().description}
@@ -101,7 +101,7 @@ const SettingsPage: Component = () => {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                {t("settings.logoUrl")}
+                {t('settings.logoUrl')}
               </label>
               <input
                 type="url"
@@ -114,7 +114,7 @@ const SettingsPage: Component = () => {
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                {t("settings.footerText")}
+                {t('settings.footerText')}
               </label>
               <input
                 type="text"
@@ -128,11 +128,11 @@ const SettingsPage: Component = () => {
 
         {/* Feature toggles */}
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">{t("settings.featureToggles")}</h2>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{t('settings.featureToggles')}</h2>
 
           <div class="space-y-4">
             <label class="flex items-center justify-between">
-              <span class="text-sm font-medium text-gray-700">{t("settings.enableComments")}</span>
+              <span class="text-sm font-medium text-gray-700">{t('settings.enableComments')}</span>
               <input
                 type="checkbox"
                 checked={config().enableComments}
@@ -144,7 +144,7 @@ const SettingsPage: Component = () => {
             </label>
 
             <label class="flex items-center justify-between">
-              <span class="text-sm font-medium text-gray-700">{t("settings.enableAnalytics")}</span>
+              <span class="text-sm font-medium text-gray-700">{t('settings.enableAnalytics')}</span>
               <input
                 type="checkbox"
                 checked={config().enableAnalytics}
@@ -164,7 +164,7 @@ const SettingsPage: Component = () => {
             disabled={loading()}
             class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading() ? t("settings.saving") : t("settings.saveConfig")}
+            {loading() ? t('settings.saving') : t('settings.saveConfig')}
           </button>
         </div>
       </form>

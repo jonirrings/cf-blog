@@ -1,111 +1,111 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import RichTextEditor from '$lib/components/RichTextEditor.svelte';
+import { t } from '$lib/i18n';
+import { page } from '$app/stores';
+import { onMount } from 'svelte';
+import { goto } from '$app/navigation';
+import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 
-  interface JSONContent {
-    type?: string;
+interface JSONContent {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: JSONContent[];
+  text?: string;
+  marks?: Array<{
+    type: string;
     attrs?: Record<string, any>;
-    content?: JSONContent[];
-    text?: string;
-    marks?: Array<{
-      type: string;
-      attrs?: Record<string, any>;
-    }>;
-  }
+  }>;
+}
 
-  interface FormData {
-    title: string;
-    slug: string;
-    excerpt: string;
-    content: string;
-    framework: 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid';
-    status: 'draft' | 'published';
-  }
+interface FormData {
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  framework: 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid';
+  status: 'draft' | 'published';
+}
 
-  let formData: FormData = {
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    framework: 'svelte',
-    status: 'draft',
-  };
+let formData: FormData = {
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  framework: 'svelte',
+  status: 'draft',
+};
 
-  let editorContent: JSONContent | undefined = undefined;
-  let saving = false;
-  let loading = true;
+let editorContent: JSONContent | undefined = undefined;
+let saving = false;
+let loading = true;
 
-  function handleTitleChange(e: Event) {
-    const title = (e.target as HTMLInputElement).value;
-    formData.title = title;
-    formData.slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
-      .replace(/[\s-]+/g, '-')
-      .trim();
-  }
+function handleTitleChange(e: Event) {
+  const title = (e.target as HTMLInputElement).value;
+  formData.title = title;
+  formData.slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
+    .replace(/[\s-]+/g, '-')
+    .trim();
+}
 
-  function handleContentChange(e: CustomEvent<JSONContent>) {
-    editorContent = e.detail;
-    formData.content = JSON.stringify(e.detail);
-  }
+function handleContentChange(content: JSONContent) {
+  editorContent = content;
+  formData.content = JSON.stringify(content);
+}
 
-  onMount(async () => {
-    const postId = page.params.id;
-    try {
-      const res = await fetch(`/api/posts/${postId}`);
-      const data = await res.json();
-      if (data.success && data.data) {
-        formData = {
-          title: data.data.title || '',
-          slug: data.data.slug || '',
-          excerpt: data.data.excerpt || '',
-          content: data.data.content || '',
-          framework: data.data.framework || 'svelte',
-          status: data.data.status || 'draft',
+onMount(async () => {
+  const postId = page.params.id;
+  try {
+    const res = await fetch(`/api/posts/${postId}`);
+    const data = await res.json();
+    if (data.success && data.data) {
+      formData = {
+        title: data.data.title || '',
+        slug: data.data.slug || '',
+        excerpt: data.data.excerpt || '',
+        content: data.data.content || '',
+        framework: data.data.framework || 'svelte',
+        status: data.data.status || 'draft',
+      };
+      // Parse content as JSON
+      try {
+        editorContent = JSON.parse(data.data.content);
+      } catch {
+        editorContent = {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: data.data.content }] }],
         };
-        // Parse content as JSON
-        try {
-          editorContent = JSON.parse(data.data.content);
-        } catch {
-          editorContent = {
-            type: 'doc',
-            content: [{ type: 'paragraph', content: [{ type: 'text', text: data.data.content }] }],
-          };
-        }
       }
-    } catch (err) {
-      console.error('Failed to load post:', err);
-      alert(t('post.loadFailed'));
-    } finally {
-      loading = false;
     }
-  });
-
-  async function handleSubmit() {
-    saving = true;
-    const postId = page.params.id;
-    try {
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        goto('/admin/posts');
-      } else {
-        const error = await res.json();
-        alert(`${t('post.updateFailed')}: ${error.message || t('form.error')}`);
-      }
-    } catch (error) {
-      alert(t('post.updateFailed'));
-    } finally {
-      saving = false;
-    }
+  } catch (err) {
+    console.error('Failed to load post:', err);
+    alert(t('post.loadFailed'));
+  } finally {
+    loading = false;
   }
+});
+
+async function handleSubmit() {
+  saving = true;
+  const postId = page.params.id;
+  try {
+    const res = await fetch(`/api/posts/${postId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    if (res.ok) {
+      goto('/admin/posts');
+    } else {
+      const error = await res.json();
+      alert(`${t('post.updateFailed')}: ${error.message || t('form.error')}`);
+    }
+  } catch (error) {
+    alert(t('post.updateFailed'));
+  } finally {
+    saving = false;
+  }
+}
 </script>
 
 <div>
@@ -191,9 +191,9 @@
           {t('post.content')}
         </label>
         <RichTextEditor
-          {initialContent}
+          initialContent={editorContent}
           placeholder={t('post.contentPlaceholder')}
-          on:contentChange={handleContentChange}
+          onContentChange={handleContentChange}
         />
         <p class="text-xs text-gray-500 mt-1">{t('post.editorTip')}</p>
       </div>

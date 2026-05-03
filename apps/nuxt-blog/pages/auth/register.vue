@@ -71,31 +71,31 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
-const name = ref("");
-const email = ref("");
-const password = ref("");
-const confirmPassword = ref("");
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
 const loading = ref(false);
-const error = ref("");
+const error = ref('');
 
 async function handleSubmit() {
-  error.value = "";
+  error.value = '';
 
   if (password.value !== confirmPassword.value) {
-    error.value = t("auth.passwordMismatch");
+    error.value = t('auth.passwordMismatch');
     return;
   }
 
   if (password.value.length < 6) {
-    error.value = t("auth.passwordMinLength");
+    error.value = t('auth.passwordMinLength');
     return;
   }
 
   loading.value = true;
   try {
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name.value,
         email: email.value,
@@ -104,12 +104,12 @@ async function handleSubmit() {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      navigateTo("/auth/pending");
+      navigateTo('/auth/pending');
     } else {
-      error.value = data.error || t("auth.registerFailed");
+      error.value = data.error || t('auth.registerFailed');
     }
   } catch {
-    error.value = t("auth.networkError");
+    error.value = t('auth.networkError');
   } finally {
     loading.value = false;
   }

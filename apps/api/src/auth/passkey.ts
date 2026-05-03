@@ -9,14 +9,14 @@
  * - Passkey 管理（添加/删除）
  */
 
-import { eq } from "drizzle-orm";
-import { users, passkeys } from "@cf-blog/db/schema";
-import type { NewPasskey } from "@cf-blog/db/schema";
+import { eq } from 'drizzle-orm';
+import { users, passkeys } from '@cf-blog/db/schema';
+import type { NewPasskey } from '@cf-blog/db/schema';
 
 // WebAuthn 配置
-const RP_NAME = "Blog";
-const RP_ID = "blog.jonirrings.com"; // 生产环境修改为实际域名
-const ORIGIN = "https://blog.jonirrings.com";
+const RP_NAME = 'Blog';
+const RP_ID = 'blog.jonirrings.com'; // 生产环境修改为实际域名
+const ORIGIN = 'https://blog.jonirrings.com';
 
 /**
  * 生成注册挑战
@@ -36,15 +36,15 @@ export async function generateRegistrationOptions(userId: number, userName: stri
       displayName: userName,
     },
     pubKeyCredParams: [
-      { type: "public-key", alg: -7 }, // ES256
-      { type: "public-key", alg: -257 }, // RS256
+      { type: 'public-key', alg: -7 }, // ES256
+      { type: 'public-key', alg: -257 }, // RS256
     ],
     timeout: 60000,
-    attestation: "none",
+    attestation: 'none',
     excludeCredentials: [],
     authenticatorSelection: {
-      residentKey: "preferred",
-      userVerification: "preferred",
+      residentKey: 'preferred',
+      userVerification: 'preferred',
     },
   };
 }
@@ -55,7 +55,7 @@ export async function generateRegistrationOptions(userId: number, userName: stri
 export async function verifyRegistrationResponse(
   userId: number,
   response: any,
-  challenge: string,
+  challenge: string
 ): Promise<{ success: boolean; passkey?: NewPasskey; error?: string }> {
   try {
     // 注意：实际使用需要引入 @simplewebauthn/server 进行验证
@@ -64,25 +64,25 @@ export async function verifyRegistrationResponse(
     const { id, rawId, response: attestationResponse } = response;
 
     if (!id || !attestationResponse) {
-      return { success: false, error: "无效的响应数据" };
+      return { success: false, error: '无效的响应数据' };
     }
 
     // 创建 Passkey 记录
     const passkey: NewPasskey = {
       userId,
       credentialId: id,
-      publicKey: Buffer.from(JSON.stringify(response)).toString("base64"),
+      publicKey: Buffer.from(JSON.stringify(response)).toString('base64'),
       counter: 0,
-      deviceType: "singleDevice",
+      deviceType: 'singleDevice',
       backedUp: false,
-      transports: attestationResponse.transports?.join(",") || null,
+      transports: attestationResponse.transports?.join(',') || null,
       createdAt: new Date(),
     };
 
     return { success: true, passkey };
   } catch (error) {
-    console.error("[Passkey] 注册验证失败:", error);
-    return { success: false, error: "验证失败" };
+    console.error('[Passkey] 注册验证失败:', error);
+    return { success: false, error: '验证失败' };
   }
 }
 
@@ -90,14 +90,14 @@ export async function verifyRegistrationResponse(
  * 生成登录挑战
  */
 export async function generateAuthenticationOptions(
-  allowCredentials?: Array<{ id: string; type: string }>,
+  allowCredentials?: Array<{ id: string; type: string }>
 ): Promise<any> {
   return {
     challenge: crypto.randomUUID(),
     timeout: 60000,
     rpId: RP_ID,
     allowCredentials: allowCredentials || [],
-    userVerification: "preferred",
+    userVerification: 'preferred',
   };
 }
 
@@ -107,33 +107,33 @@ export async function generateAuthenticationOptions(
 export async function verifyAuthenticationResponse(
   response: any,
   challenge: string,
-  passkey: any,
+  passkey: any
 ): Promise<{ success: boolean; userId?: number; error?: string }> {
   try {
     const { id, response: authResponse, type } = response;
 
     if (!id || !authResponse) {
-      return { success: false, error: "无效的响应数据" };
+      return { success: false, error: '无效的响应数据' };
     }
 
     // 解析 authenticatorData
-    const authenticatorData = Buffer.from(authResponse.authenticatorData, "base64");
-    const clientDataJSON = Buffer.from(authResponse.clientDataJSON, "base64");
+    const authenticatorData = Buffer.from(authResponse.authenticatorData, 'base64');
+    const clientDataJSON = Buffer.from(authResponse.clientDataJSON, 'base64');
 
     // 验证 challenge
     const clientData = JSON.parse(new TextDecoder().decode(clientDataJSON));
     if (clientData.challenge !== challenge) {
-      return { success: false, error: "Challenge 不匹配" };
+      return { success: false, error: 'Challenge 不匹配' };
     }
 
     // 验证 origin
     if (clientData.origin !== ORIGIN) {
-      return { success: false, error: "Origin 不匹配" };
+      return { success: false, error: 'Origin 不匹配' };
     }
 
     // 验证 token binding
-    if (clientData.tokenBinding && clientData.tokenBinding.status !== "not-supported") {
-      return { success: false, error: "Token binding 不支持" };
+    if (clientData.tokenBinding && clientData.tokenBinding.status !== 'not-supported') {
+      return { success: false, error: 'Token binding 不支持' };
     }
 
     // 解析 authenticator data
@@ -143,66 +143,66 @@ export async function verifyAuthenticationResponse(
     const counter = counterBuffer.readUInt32BE(0);
 
     // 验证 RP ID hash
-    const expectedRpIdHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(RP_ID));
+    const expectedRpIdHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(RP_ID));
     const rpIdHashBuffer = Buffer.from(expectedRpIdHash);
     if (!rpIdHash.equals(rpIdHashBuffer)) {
-      return { success: false, error: "RP ID 验证失败" };
+      return { success: false, error: 'RP ID 验证失败' };
     }
 
     // 验证 flags (UV 和 BE 位)
     const hasUserVerification = (flags & 0x04) !== 0;
     const hasBackedUp = (flags & 0x08) !== 0;
     if (!hasUserVerification) {
-      console.warn("[Passkey] 缺少用户验证");
+      console.warn('[Passkey] 缺少用户验证');
     }
 
     // 验证 counter（防止重放攻击）
     if (counter <= passkey.counter) {
-      return { success: false, error: "Counter 异常，可能存在重放攻击" };
+      return { success: false, error: 'Counter 异常，可能存在重放攻击' };
     }
 
     // 验证签名
-    const signature = Buffer.from(authResponse.signature, "base64");
+    const signature = Buffer.from(authResponse.signature, 'base64');
     const signedData = Buffer.concat([authenticatorData, clientDataJSON]);
 
     // 解析公钥
     const publicKeyPem = passkey.publicKey;
-    const publicKeyDer = Buffer.from(publicKeyPem, "base64");
+    const publicKeyDer = Buffer.from(publicKeyPem, 'base64');
 
     try {
       const cryptoKey = await crypto.subtle.importKey(
-        "spki",
+        'spki',
         publicKeyDer,
         {
-          name: "ECDSA",
-          namedCurve: "P-256",
+          name: 'ECDSA',
+          namedCurve: 'P-256',
         },
         true,
-        ["verify"],
+        ['verify']
       );
 
       const isValid = await crypto.subtle.verify(
         {
-          name: "ECDSA",
-          hash: "SHA-256",
+          name: 'ECDSA',
+          hash: 'SHA-256',
         },
         cryptoKey,
         signature,
-        signedData,
+        signedData
       );
 
       if (!isValid) {
-        return { success: false, error: "签名验证失败" };
+        return { success: false, error: '签名验证失败' };
       }
     } catch (verifyError) {
-      console.error("[Passkey] 签名验证失败:", verifyError);
-      return { success: false, error: "签名验证失败" };
+      console.error('[Passkey] 签名验证失败:', verifyError);
+      return { success: false, error: '签名验证失败' };
     }
 
     return { success: true, userId: passkey.userId };
   } catch (error) {
-    console.error("[Passkey] 登录验证失败:", error);
-    return { success: false, error: "验证失败" };
+    console.error('[Passkey] 登录验证失败:', error);
+    return { success: false, error: '验证失败' };
   }
 }
 
@@ -223,7 +223,7 @@ export async function savePasskey(db: any, passkey: NewPasskey): Promise<boolean
     await db.insert(passkeys).values(passkey);
     return true;
   } catch (error) {
-    console.error("[Passkey] 保存失败:", error);
+    console.error('[Passkey] 保存失败:', error);
     return false;
   }
 }
@@ -236,7 +236,7 @@ export async function deletePasskey(db: any, credentialId: string): Promise<bool
     await db.delete(passkeys).where(eq(passkeys.credentialId, credentialId));
     return true;
   } catch (error) {
-    console.error("[Passkey] 删除失败:", error);
+    console.error('[Passkey] 删除失败:', error);
     return false;
   }
 }
@@ -267,7 +267,7 @@ export async function getPasskeyByCredentialId(db: any, credentialId: string): P
 export async function createChallenge(kv: KVNamespace, userId?: string): Promise<string> {
   const challenge = crypto.randomUUID();
   const key = `challenge:${challenge}`;
-  const value = userId || "anonymous";
+  const value = userId || 'anonymous';
 
   // 存储 5 分钟
   await kv.put(key, value, { expirationTtl: 300 });
@@ -280,7 +280,7 @@ export async function createChallenge(kv: KVNamespace, userId?: string): Promise
  */
 export async function verifyChallenge(
   kv: KVNamespace,
-  challenge: string,
+  challenge: string
 ): Promise<{ valid: boolean; userId?: string }> {
   const key = `challenge:${challenge}`;
   const value = await kv.get(key);
@@ -292,5 +292,5 @@ export async function verifyChallenge(
   // 验证后删除挑战
   await kv.delete(key);
 
-  return { valid: true, userId: value === "anonymous" ? undefined : value };
+  return { valid: true, userId: value === 'anonymous' ? undefined : value };
 }

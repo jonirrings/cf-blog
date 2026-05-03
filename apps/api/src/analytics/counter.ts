@@ -7,7 +7,7 @@
  * - 时间窗口去重（1 小时内同一用户只计 1 次）
  */
 
-import type { KVNamespace } from "@cloudflare/workers-types";
+import type { KVNamespace } from '@cloudflare/workers-types';
 
 export interface VisitRecord {
   postId: string;
@@ -59,7 +59,7 @@ export async function recordVisit(
   postId: string,
   ip: string,
   userAgent: string,
-  userId?: string,
+  userId?: string
 ): Promise<{ recorded: boolean; count: number }> {
   const fingerprint = generateFingerprint(ip, userAgent);
   const now = Date.now();
@@ -131,7 +131,7 @@ export async function getVisitCount(kv: KVNamespace, postId: string): Promise<nu
  */
 export async function getVisitCounts(
   kv: KVNamespace,
-  postIds: string[],
+  postIds: string[]
 ): Promise<Map<string, number>> {
   const results = new Map<string, number>();
   const keys = postIds.map((id) => getVisitCountKey(id));

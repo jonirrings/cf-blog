@@ -8,18 +8,18 @@
  * - 在线人数统计同步
  */
 
-import type { RoomDO } from "../websocket/RoomDO";
-import type { HomeDO } from "../websocket/HomeDO";
-import type { PresenceDO } from "../websocket/PresenceDO";
+import type { RoomDO } from '../websocket/RoomDO';
+import type { HomeDO } from '../websocket/HomeDO';
+import type { PresenceDO } from '../websocket/PresenceDO';
 
 // 广播事件类型
 export type BroadcastEventType =
-  | "comment_added"
-  | "comment_approved"
-  | "comment_rejected"
-  | "post_updated"
-  | "post_published"
-  | "post_deleted";
+  | 'comment_added'
+  | 'comment_approved'
+  | 'comment_rejected'
+  | 'post_updated'
+  | 'post_published'
+  | 'post_deleted';
 
 // 广播事件数据
 export interface BroadcastEvent {
@@ -34,7 +34,7 @@ export interface BroadcastEvent {
 export async function broadcastToRoom(
   env: { ROOM_DO: DurableObjectNamespace },
   postId: string,
-  event: BroadcastEvent,
+  event: BroadcastEvent
 ): Promise<void> {
   try {
     const id = env.ROOM_DO.idFromName(postId);
@@ -43,13 +43,13 @@ export async function broadcastToRoom(
     };
 
     await stub.fetch(
-      new Request("http://internal/room/broadcast", {
-        method: "POST",
+      new Request('http://internal/room/broadcast', {
+        method: 'POST',
         body: JSON.stringify(event),
-      }),
+      })
     );
   } catch (error) {
-    console.error("[Broadcast] 房间广播失败:", error);
+    console.error('[Broadcast] 房间广播失败:', error);
   }
 }
 
@@ -58,22 +58,22 @@ export async function broadcastToRoom(
  */
 export async function broadcastToHome(
   env: { HOME_DO: DurableObjectNamespace },
-  event: BroadcastEvent,
+  event: BroadcastEvent
 ): Promise<void> {
   try {
-    const id = env.HOME_DO.idFromName("home");
+    const id = env.HOME_DO.idFromName('home');
     const stub = env.HOME_DO.get(id) as unknown as {
       fetch: (request: Request) => Promise<Response>;
     };
 
     await stub.fetch(
-      new Request("http://internal/home/broadcast", {
-        method: "POST",
+      new Request('http://internal/home/broadcast', {
+        method: 'POST',
         body: JSON.stringify(event),
-      }),
+      })
     );
   } catch (error) {
-    console.error("[Broadcast] 首页广播失败:", error);
+    console.error('[Broadcast] 首页广播失败:', error);
   }
 }
 
@@ -89,10 +89,10 @@ export async function broadcastNewComment(
     userName: string;
     content: string;
     createdAt: string;
-  },
+  }
 ): Promise<void> {
   await broadcastToRoom(env, postId, {
-    type: "comment_added",
+    type: 'comment_added',
     payload: comment,
     timestamp: new Date().toISOString(),
   });
@@ -105,10 +105,10 @@ export async function broadcastCommentApproval(
   env: { ROOM_DO: DurableObjectNamespace },
   postId: string,
   commentId: number,
-  approved: boolean,
+  approved: boolean
 ): Promise<void> {
   await broadcastToRoom(env, postId, {
-    type: approved ? "comment_approved" : "comment_rejected",
+    type: approved ? 'comment_approved' : 'comment_rejected',
     payload: { commentId, approved },
     timestamp: new Date().toISOString(),
   });
@@ -125,18 +125,18 @@ export async function broadcastNewPost(
     slug: string;
     authorId: number;
     authorName: string;
-  },
+  }
 ): Promise<void> {
   // 广播到首页
   await broadcastToHome(env, {
-    type: "post_published",
+    type: 'post_published',
     payload: post,
     timestamp: new Date().toISOString(),
   });
 
   // 可选：广播到文章自己的房间（用于通知作者）
   await broadcastToRoom(env, post.id.toString(), {
-    type: "post_published",
+    type: 'post_published',
     payload: post,
     timestamp: new Date().toISOString(),
   });
@@ -153,10 +153,10 @@ export async function broadcastPostUpdate(
     title: string;
     content: string;
     updatedAt: string;
-  },
+  }
 ): Promise<void> {
   await broadcastToRoom(env, postId, {
-    type: "post_updated",
+    type: 'post_updated',
     payload: post,
     timestamp: new Date().toISOString(),
   });
@@ -168,18 +168,18 @@ export async function broadcastPostUpdate(
 export async function broadcastPostDelete(
   env: { HOME_DO: DurableObjectNamespace; ROOM_DO: DurableObjectNamespace },
   postId: string,
-  postId_num: number,
+  postId_num: number
 ): Promise<void> {
   // 广播到首页
   await broadcastToHome(env, {
-    type: "post_deleted",
+    type: 'post_deleted',
     payload: { postId: postId_num },
     timestamp: new Date().toISOString(),
   });
 
   // 广播到房间（通知读者文章已删除）
   await broadcastToRoom(env, postId, {
-    type: "post_deleted",
+    type: 'post_deleted',
     payload: { postId: postId_num },
     timestamp: new Date().toISOString(),
   });

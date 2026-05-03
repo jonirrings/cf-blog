@@ -1,7 +1,7 @@
-import { createResource, Show } from "solid-js";
-import { A, useParams } from "@solidjs/router";
-import { useTranslation } from "~/lib/i18n";
-import { PublicNav } from "~/components/PublicNav";
+import { createResource, Show } from 'solid-js';
+import { A, useParams } from '@solidjs/router';
+import { useTranslation } from '~/lib/i18n';
+import { PublicNav } from '~/components/PublicNav';
 
 interface Post {
   id: string;
@@ -14,7 +14,7 @@ interface Post {
 }
 
 async function fetchPost(slug: string): Promise<Post | null> {
-  const api_url = import.meta.env.PUBLIC_API_URL || "http://localhost:8788";
+  const api_url = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
   const res = await fetch(`${api_url}/api/posts/${slug}`);
   if (!res.ok) return null;
   const { data } = await res.json();
@@ -27,7 +27,7 @@ export default function PostPage() {
   const [post] = createResource(() => params.slug, fetchPost);
 
   function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString(locale() === "zh-CN" ? "zh-CN" : "en");
+    return new Date(dateString).toLocaleDateString(locale() === 'zh-CN' ? 'zh-CN' : 'en');
   }
 
   return (
@@ -35,18 +35,18 @@ export default function PostPage() {
       <PublicNav />
 
       <main class="max-w-4xl mx-auto px-4 py-8">
-        <Show when={post()} fallback={<p class="text-gray-500">{t("site.postNotExist")}</p>}>
+        <Show when={post()} fallback={<p class="text-gray-500">{t('site.postNotExist')}</p>}>
           {(post) => (
             <article>
               <header class="mb-8">
                 <h1 class="text-4xl font-bold mb-2 text-gray-900">{post().title}</h1>
                 <div class="text-sm text-gray-500 space-x-4">
                   <span>
-                    {t("site.publishedAt")} {formatDate(post().created_at)}
+                    {t('site.publishedAt')} {formatDate(post().created_at)}
                   </span>
                   {post().updated_at !== post().created_at && (
                     <span>
-                      {t("site.updatedAt")} {formatDate(post().updated_at)}
+                      {t('site.updatedAt')} {formatDate(post().updated_at)}
                     </span>
                   )}
                 </div>

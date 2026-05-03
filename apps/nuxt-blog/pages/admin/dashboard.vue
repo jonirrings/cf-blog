@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t } = useI18n();
 
@@ -87,41 +87,41 @@ const statCards = computed(() => {
   if (!s) return [];
   return [
     {
-      title: t("stats.totalPosts"),
+      title: t('stats.totalPosts'),
       value: s.totalPosts,
-      sub: `${s.publishedPosts} ${t("post.status.published")} · ${s.draftPosts} ${t("post.status.draft")}`,
-      color: "blue",
+      sub: `${s.publishedPosts} ${t('post.status.published')} · ${s.draftPosts} ${t('post.status.draft')}`,
+      color: 'blue',
     },
     {
-      title: t("stats.totalComments"),
+      title: t('stats.totalComments'),
       value: s.totalComments,
-      sub: `${s.pendingComments} ${t("comment.pending")}`,
-      color: "green",
+      sub: `${s.pendingComments} ${t('comment.pending')}`,
+      color: 'green',
     },
     {
-      title: t("stats.totalUsers"),
+      title: t('stats.totalUsers'),
       value: s.totalUsers,
-      sub: `${s.pendingUsers} ${t("user.pending")}`,
-      color: "purple",
+      sub: `${s.pendingUsers} ${t('user.pending')}`,
+      color: 'purple',
     },
     {
-      title: t("stats.totalViews"),
+      title: t('stats.totalViews'),
       value: s.totalViews,
-      sub: t("stats.totalViews.sub"),
-      color: "orange",
+      sub: t('stats.totalViews.sub'),
+      color: 'orange',
     },
   ];
 });
 
 onMounted(async () => {
   try {
-    const res = await fetch("/api/stats");
+    const res = await fetch('/api/stats');
     const data = await res.json();
     if (data.success && data.data) {
       stats.value = data.data;
     }
   } catch (err) {
-    console.error("Failed to fetch stats:", err);
+    console.error('Failed to fetch stats:', err);
   } finally {
     loading.value = false;
   }

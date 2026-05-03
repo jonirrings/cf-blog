@@ -7,7 +7,7 @@
  * - 定时同步任务
  */
 
-import type { KVNamespace } from "@cloudflare/workers-types";
+import type { KVNamespace } from '@cloudflare/workers-types';
 
 export interface CloudflareAnalyticsResponse {
   success: boolean;
@@ -40,7 +40,7 @@ export async function fetchCloudflareAnalytics(
   accountId: string,
   zoneId: string,
   since: string,
-  until: string,
+  until: string
 ): Promise<CloudflareAnalyticsResponse | null> {
   const url = `https://api.cloudflare.com/client/v4/graphql`;
 
@@ -70,23 +70,23 @@ export async function fetchCloudflareAnalytics(
 
   try {
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${apiToken}`,
       },
       body: JSON.stringify({ query }),
     });
 
     if (!response.ok) {
-      console.error("Failed to fetch Cloudflare Analytics:", response.status);
+      console.error('Failed to fetch Cloudflare Analytics:', response.status);
       return null;
     }
 
     const data = (await response.json()) as CloudflareAnalyticsResponse;
     return data;
   } catch (error) {
-    console.error("Error fetching Cloudflare Analytics:", error);
+    console.error('Error fetching Cloudflare Analytics:', error);
     return null;
   }
 }
@@ -99,7 +99,7 @@ export async function syncAnalytics(
   apiToken: string,
   accountId: string,
   zoneId: string,
-  postId: string,
+  postId: string
 ): Promise<SyncResult> {
   const now = new Date();
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 天前
@@ -144,7 +144,7 @@ export async function syncAnalytics(
         postId,
         count: cloudflareCount,
         lastUpdated: Date.now(),
-      }),
+      })
     );
   }
 
@@ -164,7 +164,7 @@ export async function batchSyncAnalytics(
   apiToken: string,
   accountId: string,
   zoneId: string,
-  postIds: string[],
+  postIds: string[]
 ): Promise<Map<string, SyncResult>> {
   const results = new Map<string, SyncResult>();
 

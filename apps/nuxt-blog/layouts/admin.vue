@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Locale } from "@cf-blog/i18n";
+import type { Locale } from '@cf-blog/i18n';
 
 const { t, locale, setLocale, supportedLocales } = useI18n();
 const route = useRoute();
@@ -91,15 +91,15 @@ const userInfo = ref<UserInfo | null>(null);
 const authorized = ref(false);
 
 const navItems = computed(() => [
-  { to: "/admin/dashboard", icon: "📊", label: t("admin.dashboard") },
-  { to: "/admin/posts", icon: "📝", label: t("admin.posts") },
-  { to: "/admin/comments", icon: "💬", label: t("admin.comments") },
-  { to: "/admin/users", icon: "👥", label: t("admin.users") },
-  { to: "/admin/settings", icon: "⚙️", label: t("admin.settings") },
+  { to: '/admin/dashboard', icon: '📊', label: t('admin.dashboard') },
+  { to: '/admin/posts', icon: '📝', label: t('admin.posts') },
+  { to: '/admin/comments', icon: '💬', label: t('admin.comments') },
+  { to: '/admin/users', icon: '👥', label: t('admin.users') },
+  { to: '/admin/settings', icon: '⚙️', label: t('admin.settings') },
 ]);
 
 function isActive(path: string): boolean {
-  return route.path === path || route.path.startsWith(path + "/");
+  return route.path === path || route.path.startsWith(path + '/');
 }
 
 async function handleLocaleChange(newLocale: Locale) {
@@ -108,33 +108,33 @@ async function handleLocaleChange(newLocale: Locale) {
 
 async function handleLogout() {
   try {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch('/api/auth/logout', { method: 'POST' });
   } catch {
     // Ignore logout API errors
   }
-  navigateTo("/auth/login");
+  navigateTo('/auth/login');
 }
 
 onMounted(async () => {
   try {
-    const res = await fetch("/api/auth/session");
+    const res = await fetch('/api/auth/session');
     const data = await res.json();
     if (!res.ok || !data.success || !data.user) {
-      navigateTo("/auth/login");
+      navigateTo('/auth/login');
       return;
     }
-    if (data.user.role !== "admin") {
-      navigateTo("/");
+    if (data.user.role !== 'admin') {
+      navigateTo('/');
       return;
     }
     userInfo.value = {
-      name: data.user.name || "",
-      email: data.user.email || "",
+      name: data.user.name || '',
+      email: data.user.email || '',
       role: data.user.role,
     };
     authorized.value = true;
   } catch {
-    navigateTo("/auth/login");
+    navigateTo('/auth/login');
   }
 });
 </script>

@@ -1,55 +1,57 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
+import { goto } from '$app/navigation';
+import { onMount } from 'svelte';
 
-  interface Post {
-    id: number;
-    title: string;
-    slug: string;
-    framework: string;
-    status: 'draft' | 'published';
-    viewCount: number;
-    createdAt: string;
-  }
+interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  framework: string;
+  status: 'draft' | 'published';
+  viewCount: number;
+  createdAt: string;
+}
 
-  let posts: Post[] = [];
-  let filter = 'all';
-  let loading = $state(true);
+let posts: Post[] = [];
+let filter = 'all';
+let loading = $state(true);
 
-  $derived(filteredPosts = posts.filter(post => {
+$derived(
+  (filteredPosts = posts.filter((post) => {
     if (filter === 'all') return true;
     if (filter === 'published') return post.status === 'published';
     if (filter === 'draft') return post.status === 'draft';
     return true;
-  }));
+  }))
+);
 
-  $derived(publishedCount = posts.filter(p => p.status === 'published').length);
-  $derived(draftCount = posts.filter(p => p.status === 'draft').length);
+$derived((publishedCount = posts.filter((p) => p.status === 'published').length));
+$derived((draftCount = posts.filter((p) => p.status === 'draft').length));
 
-  async function handleDelete(id: number) {
-    if (!confirm(t('post.deleteConfirm'))) return;
-    try {
-      const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        posts = posts.filter(p => p.id !== id);
-      }
-    } catch (err) {
-      console.error('Delete failed:', err);
+async function handleDelete(id: number) {
+  if (!confirm(t('post.deleteConfirm'))) return;
+  try {
+    const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      posts = posts.filter((p) => p.id !== id);
     }
+  } catch (err) {
+    console.error('Delete failed:', err);
   }
+}
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/posts');
-      const data = await res.json();
-      posts = data.data?.list || [];
-    } catch (err) {
-      console.error('Failed to fetch posts:', err);
-    } finally {
-      loading = false;
-    }
-  });
+onMount(async () => {
+  try {
+    const res = await fetch('/api/posts');
+    const data = await res.json();
+    posts = data.data?.list || [];
+  } catch (err) {
+    console.error('Failed to fetch posts:', err);
+  } finally {
+    loading = false;
+  }
+});
 </script>
 
 <div>

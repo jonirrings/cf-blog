@@ -137,8 +137,18 @@ interface FilterOption {
 
 const filters = ref<FilterOption[]>([
   { value: 'all', label: t('filter.all'), count: 0, activeClass: 'bg-blue-100 text-blue-600' },
-  { value: 'pending', label: t('user.pending'), count: 0, activeClass: 'bg-yellow-100 text-yellow-600' },
-  { value: 'approved', label: t('user.approved'), count: 0, activeClass: 'bg-green-100 text-green-600' },
+  {
+    value: 'pending',
+    label: t('user.pending'),
+    count: 0,
+    activeClass: 'bg-yellow-100 text-yellow-600',
+  },
+  {
+    value: 'approved',
+    label: t('user.approved'),
+    count: 0,
+    activeClass: 'bg-green-100 text-green-600',
+  },
 ]);
 
 const currentFilter = ref<'all' | 'pending' | 'approved'>('all');
@@ -147,22 +157,22 @@ const loading = ref(true);
 
 const filteredUsers = computed(() => {
   if (currentFilter.value === 'all') return users.value;
-  if (currentFilter.value === 'pending') return users.value.filter(u => !u.isApproved);
-  if (currentFilter.value === 'approved') return users.value.filter(u => u.isApproved);
+  if (currentFilter.value === 'pending') return users.value.filter((u) => !u.isApproved);
+  if (currentFilter.value === 'approved') return users.value.filter((u) => u.isApproved);
   return users.value;
 });
 
 const updateFilterCounts = () => {
   filters.value[0].count = users.value.length;
-  filters.value[1].count = users.value.filter(u => !u.isApproved).length;
-  filters.value[2].count = users.value.filter(u => u.isApproved).length;
+  filters.value[1].count = users.value.filter((u) => !u.isApproved).length;
+  filters.value[2].count = users.value.filter((u) => u.isApproved).length;
 };
 
 const handleApproveUser = async (id: number) => {
   try {
     const res = await $fetch(`/api/users/${id}/approve`, { method: 'POST' });
     if (res.success) {
-      users.value = users.value.map(u => u.id === id ? { ...u, isApproved: true } : u);
+      users.value = users.value.map((u) => (u.id === id ? { ...u, isApproved: true } : u));
       updateFilterCounts();
     }
   } catch (err) {
@@ -178,7 +188,7 @@ const handleRoleChange = async (id: number, newRole: 'admin' | 'publisher' | 'co
       body: { role: newRole },
     });
     if (res.success) {
-      users.value = users.value.map(u => u.id === id ? { ...u, role: newRole } : u);
+      users.value = users.value.map((u) => (u.id === id ? { ...u, role: newRole } : u));
     }
   } catch (err) {
     console.error('Role change failed:', err);
@@ -193,9 +203,13 @@ const handlePublisherApplication = async (id: number, approve: boolean) => {
       body: { approve },
     });
     if (res.success) {
-      users.value = users.value.map(u =>
+      users.value = users.value.map((u) =>
         u.id === id
-          ? { ...u, publisherApplicationStatus: approve ? 'approved' : 'rejected', role: approve ? 'publisher' : u.role }
+          ? {
+              ...u,
+              publisherApplicationStatus: approve ? 'approved' : 'rejected',
+              role: approve ? 'publisher' : u.role,
+            }
           : u
       );
       updateFilterCounts();

@@ -1,64 +1,64 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { goto } from '$app/navigation';
-  import RichTextEditor from '$lib/components/RichTextEditor.svelte';
+import { t } from '$lib/i18n';
+import { goto } from '$app/navigation';
+import RichTextEditor from '$lib/components/RichTextEditor.svelte';
 
-  interface JSONContent {
-    type?: string;
+interface JSONContent {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: JSONContent[];
+  text?: string;
+  marks?: Array<{
+    type: string;
     attrs?: Record<string, any>;
-    content?: JSONContent[];
-    text?: string;
-    marks?: Array<{
-      type: string;
-      attrs?: Record<string, any>;
-    }>;
-  }
+  }>;
+}
 
-  let formData = {
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    framework: 'svelte' as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid',
-    status: 'draft' as 'draft' | 'published',
-  };
+let formData = {
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  framework: 'svelte' as 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid',
+  status: 'draft' as 'draft' | 'published',
+};
 
-  let saving = false;
+let saving = false;
 
-  function handleTitleChange(e: Event) {
-    const title = (e.target as HTMLInputElement).value;
-    formData.title = title;
-    formData.slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
-      .replace(/[\s-]+/g, '-')
-      .trim();
-  }
+function handleTitleChange(e: Event) {
+  const title = (e.target as HTMLInputElement).value;
+  formData.title = title;
+  formData.slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
+    .replace(/[\s-]+/g, '-')
+    .trim();
+}
 
-  function handleContentChange(e: CustomEvent<JSONContent>) {
-    formData.content = JSON.stringify(e.detail);
-  }
+function handleContentChange(content: JSONContent) {
+  formData.content = JSON.stringify(content);
+}
 
-  async function handleSubmit() {
-    saving = true;
-    try {
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        goto('/admin/posts');
-      } else {
-        const error = await res.json();
-        alert(`${t('post.createFailed')}: ${error.message || t('form.error')}`);
-      }
-    } catch (error) {
-      alert(t('post.createFailed'));
-    } finally {
-      saving = false;
+async function handleSubmit() {
+  saving = true;
+  try {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    if (res.ok) {
+      goto('/admin/posts');
+    } else {
+      const error = await res.json();
+      alert(`${t('post.createFailed')}: ${error.message || t('form.error')}`);
     }
+  } catch (error) {
+    alert(t('post.createFailed'));
+  } finally {
+    saving = false;
   }
+}
 </script>
 
 <div>
@@ -145,7 +145,7 @@
         </label>
         <RichTextEditor
           placeholder={t('post.contentPlaceholder')}
-          on:contentChange={handleContentChange}
+          onContentChange={handleContentChange}
         />
         <p class="text-xs text-gray-500 mt-1">{t('post.editorTip')}</p>
       </div>

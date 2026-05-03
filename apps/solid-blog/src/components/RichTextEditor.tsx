@@ -1,10 +1,10 @@
-import { Component, createSignal, onMount, onCleanup, createEffect } from "solid-js";
-import { useEditor, EditorContent } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
-import { useTranslation } from "~/lib/i18n";
+import { Component, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
+import { useEditor, EditorContent } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
+import Link from '@tiptap/extension-link';
+import { useTranslation } from '~/lib/i18n';
 
 export interface JSONContent {
   type?: string;
@@ -31,7 +31,7 @@ const RichTextEditor: Component<RichTextEditorProps> = (props) => {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: props.placeholder || t("post.contentPlaceholder"),
+        placeholder: props.placeholder || t('post.contentPlaceholder'),
       }),
       Image.configure({
         allowBase64: true,
@@ -39,8 +39,8 @@ const RichTextEditor: Component<RichTextEditorProps> = (props) => {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          rel: "noopener noreferrer",
-          target: "_blank",
+          rel: 'noopener noreferrer',
+          target: '_blank',
         },
       }),
     ],
@@ -48,7 +48,7 @@ const RichTextEditor: Component<RichTextEditorProps> = (props) => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg",
+          'prose prose-lg focus:outline-none max-w-none min-h-[400px] p-4 border border-gray-200 rounded-lg',
       },
     },
     onUpdate: ({ editor }) => {

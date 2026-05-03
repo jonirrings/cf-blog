@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { t, locale, initLocale, setLocaleWithCookie, supportedLocales } from '$lib/i18n';
-  import type { Locale } from '@cf-blog/i18n';
+import { onMount } from 'svelte';
+import { t, locale, initLocale, setLocaleWithCookie, supportedLocales } from '$lib/i18n';
+import type { Locale } from '@cf-blog/i18n';
 
-  let currentLocale = $state<string>('zh-CN');
+let currentLocale = $state<string>('zh-CN');
 
-  onMount(() => {
-    initLocale();
-    locale.subscribe((val) => {
-      currentLocale = val;
-    });
+onMount(() => {
+  initLocale();
+  locale.subscribe((val) => {
+    currentLocale = val;
   });
+});
 
-  function handleLocaleChange(e: Event) {
-    const select = e.target as HTMLSelectElement;
-    setLocaleWithCookie(select.value as Locale);
-  }
+function handleLocaleChange(e: Event) {
+  const select = e.target as HTMLSelectElement;
+  setLocaleWithCookie(select.value as Locale);
+}
 </script>
 
 <main class="min-h-screen p-8">

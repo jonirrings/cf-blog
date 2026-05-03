@@ -50,14 +50,14 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
-const sessionEmail = ref("");
+const sessionEmail = ref('');
 
 onMounted(async () => {
   try {
-    const res = await fetch("/api/auth/session");
+    const res = await fetch('/api/auth/session');
     const data = await res.json();
     if (res.ok && data.success && data.user) {
-      sessionEmail.value = data.user.email || "";
+      sessionEmail.value = data.user.email || '';
     }
   } catch {
     // Session fetch failed, show page without email

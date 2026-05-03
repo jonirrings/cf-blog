@@ -7,7 +7,7 @@
  * - 数据格式转换
  */
 
-import type { Env } from "../index";
+import type { Env } from '../index';
 
 export interface GhostExportData {
   meta: {
@@ -30,8 +30,8 @@ export interface GhostPost {
   comment_id: string;
   feature_image?: string;
   featured: boolean;
-  status: "published" | "draft";
-  visibility: "public" | "members" | "paid";
+  status: 'published' | 'draft';
+  visibility: 'public' | 'members' | 'paid';
   created_at: string;
   updated_at: string;
   published_at?: string;
@@ -51,7 +51,7 @@ export interface GhostTag {
   parent?: GhostTag | null;
   meta_title?: string;
   meta_description?: string;
-  visibility: "public" | "internal";
+  visibility: 'public' | 'internal';
   og_image?: string;
   og_title?: string;
   og_description?: string;
@@ -88,7 +88,7 @@ export interface GhostUser {
  */
 export async function importFromGhost(
   env: Env,
-  ghostData: GhostExportData,
+  ghostData: GhostExportData
 ): Promise<{
   success: boolean;
   importedPosts: number;
@@ -124,7 +124,7 @@ export async function importFromGhost(
     for (const post of ghostData.data.posts) {
       try {
         const excerpt =
-          post.custom_excerpt || post.excerpt || post.html.slice(0, 200).replace(/<[^>]+>/g, "");
+          post.custom_excerpt || post.excerpt || post.html.slice(0, 200).replace(/<[^>]+>/g, '');
 
         await db
           .insert(db.schema.posts)
@@ -133,8 +133,8 @@ export async function importFromGhost(
             slug: post.slug,
             content: post.html,
             excerpt,
-            status: post.status === "published" ? "published" : "draft",
-            framework: "next",
+            status: post.status === 'published' ? 'published' : 'draft',
+            framework: 'next',
             coverImage: post.feature_image,
             publishedAt: post.published_at,
             createdAt: post.created_at,
@@ -183,7 +183,7 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
     feature_image: post.coverImage || undefined,
     featured: false,
     status: post.status,
-    visibility: "public" as const,
+    visibility: 'public' as const,
     created_at: post.createdAt,
     updated_at: post.updatedAt,
     published_at: post.publishedAt || undefined,
@@ -193,7 +193,7 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
       id: tag.id.toString(),
       name: tag.name,
       slug: tag.slug,
-      visibility: "public" as const,
+      visibility: 'public' as const,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })),
@@ -203,7 +203,7 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
     id: tag.id.toString(),
     name: tag.name,
     slug: tag.slug,
-    visibility: "public" as const,
+    visibility: 'public' as const,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }));
@@ -211,7 +211,7 @@ export async function exportToGhost(env: Env): Promise<GhostExportData> {
   return {
     meta: {
       exported_on: Date.now(),
-      version: "5.0",
+      version: '5.0',
     },
     data: {
       posts: ghostPosts,

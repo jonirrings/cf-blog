@@ -93,9 +93,7 @@ export function PasskeyButton({ onAuthComplete, mode, apiBaseUrl }: PasskeyButto
 
   return (
     <>
-      {error && (
-        <div className="bg-red-50 text-red-600 p-2 rounded text-xs mb-3">{error}</div>
-      )}
+      {error && <div className="bg-red-50 text-red-600 p-2 rounded text-xs mb-3">{error}</div>}
       <button
         type="button"
         onClick={handleClick}
@@ -103,9 +101,18 @@ export function PasskeyButton({ onAuthComplete, mode, apiBaseUrl }: PasskeyButto
         className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+          />
         </svg>
-        {loading ? i18n.t('auth.passkeyProcessing') : mode === 'register' ? i18n.t('auth.passkeyRegister') : i18n.t('auth.passkey')}
+        {loading
+          ? i18n.t('auth.passkeyProcessing')
+          : mode === 'register'
+            ? i18n.t('auth.passkeyRegister')
+            : i18n.t('auth.passkey')}
       </button>
     </>
   );

@@ -4,17 +4,17 @@
  * 使用 @cf-blog/i18n 集成
  */
 
-import { writable } from "svelte/store";
-import i18n, { supportedLocales, type Locale } from "@cf-blog/i18n";
+import { writable } from 'svelte/store';
+import i18n, { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 // 当前语言 store
-export const locale = writable<Locale>("zh-CN");
+export const locale = writable<Locale>('zh-CN');
 export const ready = writable(false);
 
 // 初始化语言
 export function initLocale() {
   const savedLocale = document.cookie.match(/locale=([^;]+)/)?.[1] as Locale | null;
-  if (savedLocale && ["zh-CN", "en"].includes(savedLocale)) {
+  if (savedLocale && ['zh-CN', 'en'].includes(savedLocale)) {
     i18n.changeLanguage(savedLocale);
     locale.set(savedLocale);
   }

@@ -79,34 +79,34 @@
 
 <script setup lang="ts">
 const { t } = useI18n();
-const email = ref("");
-const password = ref("");
+const email = ref('');
+const password = ref('');
 const loading = ref(false);
-const error = ref("");
+const error = ref('');
 const githubLoading = ref(false);
 const passkeyLoading = ref(false);
 
 async function handleSubmit() {
   loading.value = true;
-  error.value = "";
+  error.value = '';
   try {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, password: password.value }),
     });
     const data = await res.json();
     if (res.ok && data.success) {
       if (data.user.isApproved) {
-        navigateTo("/admin/dashboard");
+        navigateTo('/admin/dashboard');
       } else {
-        navigateTo("/auth/pending");
+        navigateTo('/auth/pending');
       }
     } else {
-      error.value = data.error || t("auth.loginFailed");
+      error.value = data.error || t('auth.loginFailed');
     }
   } catch {
-    error.value = t("auth.networkError");
+    error.value = t('auth.networkError');
   } finally {
     loading.value = false;
   }
@@ -115,17 +115,17 @@ async function handleSubmit() {
 async function handleGitHub() {
   githubLoading.value = true;
   try {
-    const res = await fetch("/api/auth/github");
+    const res = await fetch('/api/auth/github');
     const { authUrl } = await res.json();
     if (authUrl) window.location.href = authUrl;
   } catch {
-    error.value = t("auth.networkError");
+    error.value = t('auth.networkError');
   } finally {
     githubLoading.value = false;
   }
 }
 
 function handlePasskey() {
-  alert(t("auth.passkeyUnsupported"));
+  alert(t('auth.passkeyUnsupported'));
 }
 </script>

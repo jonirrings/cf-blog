@@ -1,6 +1,6 @@
-import Link from "next/link";
-import i18n from "@cf-blog/i18n";
-import { PublicNav } from "@/components/PublicNav";
+import Link from 'next/link';
+import i18n from '@cf-blog/i18n';
+import { PublicNav } from '@/components/PublicNav';
 
 interface Post {
   id: string;
@@ -12,8 +12,8 @@ interface Post {
 
 async function getPosts(): Promise<Post[]> {
   try {
-    const res = await fetch(`${process.env.API_URL || "http://localhost:8788"}/api/posts`, {
-      cache: "no-store",
+    const res = await fetch(`${process.env.API_URL || 'http://localhost:8788'}/api/posts`, {
+      cache: 'no-store',
     });
     if (!res.ok) {
       return [];
@@ -34,9 +34,9 @@ export default async function HomePage() {
         <PublicNav />
 
         <section>
-          <h2 className="text-2xl font-semibold mb-4">{i18n.t("site.latestPosts")}</h2>
+          <h2 className="text-2xl font-semibold mb-4">{i18n.t('site.latestPosts')}</h2>
           {posts.length === 0 ? (
-            <p className="text-gray-500">{i18n.t("site.noPosts")}</p>
+            <p className="text-gray-500">{i18n.t('site.noPosts')}</p>
           ) : (
             <ul className="space-y-4">
               {posts.map((post) => (
@@ -49,7 +49,7 @@ export default async function HomePage() {
                   </Link>
                   {post.excerpt && <p className="text-gray-600 mt-2">{post.excerpt}</p>}
                   <p className="text-sm text-gray-400 mt-2">
-                    {new Date(post.created_at).toLocaleDateString("zh-CN")}
+                    {new Date(post.created_at).toLocaleDateString('zh-CN')}
                   </p>
                 </li>
               ))}

@@ -7,7 +7,7 @@
  * - 热门页面排名
  */
 
-import type { KVNamespace } from "@cloudflare/workers-types";
+import type { KVNamespace } from '@cloudflare/workers-types';
 
 export interface TimeSeriesData {
   timestamp: number;
@@ -53,7 +53,7 @@ function getRefererKey(postId: string): string {
 export async function recordAccessTime(
   kv: KVNamespace,
   postId: string,
-  referer?: string,
+  referer?: string
 ): Promise<void> {
   const now = Date.now();
   const hourKey = getHourKey(now);
@@ -84,7 +84,7 @@ export async function recordAccessTime(
  */
 export async function getHourlyTrend(
   kv: KVNamespace,
-  hours: number = 24,
+  hours: number = 24
 ): Promise<TimeSeriesData[]> {
   const result: TimeSeriesData[] = [];
   const now = Date.now();
@@ -146,7 +146,7 @@ export async function getRefererStats(kv: KVNamespace, postId: string): Promise<
  * 获取热门页面排名
  */
 export async function getTopPages(kv: KVNamespace, limit: number = 10): Promise<PageRank[]> {
-  const allKeys = await kv.list({ prefix: "visit_count:" });
+  const allKeys = await kv.list({ prefix: 'visit_count:' });
   const counts: PageRank[] = [];
 
   for (const key of allKeys.keys) {

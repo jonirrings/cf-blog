@@ -23,10 +23,10 @@ export interface TurnstileResponse {
 export async function verifyTurnstileToken(
   secretKey: string,
   token: string,
-  remoteIp?: string,
+  remoteIp?: string
 ): Promise<{ valid: boolean; error?: string; response?: TurnstileResponse }> {
   try {
-    const url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+    const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
     const body = new URLSearchParams({
       secret: secretKey,
@@ -35,9 +35,9 @@ export async function verifyTurnstileToken(
     });
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body,
     });
@@ -47,16 +47,16 @@ export async function verifyTurnstileToken(
     if (!data.success) {
       return {
         valid: false,
-        error: `Turnstile 验证失败：${data.error_codes?.join(", ") || "未知错误"}`,
+        error: `Turnstile 验证失败：${data.error_codes?.join(', ') || '未知错误'}`,
       };
     }
 
     return { valid: true, response: data };
   } catch (error) {
-    console.error("[Turnstile] 验证失败:", error);
+    console.error('[Turnstile] 验证失败:', error);
     return {
       valid: false,
-      error: "Turnstile 服务不可用",
+      error: 'Turnstile 服务不可用',
     };
   }
 }
@@ -70,12 +70,12 @@ export function getClientIP(request: Request): string | undefined {
     return cf.clientIp;
   }
 
-  const headers = ["x-forwarded-for", "x-real-ip", "true-client-ip", "x-client-ip"];
+  const headers = ['x-forwarded-for', 'x-real-ip', 'true-client-ip', 'x-client-ip'];
 
   for (const header of headers) {
     const ip = request.headers.get(header);
     if (ip) {
-      return ip.split(",")[0].trim();
+      return ip.split(',')[0].trim();
     }
   }
 
@@ -90,10 +90,10 @@ export function turnstileMiddleware(
   options: {
     requiredPaths?: string[];
     excludePaths?: string[];
-  } = {},
+  } = {}
 ) {
   const {
-    requiredPaths = ["/api/auth", "/api/comments", "/api/users/publisher-apply"],
+    requiredPaths = ['/api/auth', '/api/comments', '/api/users/publisher-apply'],
     excludePaths = [],
   } = options;
 
@@ -102,7 +102,7 @@ export function turnstileMiddleware(
     const method = c.req.method;
 
     // 只对 POST 请求进行验证
-    if (method !== "POST") {
+    if (method !== 'POST') {
       await next();
       return;
     }
@@ -122,16 +122,16 @@ export function turnstileMiddleware(
 
     // 从请求体中获取 Turnstile Token
     const body = await c.req.json().catch(() => ({}));
-    const token = body["cf-turnstile-response"] || body["turnstileToken"];
+    const token = body['cf-turnstile-response'] || body['turnstileToken'];
 
     if (!token) {
       return c.json(
         {
           success: false,
-          error: "人机验证失败",
-          message: "请完成人机验证",
+          error: '人机验证失败',
+          message: '请完成人机验证',
         },
-        400,
+        400
       );
     }
 
@@ -143,10 +143,10 @@ export function turnstileMiddleware(
       return c.json(
         {
           success: false,
-          error: "人机验证失败",
+          error: '人机验证失败',
           message: result.error,
         },
-        400,
+        400
       );
     }
 
@@ -161,12 +161,12 @@ export function turnstileMiddleware(
 export function getTurnstileConfig(
   siteKey: string,
   options: {
-    theme?: "light" | "dark";
-    size?: "normal" | "compact";
+    theme?: 'light' | 'dark';
+    size?: 'normal' | 'compact';
     language?: string;
-  } = {},
+  } = {}
 ) {
-  const { theme = "light", size = "normal", language = "zh-CN" } = options;
+  const { theme = 'light', size = 'normal', language = 'zh-CN' } = options;
 
   return {
     sitekey: siteKey,

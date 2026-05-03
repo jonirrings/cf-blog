@@ -4,8 +4,8 @@
  * 使用 @cf-blog/i18n 集成
  */
 
-import { createSignal, onMount } from "solid-js";
-import i18n, { supportedLocales, type Locale } from "@cf-blog/i18n";
+import { createSignal, onMount } from 'solid-js';
+import i18n, { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 /**
  * SolidJS Signal - 获取当前语言和翻译
@@ -17,12 +17,12 @@ import i18n, { supportedLocales, type Locale } from "@cf-blog/i18n";
  * ```
  */
 export function useTranslation() {
-  const [locale, setLocaleState] = createSignal<Locale>("zh-CN");
+  const [locale, setLocaleState] = createSignal<Locale>('zh-CN');
   const [ready, setReady] = createSignal(false);
 
   onMount(() => {
     const savedLocale = document.cookie.match(/locale=([^;]+)/)?.[1] as Locale | null;
-    if (savedLocale && ["zh-CN", "en"].includes(savedLocale)) {
+    if (savedLocale && ['zh-CN', 'en'].includes(savedLocale)) {
       i18n.changeLanguage(savedLocale);
       setLocaleState(savedLocale);
     }
@@ -45,4 +45,4 @@ export function useTranslation() {
 }
 
 export { i18n, supportedLocales };
-export type { Locale } from "@cf-blog/i18n";
+export type { Locale } from '@cf-blog/i18n';

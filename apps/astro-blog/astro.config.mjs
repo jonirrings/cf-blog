@@ -1,10 +1,10 @@
-import { defineConfig } from "astro/config";
-import react from "@astrojs/react";
+import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
 
 export default defineConfig({
-  outDir: "../dist/astro",
-  base: "/astro",
-  output: "static",
+  outDir: '../dist/astro',
+  base: '/astro',
+  output: 'static',
   devToolbar: { enabled: false },
   server: {
     port: 4321,

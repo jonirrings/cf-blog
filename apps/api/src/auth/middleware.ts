@@ -8,10 +8,10 @@
  * - 审计日志记录
  */
 
-import { Context, Next } from "hono";
-import { getSession, getSessionToken, type SessionPayload } from "./session";
-import type { Env } from "../index";
-import { auditLogs } from "@cf-blog/db/schema";
+import { Context, Next } from 'hono';
+import { getSession, getSessionToken, type SessionPayload } from './session';
+import type { Env } from '../index';
+import { auditLogs } from '@cf-blog/db/schema';
 
 // 扩展 Hono Context 类型
 export interface AuthContext extends Context<{ Bindings: Env }> {
@@ -25,12 +25,12 @@ export async function authMiddleware(c: AuthContext, next: Next): Promise<Respon
   const session = await getSession(c.req.raw, c.env);
 
   if (!session) {
-    return c.json({ success: false, error: "Unauthorized", message: "请先登录" }, 401);
+    return c.json({ success: false, error: 'Unauthorized', message: '请先登录' }, 401);
   }
 
   // 检查 Session 是否过期
   if (Date.now() > session.expiresAt) {
-    return c.json({ success: false, error: "Unauthorized", message: "Session 已过期" }, 401);
+    return c.json({ success: false, error: 'Unauthorized', message: 'Session 已过期' }, 401);
   }
 
   // 将 Session 附加到 Context
@@ -54,11 +54,11 @@ export async function adminMiddleware(c: AuthContext, next: Next): Promise<Respo
   const session = await getSession(c.req.raw, c.env);
 
   if (!session) {
-    return c.json({ success: false, error: "Unauthorized", message: "请先登录" }, 401);
+    return c.json({ success: false, error: 'Unauthorized', message: '请先登录' }, 401);
   }
 
-  if (session.userRole !== "admin") {
-    return c.json({ success: false, error: "Forbidden", message: "需要管理员权限" }, 403);
+  if (session.userRole !== 'admin') {
+    return c.json({ success: false, error: 'Forbidden', message: '需要管理员权限' }, 403);
   }
 
   c.session = session;
@@ -72,11 +72,11 @@ export async function publisherMiddleware(c: AuthContext, next: Next): Promise<R
   const session = await getSession(c.req.raw, c.env);
 
   if (!session) {
-    return c.json({ success: false, error: "Unauthorized", message: "请先登录" }, 401);
+    return c.json({ success: false, error: 'Unauthorized', message: '请先登录' }, 401);
   }
 
-  if (session.userRole !== "publisher" && session.userRole !== "admin") {
-    return c.json({ success: false, error: "Forbidden", message: "需要发布者权限" }, 403);
+  if (session.userRole !== 'publisher' && session.userRole !== 'admin') {
+    return c.json({ success: false, error: 'Forbidden', message: '需要发布者权限' }, 403);
   }
 
   c.session = session;
@@ -90,11 +90,11 @@ export async function approvedMiddleware(c: AuthContext, next: Next): Promise<Re
   const session = await getSession(c.req.raw, c.env);
 
   if (!session) {
-    return c.json({ success: false, error: "Unauthorized", message: "请先登录" }, 401);
+    return c.json({ success: false, error: 'Unauthorized', message: '请先登录' }, 401);
   }
 
   if (!session.isApproved) {
-    return c.json({ success: false, error: "Forbidden", message: "您的账号待审批" }, 403);
+    return c.json({ success: false, error: 'Forbidden', message: '您的账号待审批' }, 403);
   }
 
   c.session = session;
@@ -128,7 +128,7 @@ export function requireAdmin() {
 export function canEditPost(session: SessionPayload | null, postAuthorId: number): boolean {
   if (!session) return false;
   // 管理员可以编辑任何文章
-  if (session.userRole === "admin") return true;
+  if (session.userRole === 'admin') return true;
   // 作者可以编辑自己的文章
   if (session.userId === postAuthorId) return true;
   return false;
@@ -140,7 +140,7 @@ export function canEditPost(session: SessionPayload | null, postAuthorId: number
 export function canDeletePost(session: SessionPayload | null, postAuthorId: number): boolean {
   if (!session) return false;
   // 只有管理员和作者可以删除
-  if (session.userRole === "admin") return true;
+  if (session.userRole === 'admin') return true;
   if (session.userId === postAuthorId) return true;
   return false;
 }
@@ -151,9 +151,9 @@ export function canDeletePost(session: SessionPayload | null, postAuthorId: numb
 export function canApproveComment(session: SessionPayload | null, postAuthorId: number): boolean {
   if (!session) return false;
   // 管理员可以审批任何评论
-  if (session.userRole === "admin") return true;
+  if (session.userRole === 'admin') return true;
   // 文章作者可以审批自己文章下的评论
-  if (session.userId === postAuthorId && session.userRole === "publisher") return true;
+  if (session.userId === postAuthorId && session.userRole === 'publisher') return true;
   return false;
 }
 
@@ -166,7 +166,7 @@ export async function auditLog(
   action: string,
   targetType: string,
   targetId: number | string,
-  details?: Record<string, any>,
+  details?: Record<string, any>
 ): Promise<void> {
   try {
     await db.insert(auditLogs).values({
@@ -178,6 +178,6 @@ export async function auditLog(
       timestamp: new Date(),
     });
   } catch (error) {
-    console.error("[AuditLog] 记录失败:", error);
+    console.error('[AuditLog] 记录失败:', error);
   }
 }

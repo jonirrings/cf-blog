@@ -1,7 +1,7 @@
-import { Component, createSignal, onMount, Show } from "solid-js";
-import { Outlet, useNavigate } from "@solidjs/router";
-import { useTranslation } from "~/lib/i18n";
-import { supportedLocales } from "@cf-blog/i18n";
+import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Outlet, useNavigate } from '@solidjs/router';
+import { useTranslation } from '~/lib/i18n';
+import { supportedLocales } from '@cf-blog/i18n';
 
 interface SessionInfo {
   userName: string;
@@ -18,20 +18,20 @@ const AdminLayout: Component = () => {
 
   onMount(async () => {
     try {
-      const res = await fetch("/api/auth/session");
+      const res = await fetch('/api/auth/session');
       const data = await res.json();
       if (data.success && data.session) {
-        if (data.session.userRole !== "admin") {
-          navigate("/solid/");
+        if (data.session.userRole !== 'admin') {
+          navigate('/solid/');
           return;
         }
         setSession(data.session);
       } else {
-        navigate("/solid/auth/login");
+        navigate('/solid/auth/login');
         return;
       }
     } catch {
-      navigate("/solid/auth/login");
+      navigate('/solid/auth/login');
       return;
     } finally {
       setLoading(false);
@@ -39,11 +39,11 @@ const AdminLayout: Component = () => {
   });
 
   const navItems = [
-    { href: "/solid/admin", label: t("admin.dashboard"), icon: "📊" },
-    { href: "/solid/admin/posts", label: t("admin.posts"), icon: "📝" },
-    { href: "/solid/admin/comments", label: t("admin.comments"), icon: "💬" },
-    { href: "/solid/admin/users", label: t("admin.users"), icon: "👥" },
-    { href: "/solid/admin/settings", label: t("admin.settings"), icon: "⚙️" },
+    { href: '/solid/admin', label: t('admin.dashboard'), icon: '📊' },
+    { href: '/solid/admin/posts', label: t('admin.posts'), icon: '📝' },
+    { href: '/solid/admin/comments', label: t('admin.comments'), icon: '💬' },
+    { href: '/solid/admin/users', label: t('admin.users'), icon: '👥' },
+    { href: '/solid/admin/settings', label: t('admin.settings'), icon: '⚙️' },
   ];
 
   return (
@@ -51,7 +51,7 @@ const AdminLayout: Component = () => {
       when={!loading()}
       fallback={
         <div class="flex items-center justify-center min-h-screen">
-          <p>{t("common.loading")}</p>
+          <p>{t('common.loading')}</p>
         </div>
       }
     >
@@ -59,9 +59,9 @@ const AdminLayout: Component = () => {
         <div class="flex min-h-screen bg-gray-100">
           <aside class="w-64 bg-white shadow-lg fixed h-full flex flex-col">
             <div class="p-6 border-b">
-              <h2 class="text-xl font-bold text-gray-900">{t("admin.title")}</h2>
+              <h2 class="text-xl font-bold text-gray-900">{t('admin.title')}</h2>
               <a href="/solid/" class="text-sm text-blue-600 hover:underline">
-                {t("admin.backToBlog")}
+                {t('admin.backToBlog')}
               </a>
             </div>
             <nav class="flex-1 p-4 space-y-2">

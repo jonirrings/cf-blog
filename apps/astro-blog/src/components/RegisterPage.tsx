@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import i18n from "@cf-blog/i18n";
-import { AuthLayout, RegisterForm, GitHubButton, PasskeyButton } from "@cf-blog/auth-ui";
+import React, { useEffect } from 'react';
+import i18n from '@cf-blog/i18n';
+import { AuthLayout, RegisterForm, GitHubButton, PasskeyButton } from '@cf-blog/auth-ui';
 
 interface RegisterPageProps {
   /** Current locale for i18n */
@@ -16,22 +16,22 @@ export default function RegisterPage({ locale, apiBaseUrl }: RegisterPageProps) 
 
   const handleRegisterSuccess = (user: { isApproved?: boolean }) => {
     if (user?.isApproved) {
-      window.location.href = "/astro/admin/dashboard";
+      window.location.href = '/astro/admin/dashboard';
     } else {
-      window.location.href = "/astro/auth/pending";
+      window.location.href = '/astro/auth/pending';
     }
   };
 
   const handleLoginClick = () => {
-    window.location.href = "/astro/auth/login";
+    window.location.href = '/astro/auth/login';
   };
 
   const handlePasskeyComplete = () => {
-    window.location.href = "/astro/admin/dashboard";
+    window.location.href = '/astro/admin/dashboard';
   };
 
   return (
-    <AuthLayout title={i18n.t("auth.registerTitle")} subtitle={i18n.t("auth.registerSubtitle")}>
+    <AuthLayout title={i18n.t('auth.registerTitle')} subtitle={i18n.t('auth.registerSubtitle')}>
       <div className="space-y-4">
         <GitHubButton apiBaseUrl={apiBaseUrl} />
         <PasskeyButton

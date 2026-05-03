@@ -1,0 +1,23 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+  "extends": ["../../biome.json"],
+  "files": {
+    "includes": [
+      "components/**",
+      "composables/**",
+      "pages/**",
+      "layouts/**",
+      "*.ts",
+      "*.vue",
+      "*.json"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      }
+    }
+  }
+}

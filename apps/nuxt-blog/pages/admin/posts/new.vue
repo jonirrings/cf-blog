@@ -111,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: 'admin' });
 
 const { t } = useI18n();
 
@@ -127,12 +127,12 @@ interface JSONContent {
 }
 
 const form = ref({
-  title: "",
-  slug: "",
-  excerpt: "",
-  content: "",
-  framework: "nuxt",
-  status: "draft",
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  framework: 'nuxt',
+  status: 'draft',
 });
 
 const saving = ref(false);
@@ -144,13 +144,13 @@ function handleContentChange(content: JSONContent) {
 const handleSubmit = async () => {
   saving.value = true;
   try {
-    await $fetch("/api/posts", {
-      method: "POST",
+    await $fetch('/api/posts', {
+      method: 'POST',
       body: form.value,
     });
-    navigateTo("/admin/posts");
+    navigateTo('/admin/posts');
   } catch (error) {
-    alert(t("form.error") + ": " + error.message);
+    alert(t('form.error') + ': ' + error.message);
   } finally {
     saving.value = false;
   }

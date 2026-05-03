@@ -4,15 +4,15 @@
  * - GET /api/stats - 获取仪表盘统计数据
  */
 
-import { Hono } from "hono";
-import { drizzle } from "drizzle-orm/d1";
-import { eq, or, sql } from "drizzle-orm";
-import type { Env } from "../index";
-import { posts, comments, users } from "@cf-blog/db/schema";
+import { Hono } from 'hono';
+import { drizzle } from 'drizzle-orm/d1';
+import { eq, or, sql } from 'drizzle-orm';
+import type { Env } from '../index';
+import { posts, comments, users } from '@cf-blog/db/schema';
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/", async (c) => {
+app.get('/', async (c) => {
   try {
     const db = drizzle(c.env.DB);
 
@@ -20,12 +20,12 @@ app.get("/", async (c) => {
     const publishedPosts = await db
       .select({ count: posts.id })
       .from(posts)
-      .where(eq(posts.status, "published"))
+      .where(eq(posts.status, 'published'))
       .all();
     const draftPosts = await db
       .select({ count: posts.id })
       .from(posts)
-      .where(eq(posts.status, "draft"))
+      .where(eq(posts.status, 'draft'))
       .all();
 
     const totalComments = await db.select({ count: comments.id }).from(comments).all();
@@ -64,13 +64,13 @@ app.get("/", async (c) => {
       data,
     });
   } catch (err) {
-    console.error("Stats API error:", err);
+    console.error('Stats API error:', err);
     return c.json(
       {
         success: false,
-        error: "Failed to fetch stats",
+        error: 'Failed to fetch stats',
       },
-      500,
+      500
     );
   }
 });

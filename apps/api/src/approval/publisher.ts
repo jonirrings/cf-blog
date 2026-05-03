@@ -8,18 +8,18 @@
  * - 拒绝申请
  */
 
-import { eq, and } from "drizzle-orm";
-import { users, auditLogs } from "@cf-blog/db/schema";
+import { eq, and } from 'drizzle-orm';
+import { users, auditLogs } from '@cf-blog/db/schema';
 
 // 申请者状态枚举
-export type PublisherApplicationStatus = "pending" | "approved" | "rejected";
+export type PublisherApplicationStatus = 'pending' | 'approved' | 'rejected';
 
 /**
  * 用户申请成为发布者
  */
 export async function applyForPublisher(
   db: any,
-  userId: number,
+  userId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await db.query.users.findFirst({
@@ -27,11 +27,11 @@ export async function applyForPublisher(
     });
 
     if (!user) {
-      return { success: false, error: "用户不存在" };
+      return { success: false, error: '用户不存在' };
     }
 
-    if (user.role === "publisher" || user.role === "admin") {
-      return { success: false, error: "已是发布者或管理员" };
+    if (user.role === 'publisher' || user.role === 'admin') {
+      return { success: false, error: '已是发布者或管理员' };
     }
 
     // 更新用户角色为 publisher（待审批）
@@ -40,7 +40,7 @@ export async function applyForPublisher(
     await db
       .update(users)
       .set({
-        role: "publisher",
+        role: 'publisher',
         isApproved: false, // 需要管理员审批
         updatedAt: new Date(),
       })
@@ -49,8 +49,8 @@ export async function applyForPublisher(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId,
-      action: "PUBLISHER_APPLICATION_SUBMITTED",
-      targetType: "user",
+      action: 'PUBLISHER_APPLICATION_SUBMITTED',
+      targetType: 'user',
       targetId: userId.toString(),
       details: JSON.stringify({ userEmail: user.email }),
       timestamp: new Date(),
@@ -58,8 +58,8 @@ export async function applyForPublisher(
 
     return { success: true };
   } catch (error) {
-    console.error("[PublisherApplication] 申请失败:", error);
-    return { success: false, error: "申请失败" };
+    console.error('[PublisherApplication] 申请失败:', error);
+    return { success: false, error: '申请失败' };
   }
 }
 
@@ -68,7 +68,7 @@ export async function applyForPublisher(
  */
 export async function getPendingApplications(db: any): Promise<any[]> {
   return db.query.users.findMany({
-    where: and(eq(users.role, "publisher"), eq(users.isApproved, false)),
+    where: and(eq(users.role, 'publisher'), eq(users.isApproved, false)),
     columns: {
       id: true,
       email: true,
@@ -90,7 +90,7 @@ export async function getPendingApplications(db: any): Promise<any[]> {
 export async function approvePublisherApplication(
   db: any,
   userId: number,
-  adminUserId: number,
+  adminUserId: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await db.query.users.findFirst({
@@ -98,15 +98,15 @@ export async function approvePublisherApplication(
     });
 
     if (!user) {
-      return { success: false, error: "用户不存在" };
+      return { success: false, error: '用户不存在' };
     }
 
-    if (user.role !== "publisher") {
-      return { success: false, error: "用户不是申请者" };
+    if (user.role !== 'publisher') {
+      return { success: false, error: '用户不是申请者' };
     }
 
     if (user.isApproved) {
-      return { success: false, error: "申请已审批通过" };
+      return { success: false, error: '申请已审批通过' };
     }
 
     // 更新用户状态为已审批
@@ -121,8 +121,8 @@ export async function approvePublisherApplication(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: "PUBLISHER_APPLICATION_APPROVED",
-      targetType: "user",
+      action: 'PUBLISHER_APPLICATION_APPROVED',
+      targetType: 'user',
       targetId: userId.toString(),
       details: JSON.stringify({ targetEmail: user.email }),
       timestamp: new Date(),
@@ -130,8 +130,8 @@ export async function approvePublisherApplication(
 
     return { success: true };
   } catch (error) {
-    console.error("[PublisherApplication] 审批失败:", error);
-    return { success: false, error: "审批失败" };
+    console.error('[PublisherApplication] 审批失败:', error);
+    return { success: false, error: '审批失败' };
   }
 }
 
@@ -142,7 +142,7 @@ export async function rejectPublisherApplication(
   db: any,
   userId: number,
   adminUserId: number,
-  reason?: string,
+  reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await db.query.users.findFirst({
@@ -150,18 +150,18 @@ export async function rejectPublisherApplication(
     });
 
     if (!user) {
-      return { success: false, error: "用户不存在" };
+      return { success: false, error: '用户不存在' };
     }
 
-    if (user.role !== "publisher") {
-      return { success: false, error: "用户不是申请者" };
+    if (user.role !== 'publisher') {
+      return { success: false, error: '用户不是申请者' };
     }
 
     // 降级为 commenter 并保持未审批状态
     await db
       .update(users)
       .set({
-        role: "commenter",
+        role: 'commenter',
         isApproved: user.isApproved, // 保持原有审批状态
         updatedAt: new Date(),
       })
@@ -170,8 +170,8 @@ export async function rejectPublisherApplication(
     // 记录审计日志
     await db.insert(auditLogs).values({
       userId: adminUserId,
-      action: "PUBLISHER_APPLICATION_REJECTED",
-      targetType: "user",
+      action: 'PUBLISHER_APPLICATION_REJECTED',
+      targetType: 'user',
       targetId: userId.toString(),
       details: JSON.stringify({ targetEmail: user.email, reason }),
       timestamp: new Date(),
@@ -179,8 +179,8 @@ export async function rejectPublisherApplication(
 
     return { success: true };
   } catch (error) {
-    console.error("[PublisherApplication] 拒绝失败:", error);
-    return { success: false, error: "拒绝失败" };
+    console.error('[PublisherApplication] 拒绝失败:', error);
+    return { success: false, error: '拒绝失败' };
   }
 }
 
@@ -189,12 +189,12 @@ export async function rejectPublisherApplication(
  */
 export function canApplyForPublisher(userRole: string | null, isApproved: boolean): boolean {
   // 只有已审批的 commenter 可以申请
-  return userRole === "commenter" && isApproved === true;
+  return userRole === 'commenter' && isApproved === true;
 }
 
 /**
  * 检查用户是否是发布者（已审批）
  */
 export function isPublisher(userRole: string | null, isApproved: boolean | null): boolean {
-  return userRole === "publisher" && isApproved === true;
+  return userRole === 'publisher' && isApproved === true;
 }

@@ -1,39 +1,39 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslation } from "@/lib/i18n";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
-        router.push(data.user.isApproved ? "/admin/dashboard" : "/auth/pending");
+        router.push(data.user.isApproved ? '/admin/dashboard' : '/auth/pending');
       } else {
-        setError(data.error || t("auth.loginFailed"));
+        setError(data.error || t('auth.loginFailed'));
       }
     } catch (err) {
-      setError(t("auth.networkError"));
+      setError(t('auth.networkError'));
     } finally {
       setLoading(false);
     }
@@ -44,14 +44,14 @@ export default function LoginPage() {
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{t("auth.loginTitle")}</h1>
-            <p className="text-gray-500 mt-2">{t("auth.loginSubtitle")}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('auth.loginTitle')}</h1>
+            <p className="text-gray-500 mt-2">{t('auth.loginSubtitle')}</p>
           </div>
 
           <div className="space-y-4 mb-6">
             <button
               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-              onClick={() => alert("GitHub login not implemented")}
+              onClick={() => alert('GitHub login not implemented')}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -60,12 +60,12 @@ export default function LoginPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              {t("auth.github")}
+              {t('auth.github')}
             </button>
 
             <button
               className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              onClick={() => alert("Passkey login not implemented")}
+              onClick={() => alert('Passkey login not implemented')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -75,7 +75,7 @@ export default function LoginPage() {
                   d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
                 />
               </svg>
-              {t("auth.passkey")}
+              {t('auth.passkey')}
             </button>
           </div>
 
@@ -84,7 +84,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">{t("auth.useEmailLogin")}</span>
+              <span className="px-2 bg-white text-gray-500">{t('auth.useEmailLogin')}</span>
             </div>
           </div>
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("auth.email")}
+                {t('auth.email')}
               </label>
               <input
                 type="email"
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("auth.password")}
+                {t('auth.password')}
               </label>
               <input
                 type="password"
@@ -130,14 +130,14 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? t("auth.loggingIn") : t("auth.login")}
+              {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
-            {t("auth.noAccount")}{" "}
+            {t('auth.noAccount')}{' '}
             <Link href="/auth/register" className="text-blue-600 hover:underline">
-              {t("auth.register")}
+              {t('auth.register')}
             </Link>
           </p>
         </div>

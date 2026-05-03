@@ -9,19 +9,19 @@
  * - GET /api/importexport/zip - 导出整个博客为 ZIP
  */
 
-import { Hono } from "hono";
-import type { Env } from "../index";
-import { adminMiddleware } from "../auth/middleware";
-import { importFromGhost, exportToGhost } from "../importexport/ghost";
-import { exportPostAsMarkdown, exportAllPostsAsMarkdown } from "../importexport/markdown";
-import { exportPostAsZip, exportBlogAsZip } from "../importexport/zip";
+import { Hono } from 'hono';
+import type { Env } from '../index';
+import { adminMiddleware } from '../auth/middleware';
+import { importFromGhost, exportToGhost } from '../importexport/ghost';
+import { exportPostAsMarkdown, exportAllPostsAsMarkdown } from '../importexport/markdown';
+import { exportPostAsZip, exportBlogAsZip } from '../importexport/zip';
 
 const app = new Hono<{ Bindings: Env }>();
 
 /**
  * GET /api/importexport/ghost - 导出 Ghost JSON 格式
  */
-app.get("/ghost", adminMiddleware, async (c) => {
+app.get('/ghost', adminMiddleware, async (c) => {
   try {
     const ghostData = await exportToGhost(c.env);
     return c.json({
@@ -34,7 +34,7 @@ app.get("/ghost", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });
@@ -42,16 +42,16 @@ app.get("/ghost", adminMiddleware, async (c) => {
 /**
  * POST /api/importexport/ghost - 导入 Ghost JSON 格式
  */
-app.post("/ghost", adminMiddleware, async (c) => {
+app.post('/ghost', adminMiddleware, async (c) => {
   try {
     const body = await c.req.json().catch(() => ({}));
     if (!body.data || !body.data.posts) {
       return c.json(
         {
           success: false,
-          error: "Invalid Ghost export format",
+          error: 'Invalid Ghost export format',
         },
-        400,
+        400
       );
     }
 
@@ -69,7 +69,7 @@ app.post("/ghost", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });
@@ -77,8 +77,8 @@ app.post("/ghost", adminMiddleware, async (c) => {
 /**
  * GET /api/importexport/markdown/:postId - 导出单篇文章为 Markdown
  */
-app.get("/markdown/:postId", adminMiddleware, async (c) => {
-  const postId = c.req.param("postId");
+app.get('/markdown/:postId', adminMiddleware, async (c) => {
+  const postId = c.req.param('postId');
 
   try {
     const result = await exportPostAsMarkdown(c.env, postId);
@@ -87,15 +87,15 @@ app.get("/markdown/:postId", adminMiddleware, async (c) => {
       return c.json(
         {
           success: false,
-          error: "Post not found",
+          error: 'Post not found',
         },
-        404,
+        404
       );
     }
 
     return c.body(result.content, 200, {
-      "Content-Type": "text/markdown",
-      "Content-Disposition": `attachment; filename="${result.filename}"`,
+      'Content-Type': 'text/markdown',
+      'Content-Disposition': `attachment; filename="${result.filename}"`,
     });
   } catch (error) {
     return c.json(
@@ -103,7 +103,7 @@ app.get("/markdown/:postId", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });
@@ -111,27 +111,27 @@ app.get("/markdown/:postId", adminMiddleware, async (c) => {
 /**
  * GET /api/importexport/markdown - 导出所有文章为 Markdown（ZIP）
  */
-app.get("/markdown", adminMiddleware, async (c) => {
+app.get('/markdown', adminMiddleware, async (c) => {
   try {
     const posts = await exportAllPostsAsMarkdown(c.env);
 
     // 创建简单的 ZIP（实际应使用 jszip）
     const encoder = new TextEncoder();
     const zipData = new Uint8Array(
-      posts.reduce((acc, post) => acc + encoder.encode(post.content).length + 100, 1000),
+      posts.reduce((acc, post) => acc + encoder.encode(post.content).length + 100, 1000)
     );
 
     // 简化实现：返回第一个文章的 Markdown
     // 实际应生成包含所有文章的 ZIP
     if (posts.length > 0) {
       return c.body(posts[0].content, 200, {
-        "Content-Type": "text/markdown",
-        "Content-Disposition": 'attachment; filename="export.md"',
+        'Content-Type': 'text/markdown',
+        'Content-Disposition': 'attachment; filename="export.md"',
       });
     }
 
-    return c.body("", 200, {
-      "Content-Type": "text/markdown",
+    return c.body('', 200, {
+      'Content-Type': 'text/markdown',
     });
   } catch (error) {
     return c.json(
@@ -139,7 +139,7 @@ app.get("/markdown", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });
@@ -147,8 +147,8 @@ app.get("/markdown", adminMiddleware, async (c) => {
 /**
  * GET /api/importexport/zip/:postId - 导出单篇文章为 ZIP
  */
-app.get("/zip/:postId", adminMiddleware, async (c) => {
-  const postId = c.req.param("postId");
+app.get('/zip/:postId', adminMiddleware, async (c) => {
+  const postId = c.req.param('postId');
 
   try {
     const result = await exportPostAsZip(c.env, postId);
@@ -157,15 +157,15 @@ app.get("/zip/:postId", adminMiddleware, async (c) => {
       return c.json(
         {
           success: false,
-          error: "Post not found",
+          error: 'Post not found',
         },
-        404,
+        404
       );
     }
 
     return c.body(result.data, 200, {
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${result.filename}"`,
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${result.filename}"`,
     });
   } catch (error) {
     return c.json(
@@ -173,7 +173,7 @@ app.get("/zip/:postId", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });
@@ -181,13 +181,13 @@ app.get("/zip/:postId", adminMiddleware, async (c) => {
 /**
  * GET /api/importexport/zip - 导出整个博客为 ZIP
  */
-app.get("/zip", adminMiddleware, async (c) => {
+app.get('/zip', adminMiddleware, async (c) => {
   try {
     const result = await exportBlogAsZip(c.env);
 
     return c.body(result.data, 200, {
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${result.filename}"`,
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${result.filename}"`,
     });
   } catch (error) {
     return c.json(
@@ -195,7 +195,7 @@ app.get("/zip", adminMiddleware, async (c) => {
         success: false,
         error: (error as Error).message,
       },
-      500,
+      500
     );
   }
 });

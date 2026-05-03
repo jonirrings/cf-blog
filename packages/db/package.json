@@ -26,15 +26,20 @@
   "scripts": {
     "build": "tsc",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply cf-blog-db",
-    "db:migrate:local": "wrangler d1 migrations apply cf-blog-db --local",
+    "db:migrate": "wrangler d1 migrations apply cf-blog-db --config ../../wrangler.toml",
+    "db:migrate:local": "wrangler d1 migrations apply cf-blog-db --local --config ../../wrangler.dev.toml",
     "db:studio": "drizzle-kit studio",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "fmt": "biome format --write .",
+    "check": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "drizzle-orm": "^0.30.10"
   },
   "devDependencies": {
+    "@biomejs/biome": "catalog:",
     "drizzle-kit": "^0.21.0",
     "typescript": "catalog:",
     "wrangler": "^4.87.0"

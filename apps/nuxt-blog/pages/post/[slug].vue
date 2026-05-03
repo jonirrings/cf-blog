@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "default" });
+definePageMeta({ layout: 'default' });
 
 interface Post {
   id: string;
@@ -38,10 +38,10 @@ const { t, locale } = useI18n();
 
 const route = useRoute();
 const { post } = await useFetch<Post>(`/api/posts/${route.params.slug}`, {
-  baseURL: process.env.API_URL || "http://localhost:8788",
+  baseURL: process.env.API_URL || 'http://localhost:8788',
 });
 
 function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString(locale.value === "zh-CN" ? "zh-CN" : "en");
+  return new Date(dateString).toLocaleDateString(locale.value === 'zh-CN' ? 'zh-CN' : 'en');
 }
 </script>

@@ -7,7 +7,7 @@
  * - 站点配置类型定义
  */
 
-import { adminMiddleware } from "../auth/middleware";
+import { adminMiddleware } from '../auth/middleware';
 
 // 站点配置类型
 export interface SiteConfig {
@@ -36,10 +36,10 @@ export interface SiteConfig {
 
 // 默认配置
 const DEFAULT_SITE_CONFIG: SiteConfig = {
-  title: "Blog",
-  description: "A blog powered by Cloudflare",
-  url: "https://blog.jonirrings.com",
-  keywords: ["blog", "cloudflare", "nextjs", "nuxt", "sveltekit"],
+  title: 'Blog',
+  description: 'A blog powered by Cloudflare',
+  url: 'https://blog.jonirrings.com',
+  keywords: ['blog', 'cloudflare', 'nextjs', 'nuxt', 'sveltekit'],
   socialLinks: {},
   seo: {
     enable: true,
@@ -49,7 +49,7 @@ const DEFAULT_SITE_CONFIG: SiteConfig = {
   },
 };
 
-const CONFIG_KEY = "site_config";
+const CONFIG_KEY = 'site_config';
 
 /**
  * 获取站点配置
@@ -67,7 +67,7 @@ export async function getSiteConfig(kv: KVNamespace): Promise<SiteConfig> {
  */
 export async function updateSiteConfig(
   kv: KVNamespace,
-  config: Partial<SiteConfig>,
+  config: Partial<SiteConfig>
 ): Promise<SiteConfig> {
   const currentConfig = await getSiteConfig(kv);
   const newConfig = mergeConfig(currentConfig, config);

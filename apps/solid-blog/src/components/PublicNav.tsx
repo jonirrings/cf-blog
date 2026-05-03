@@ -1,13 +1,13 @@
-import { A } from "@solidjs/router";
-import { useTranslation } from "~/lib/i18n";
-import { supportedLocales, type Locale } from "@cf-blog/i18n";
+import { A } from '@solidjs/router';
+import { useTranslation } from '~/lib/i18n';
+import { supportedLocales, type Locale } from '@cf-blog/i18n';
 
 const frameworks = [
-  { href: "/next/", labelKey: "framework.next", color: "text-blue-600" },
-  { href: "/nuxt/", labelKey: "framework.nuxt", color: "text-green-600" },
-  { href: "/svelte/", labelKey: "framework.svelte", color: "text-orange-600" },
-  { href: "/astro/", labelKey: "framework.astro", color: "text-purple-600" },
-  { href: "/solid/", labelKey: "framework.solid", color: "text-blue-500" },
+  { href: '/next/', labelKey: 'framework.next', color: 'text-blue-600' },
+  { href: '/nuxt/', labelKey: 'framework.nuxt', color: 'text-green-600' },
+  { href: '/svelte/', labelKey: 'framework.svelte', color: 'text-orange-600' },
+  { href: '/astro/', labelKey: 'framework.astro', color: 'text-purple-600' },
+  { href: '/solid/', labelKey: 'framework.solid', color: 'text-blue-500' },
 ] as const;
 
 export function PublicNav() {
@@ -29,7 +29,7 @@ export function PublicNav() {
                   Solid Blog
                 </A>
               </h1>
-              <p class="text-gray-600 mt-1">{t("site.poweredBy")}</p>
+              <p class="text-gray-600 mt-1">{t('site.poweredBy')}</p>
             </div>
             <div class="flex items-center gap-4">
               <select
@@ -45,7 +45,7 @@ export function PublicNav() {
                 ))}
               </select>
               <A href="/auth/login" class="text-sm text-gray-600 hover:text-gray-900">
-                {t("auth.login")}
+                {t('auth.login')}
               </A>
             </div>
           </div>
@@ -54,7 +54,7 @@ export function PublicNav() {
 
       <nav class="bg-gray-100 border-b">
         <div class="max-w-4xl mx-auto px-4 py-3">
-          <span class="font-semibold mr-3 text-sm">{t("site.frameworkSwitch")}</span>
+          <span class="font-semibold mr-3 text-sm">{t('site.frameworkSwitch')}</span>
           {frameworks.map((fw) => (
             <A href={fw.href} class={`${fw.color} hover:underline text-sm mr-3`}>
               {t(fw.labelKey)}

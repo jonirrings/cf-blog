@@ -1,37 +1,37 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { t, locale } from '$lib/i18n';
+import { onMount } from 'svelte';
+import { t, locale } from '$lib/i18n';
 
-  interface Post {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    created_at: string;
-  }
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  created_at: string;
+}
 
-  let posts = $state<Post[]>([]);
-  let loading = $state(true);
-  let currentLocale = $state<string>('zh-CN');
+let posts = $state<Post[]>([]);
+let loading = $state(true);
+let currentLocale = $state<string>('zh-CN');
 
-  onMount(async () => {
-    locale.subscribe((val) => {
-      currentLocale = val;
-    });
-    try {
-      const res = await fetch('/api/posts');
-      const { data } = await res.json();
-      posts = data || [];
-    } catch (error) {
-      console.error('Failed to fetch posts:', error);
-    } finally {
-      loading = false;
-    }
+onMount(async () => {
+  locale.subscribe((val) => {
+    currentLocale = val;
   });
-
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString(currentLocale === 'zh-CN' ? 'zh-CN' : 'en');
+  try {
+    const res = await fetch('/api/posts');
+    const { data } = await res.json();
+    posts = data || [];
+  } catch (error) {
+    console.error('Failed to fetch posts:', error);
+  } finally {
+    loading = false;
   }
+});
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString(currentLocale === 'zh-CN' ? 'zh-CN' : 'en');
+}
 </script>
 
 <section>

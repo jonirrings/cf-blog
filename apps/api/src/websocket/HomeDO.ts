@@ -27,25 +27,25 @@ export class HomeDO {
     const url = new URL(request.url);
 
     // WebSocket 升级请求
-    if (request.headers.get("Upgrade") === "websocket") {
+    if (request.headers.get('Upgrade') === 'websocket') {
       return this.handleWebSocket(request);
     }
 
     // HTTP API - 获取访问人数
-    if (url.pathname === "/home/visitors" && request.method === "GET") {
+    if (url.pathname === '/home/visitors' && request.method === 'GET') {
       return new Response(JSON.stringify({ count: this.visitors.size }), {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // HTTP API - 广播新文章通知（内部调用）
-    if (url.pathname === "/home/broadcast" && request.method === "POST") {
+    if (url.pathname === '/home/broadcast' && request.method === 'POST') {
       const body = await request.json<any>();
       this.broadcastNewPost(body);
       return new Response(JSON.stringify({ success: true }));
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response('Not Found', { status: 404 });
   }
 
   private async handleWebSocket(request: Request): Promise<Response> {
@@ -55,8 +55,8 @@ export class HomeDO {
 
     // 解析连接信息
     const url = new URL(request.url);
-    const sessionId = url.searchParams.get("sessionId") || `anon-${Date.now()}`;
-    const userId = url.searchParams.get("userId");
+    const sessionId = url.searchParams.get('sessionId') || `anon-${Date.now()}`;
+    const userId = url.searchParams.get('userId');
 
     // 记录访问者
     this.visitors.set(sessionId, {
@@ -72,7 +72,7 @@ export class HomeDO {
 
     // 发送初始数据
     const initialData = JSON.stringify({
-      type: "home:init",
+      type: 'home:init',
       visitorCount: this.visitors.size,
       sessionId,
     });
@@ -85,13 +85,13 @@ export class HomeDO {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-    if (typeof message !== "string") return;
+    if (typeof message !== 'string') return;
 
     try {
       const data = JSON.parse(message);
 
       switch (data.type) {
-        case "home:heartbeat":
+        case 'home:heartbeat':
           const sessionId = data.sessionId;
           if (sessionId && this.visitors.has(sessionId)) {
             this.visitors.get(sessionId)!.lastSeen = Date.now();
@@ -99,7 +99,7 @@ export class HomeDO {
           break;
       }
     } catch (error) {
-      console.error("[HomeDO] Message parse error:", error);
+      console.error('[HomeDO] Message parse error:', error);
     }
   }
 
@@ -140,7 +140,7 @@ export class HomeDO {
 
   public broadcastNewPost(post: { id: string; title: string; slug: string }): void {
     const message = JSON.stringify({
-      type: "home:newPost",
+      type: 'home:newPost',
       post: {
         id: post.id,
         title: post.title,
@@ -159,7 +159,7 @@ export class HomeDO {
 
   private broadcastVisitorCount(): void {
     const message = JSON.stringify({
-      type: "home:visitorCount",
+      type: 'home:visitorCount',
       count: this.visitors.size,
       timestamp: new Date().toISOString(),
     });

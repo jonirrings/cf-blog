@@ -1,109 +1,125 @@
 <script lang="ts">
-  import { t } from '$lib/i18n';
-  import { onMount } from 'svelte';
+import { t } from '$lib/i18n';
+import { onMount } from 'svelte';
 
-  interface User {
-    id: number;
-    email: string;
-    name: string;
-    role: 'admin' | 'publisher' | 'commenter';
-    isApproved: boolean;
-    publisherApplicationStatus: 'none' | 'pending' | 'approved' | 'rejected';
-    createdAt: string;
-  }
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  role: 'admin' | 'publisher' | 'commenter';
+  isApproved: boolean;
+  publisherApplicationStatus: 'none' | 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+}
 
-  interface FilterOption {
-    value: 'all' | 'pending' | 'approved';
-    label: string;
-    count: number;
-    activeClass: string;
-  }
+interface FilterOption {
+  value: 'all' | 'pending' | 'approved';
+  label: string;
+  count: number;
+  activeClass: string;
+}
 
-  let filters: FilterOption[] = [
-    { value: 'all', label: t('filter.all'), count: 0, activeClass: 'bg-blue-100 text-blue-600' },
-    { value: 'pending', label: t('filter.pending'), count: 0, activeClass: 'bg-yellow-100 text-yellow-600' },
-    { value: 'approved', label: t('filter.approved'), count: 0, activeClass: 'bg-green-100 text-green-600' },
-  ];
+let filters: FilterOption[] = [
+  { value: 'all', label: t('filter.all'), count: 0, activeClass: 'bg-blue-100 text-blue-600' },
+  {
+    value: 'pending',
+    label: t('filter.pending'),
+    count: 0,
+    activeClass: 'bg-yellow-100 text-yellow-600',
+  },
+  {
+    value: 'approved',
+    label: t('filter.approved'),
+    count: 0,
+    activeClass: 'bg-green-100 text-green-600',
+  },
+];
 
-  let currentFilter: 'all' | 'pending' | 'approved' = 'all';
-  let users: User[] = [];
-  let loading = $state(true);
+let currentFilter: 'all' | 'pending' | 'approved' = 'all';
+let users: User[] = [];
+let loading = $state(true);
 
-  $derived(filteredUsers = users.filter((user) => {
+$derived(
+  (filteredUsers = users.filter((user) => {
     if (currentFilter === 'all') return true;
     if (currentFilter === 'pending') return !user.isApproved;
     if (currentFilter === 'approved') return user.isApproved;
     return true;
-  }));
+  }))
+);
 
-  function updateFilterCounts() {
-    filters[0].count = users.length;
-    filters[1].count = users.filter((u) => !u.isApproved).length;
-    filters[2].count = users.filter((u) => u.isApproved).length;
-  }
+function updateFilterCounts() {
+  filters[0].count = users.length;
+  filters[1].count = users.filter((u) => !u.isApproved).length;
+  filters[2].count = users.filter((u) => u.isApproved).length;
+}
 
-  const handleApproveUser = async (id: number) => {
-    try {
-      const res = await fetch(`/api/users/${id}/approve`, { method: 'POST' });
-      if (res.ok) {
-        users = users.map((u) => (u.id === id ? { ...u, isApproved: true } : u));
-        updateFilterCounts();
-      }
-    } catch (err) {
-      console.error('Approve user failed:', err);
-      alert(t('user.approveFailed'));
-    }
-  };
-
-  const handleRoleChange = async (id: number, newRole: 'admin' | 'publisher' | 'commenter') => {
-    try {
-      const res = await fetch(`/api/users/${id}/role`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole }),
-      });
-      if (res.ok) {
-        users = users.map((u) => (u.id === id ? { ...u, role: newRole } : u));
-      }
-    } catch (err) {
-      console.error('Role change failed:', err);
-      alert(t('user.roleChangeFailed'));
-    }
-  };
-
-  const handlePublisherApplication = async (id: number, approve: boolean) => {
-    try {
-      const res = await fetch(`/api/users/${id}/publisher-application`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approve }),
-      });
-      if (res.ok) {
-        users = users.map((u) =>
-          u.id === id
-            ? { ...u, publisherApplicationStatus: approve ? 'approved' : 'rejected', role: approve ? 'publisher' : u.role }
-            : u
-        );
-        updateFilterCounts();
-      }
-    } catch (err) {
-      console.error('Publisher application failed:', err);
-      alert(t('user.publisherApplication.actionFailed'));
-    }
-  };
-
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/users');
-      const data = await res.json();
-      users = data.data?.list || [];
+const handleApproveUser = async (id: number) => {
+  try {
+    const res = await fetch(`/api/users/${id}/approve`, { method: 'POST' });
+    if (res.ok) {
+      users = users.map((u) => (u.id === id ? { ...u, isApproved: true } : u));
       updateFilterCounts();
-    } catch (err) {
-      console.error('Failed to fetch users:', err);
-    } finally {
-      loading = false;
     }
-  });
+  } catch (err) {
+    console.error('Approve user failed:', err);
+    alert(t('user.approveFailed'));
+  }
+};
+
+const handleRoleChange = async (id: number, newRole: 'admin' | 'publisher' | 'commenter') => {
+  try {
+    const res = await fetch(`/api/users/${id}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole }),
+    });
+    if (res.ok) {
+      users = users.map((u) => (u.id === id ? { ...u, role: newRole } : u));
+    }
+  } catch (err) {
+    console.error('Role change failed:', err);
+    alert(t('user.roleChangeFailed'));
+  }
+};
+
+const handlePublisherApplication = async (id: number, approve: boolean) => {
+  try {
+    const res = await fetch(`/api/users/${id}/publisher-application`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approve }),
+    });
+    if (res.ok) {
+      users = users.map((u) =>
+        u.id === id
+          ? {
+              ...u,
+              publisherApplicationStatus: approve ? 'approved' : 'rejected',
+              role: approve ? 'publisher' : u.role,
+            }
+          : u
+      );
+      updateFilterCounts();
+    }
+  } catch (err) {
+    console.error('Publisher application failed:', err);
+    alert(t('user.publisherApplication.actionFailed'));
+  }
+};
+
+onMount(async () => {
+  try {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+    users = data.data?.list || [];
+    updateFilterCounts();
+  } catch (err) {
+    console.error('Failed to fetch users:', err);
+  } finally {
+    loading = false;
+  }
+});
 </script>
 
 <div>

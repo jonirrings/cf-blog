@@ -1,0 +1,57 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "cf-blog-api-dev"
+main = "apps/api/src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 数据库（本地模式，database_id 为占位符，--local 时自动使用本地 SQLite）
+[[d1_databases]]
+binding = "DB"
+database_name = "cf-blog-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "packages/db/drizzle"
+
+# KV 命名空间（本地模式使用 ephemeral 存储）
+[[kv_namespaces]]
+binding = "CONFIG_KV"
+id = "dev-config-kv"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "dev-cache-kv"
+
+[[kv_namespaces]]
+binding = "USER_KV"
+id = "dev-user-kv"
+
+# R2 存储桶（本地模式自动使用本地存储）
+[[r2_buckets]]
+binding = "IMAGES_R2"
+bucket_name = "cf-blog-images"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "PRESENCE_DO"
+class_name = "PresenceDO"
+
+[[durable_objects.bindings]]
+name = "ROOM_DO"
+class_name = "RoomDO"
+
+[[durable_objects.bindings]]
+name = "HOME_DO"
+class_name = "HomeDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["PresenceDO", "RoomDO", "HomeDO"]
+
+# 开发环境变量（敏感信息放 .dev.vars）
+[vars]
+ENVIRONMENT = "development"
+SITE_URL = "http://localhost:8787"
+
+# 开发服务器配置
+[dev]
+port = 8787
+local_protocol = "http"
