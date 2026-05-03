@@ -1,0 +1,209 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+export const prerender = false;
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// i18n values for client-side script
+const i18nValues = {
+  comment: {
+    noComments: t('comment.noComments'),
+    commentedOn: t('comment.commentedOn'),
+    approveFailed: t('comment.approveFailed'),
+    rejectFailed: t('comment.rejectFailed'),
+    rejectReasonPrompt: t('comment.rejectReason'),
+    statusPending: t('comment.status.pending'),
+    statusApproved: t('comment.status.approved'),
+    statusRejected: t('comment.status.rejected'),
+  },
+  common: {
+    approve: t('common.confirm'),
+    reject: t('comment.reject'),
+  },
+};
+---
+
+<AdminLayout title={t('comment.management')}>
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{t('comment.management')}</h1>
+
+    <!-- 过滤器 -->
+    <div class="mb-4 flex gap-2" id="comment-filters">
+      <button data-filter="pending" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-600">
+        {t('comment.status.pending')} (<span class="count">0</span>)
+      </button>
+      <button data-filter="approved" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">
+        {t('comment.status.approved')} (<span class="count">0</span>)
+      </button>
+      <button data-filter="rejected" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">
+        {t('comment.status.rejected')} (<span class="count">0</span>)
+      </button>
+    </div>
+
+    <!-- 评论列表 -->
+    <div class="space-y-4" id="comments-list">
+      <div class="text-center text-gray-500 py-8">{t('common.loading')}</div>
+    </div>
+  </div>
+
+  <script define:i18n={i18nValues}>
+    interface Comment {
+      id: number;
+      postId: number;
+      postTitle: string;
+      userId: number;
+      userName: string;
+      content: string;
+      userApproved: boolean;
+      postApproved: boolean;
+      rejected: boolean;
+      createdAt: string;
+    }
+
+    let comments: Comment[] = [];
+    let currentFilter = 'pending';
+
+    async function fetchComments() {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/comments`);
+        const data = await res.json();
+        comments = data.data?.list || [];
+        renderComments();
+        updateFilterCounts();
+      } catch (err) {
+        console.error('Failed to fetch comments:', err);
+      }
+    }
+
+    function getFilteredComments() {
+      if (currentFilter === 'pending') return comments.filter(c => !c.userApproved || !c.postApproved);
+      if (currentFilter === 'approved') return comments.filter(c => c.userApproved && c.postApproved);
+      if (currentFilter === 'rejected') return comments.filter(c => c.rejected);
+      return comments;
+    }
+
+    function updateFilterCounts() {
+      const pendingCount = comments.filter(c => !c.userApproved || !c.postApproved).length;
+      const approvedCount = comments.filter(c => c.userApproved && c.postApproved).length;
+      const rejectedCount = comments.filter(c => c.rejected).length;
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const filter = btn.getAttribute('data-filter');
+        const count = filter === 'pending' ? pendingCount : filter === 'approved' ? approvedCount : rejectedCount;
+        const countEl = btn.querySelector('.count');
+        if (countEl) countEl.textContent = count.toString();
+      });
+    }
+
+    function renderComments() {
+      const list = document.getElementById('comments-list')!;
+      const filtered = getFilteredComments();
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-center text-gray-500 py-8">${i18n.comment.noComments}</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(comment => {
+        const statusBadge = comment.rejected
+          ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">${i18n.comment.statusRejected || 'Rejected'}</span>`
+          : comment.userApproved && comment.postApproved
+            ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">${i18n.comment.statusApproved || 'Approved'}</span>`
+            : `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">${i18n.comment.statusPending || 'Pending'}</span>`;
+
+        const actionButtons = !comment.rejected && (!comment.userApproved || !comment.postApproved)
+          ? `<div class="flex gap-2">
+              <button onclick="handleApprove(${comment.id})" class="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
+              <button onclick="handleReject(${comment.id})" class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
+            </div>`
+          : '';
+
+        return `
+          <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <span class="text-sm font-medium text-gray-900">${comment.userName}</span>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm text-gray-500">
+                  ${i18n.comment.commentedOn}
+                  <a href="/astro/post/${comment.postId}" class="text-blue-600 hover:underline">${comment.postTitle}</a>
+                </span>
+              </div>
+              <div class="flex gap-2">
+                ${statusBadge}
+              </div>
+            </div>
+
+            <p class="text-gray-700 mb-4">${comment.content}</p>
+
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-400">
+                ${new Date(comment.createdAt).toLocaleString()}
+              </span>
+              ${actionButtons}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function handleApprove(id: number) {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/comments/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approveType: 'user' }),
+        });
+        if (res.ok) {
+          comments = comments.map(c => c.id === id ? { ...c, userApproved: true } : c);
+          renderComments();
+          updateFilterCounts();
+        }
+      } catch (err) {
+        console.error('Approve failed:', err);
+        alert(i18n.comment.approveFailed);
+      }
+    }
+
+    async function handleReject(id: number) {
+      const reason = prompt(i18n.comment.rejectReasonPrompt);
+      if (!reason) return;
+
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/comments/${id}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason }),
+        });
+        if (res.ok) {
+          comments = comments.map(c => c.id === id ? { ...c, rejected: true } : c);
+          renderComments();
+          updateFilterCounts();
+        }
+      } catch (err) {
+        console.error('Reject failed:', err);
+        alert(i18n.comment.rejectFailed);
+      }
+    }
+
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.className = 'filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200';
+        });
+        btn.className = 'filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-600';
+        currentFilter = btn.getAttribute('data-filter') || 'pending';
+        renderComments();
+      });
+    });
+
+    fetchComments();
+  </script>
+</AdminLayout>

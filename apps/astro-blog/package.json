@@ -1,0 +1,35 @@
+{
+  "name": "astro-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.2.0",
+    "@cf-blog/auth-ui": "workspace:*",
+    "@cf-blog/db": "workspace:*",
+    "@lucide/astro": "^1.14.0",
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-image": "catalog:",
+    "@tiptap/extension-link": "catalog:",
+    "@tiptap/extension-placeholder": "catalog:",
+    "@tiptap/react": "catalog:",
+    "@tiptap/starter-kit": "catalog:",
+    "astro": "^5.3.0",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@types/node": "catalog:",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "catalog:"
+  }
+}

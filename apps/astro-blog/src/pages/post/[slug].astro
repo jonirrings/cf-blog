@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// 获取文章详情
+const { slug } = Astro.params;
+let post: Post | null = null;
+
+try {
+  const api_url = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+  const res = await fetch(`${api_url}/api/posts/${slug}`);
+  if (res.ok) {
+    const { data } = await res.json();
+    post = data || null;
+  }
+} catch (error) {
+  console.error('Failed to fetch post:', error);
+}
+
+if (!post) {
+  return Astro.redirect('/astro/');
+}
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString(locale);
+}
+---
+
+<Layout title={post.title} locale={locale}>
+  <article>
+    <nav class="mb-4">
+      <a href="/astro/" class="text-blue-600 hover:underline">{t('site.backToHome')}</a>
+    </nav>
+
+    <header class="mb-8">
+      <h1 class="text-4xl font-bold mb-2 text-gray-900">{post.title}</h1>
+      <div class="text-sm text-gray-500 space-x-4">
+        <span>{t('site.publishedAt')} {formatDate(post.created_at)}</span>
+        {post.updated_at !== post.created_at && (
+          <span>{t('site.updatedAt')} {formatDate(post.updated_at)}</span>
+        )}
+      </div>
+    </header>
+
+    {post.excerpt && (
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <p class="text-gray-700 italic">{post.excerpt}</p>
+      </div>
+    )}
+
+    <div class="prose prose-lg max-w-none" set:html={post.content} />
+  </article>
+</Layout>

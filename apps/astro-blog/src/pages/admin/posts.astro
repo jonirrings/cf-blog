@@ -1,0 +1,199 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+export const prerender = false;
+
+interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  framework: 'next' | 'nuxt' | 'svelte' | 'astro' | 'solid';
+  status: 'draft' | 'published';
+  viewCount: number;
+  createdAt: string;
+}
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// 从 API 获取文章列表
+let posts: Post[] = [];
+let errorMessage = '';
+
+try {
+  const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+  const res = await fetch(`${apiUrl}/api/posts`);
+  if (res.ok) {
+    const data = await res.json();
+    posts = data.data?.list || [];
+  }
+} catch (err) {
+  errorMessage = t('post.loadFailed');
+  console.error(err);
+}
+
+// i18n values for client-side script
+const i18nValues = {
+  post: {
+    title: t('post.title'),
+    framework: t('post.framework'),
+    status: t('post.status'),
+    viewCount: t('post.viewCount'),
+    statusPublished: t('post.status.published'),
+    statusDraft: t('post.status.draft'),
+    noPosts: t('post.noPosts'),
+    deleteConfirm: t('post.deleteConfirm'),
+  },
+  common: {
+    all: t('filter.all'),
+    published: t('filter.published'),
+    draft: t('filter.draft'),
+    view: t('common.view'),
+    edit: t('common.edit'),
+    delete: t('common.delete'),
+    actions: t('common.actions'),
+  },
+  framework: {
+    next: t('framework.next'),
+    nuxt: t('framework.nuxt'),
+    svelte: t('framework.svelte'),
+    astro: t('framework.astro'),
+    solid: t('framework.solid'),
+  },
+};
+---
+
+<AdminLayout title={t('post.management')}>
+  <div>
+    <div class="mb-6 flex justify-between items-center">
+      <a href="/astro/admin/posts/new" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+        {t('post.new')}
+      </a>
+    </div>
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{t('post.management')}</h1>
+
+    <!-- 过滤器 -->
+    <div class="mb-4 flex gap-2" id="filter-buttons">
+      <button
+        data-filter="all"
+        class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-600"
+      >
+        {t('filter.all')} ({posts.length})
+      </button>
+      <button
+        data-filter="published"
+        class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+      >
+        {t('filter.published')} ({posts.filter(p => p.status === 'published').length})
+      </button>
+      <button
+        data-filter="draft"
+        class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+      >
+        {t('filter.draft')} ({posts.filter(p => p.status === 'draft').length})
+      </button>
+    </div>
+
+    <!-- 文章列表 -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('post.title')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('post.framework')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('post.status')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('post.viewCount')}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {posts.length === 0 ? (
+            <tr>
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">{t('post.noPosts')}</td>
+            </tr>
+          ) : (
+            posts.map((post) => (
+              <tr class="hover:bg-gray-50 post-row" data-status={post.status}>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{post.title}</div>
+                  <div class="text-sm text-gray-500">/{post.slug}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    post.framework === 'next' ? 'bg-blue-100 text-blue-800' :
+                    post.framework === 'nuxt' ? 'bg-green-100 text-green-800' :
+                    post.framework === 'svelte' ? 'bg-orange-100 text-orange-800' :
+                    post.framework === 'astro' ? 'bg-purple-100 text-purple-800' :
+                    'bg-cyan-100 text-cyan-800'
+                  }`}>
+                    {t(`framework.${post.framework}`)}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {post.status === 'published' ? t('post.status.published') : t('post.status.draft')}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{post.viewCount}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                  <a href={`/astro/post/${post.slug}`} class="text-blue-600 hover:underline">{t('common.view')}</a>
+                  <a href={`/astro/admin/posts/edit/${post.id}`} class="text-green-600 hover:underline">{t('common.edit')}</a>
+                  <button class="text-red-600 hover:underline delete-btn" data-id={post.id}>{t('common.delete')}</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script define:i18n={i18nValues}>
+    // 过滤器功能
+    const filterButtons = document.querySelectorAll('#filter-buttons button');
+    const postRows = document.querySelectorAll('.post-row');
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => {
+          b.classList.remove('bg-blue-100', 'text-blue-600');
+          b.classList.add('bg-gray-100', 'text-gray-600');
+        });
+        btn.classList.remove('bg-gray-100', 'text-gray-600');
+        btn.classList.add('bg-blue-100', 'text-blue-600');
+
+        const filter = btn.getAttribute('data-filter');
+        postRows.forEach(row => {
+          const status = row.getAttribute('data-status');
+          if (filter === 'all' || status === filter) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // 删除功能
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(i18n.post.deleteConfirm)) return;
+        const id = btn.getAttribute('data-id');
+        try {
+          const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+          const res = await fetch(`${apiBaseUrl}/api/posts/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            btn.closest('tr')?.remove();
+          }
+        } catch (err) {
+          console.error('Delete failed:', err);
+        }
+      });
+    });
+  </script>
+</AdminLayout>

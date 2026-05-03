@@ -1,0 +1,20 @@
+---
+import PendingPage from '../../components/PendingPage';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{t('auth.pendingTitle')}</title>
+  </head>
+  <body class="bg-gray-50">
+    <PendingPage client:only="react" locale={locale} apiBaseUrl={apiBaseUrl} />
+  </body>
+</html>

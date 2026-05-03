@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getLocaleFromRequest, getT } from '../lib/i18n';
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  created_at: string;
+}
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// 获取文章列表
+let posts: Post[] = [];
+try {
+  const api_url = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+  const res = await fetch(`${api_url}/api/posts`);
+  const { data } = await res.json();
+  posts = data || [];
+} catch (error) {
+  console.error('Failed to fetch posts:', error);
+}
+---
+
+<Layout title="Astro Blog" locale={locale}>
+  <section>
+    <h2 class="text-2xl font-semibold mb-4 text-gray-900">{t('site.latestPosts')}</h2>
+
+    {posts.length === 0 ? (
+      <p class="text-gray-500">{t('site.noPosts')}</p>
+    ) : (
+      <ul class="space-y-4">
+        {posts.map((post) => (
+          <li class="p-4 bg-white rounded-lg shadow">
+            <a
+              href={`/astro/post/${post.slug}`}
+              class="text-xl font-semibold text-blue-600 hover:underline"
+            >
+              {post.title}
+            </a>
+            {post.excerpt && (
+              <p class="text-gray-600 mt-2">{post.excerpt}</p>
+            )}
+            <p class="text-sm text-gray-400 mt-2">
+              {new Date(post.created_at).toLocaleDateString(locale)}
+            </p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</Layout>

@@ -1,0 +1,62 @@
+---
+import { getLocaleFromRequest, getT } from '../lib/i18n';
+
+interface Props {
+  title: string;
+  description?: string;
+  locale?: string;
+}
+
+const { title, description, locale: localeProp } = Astro.props;
+const locale = localeProp || getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description || 'A blog powered by Cloudflare'} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <header class="bg-white shadow">
+      <div class="max-w-4xl mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-gray-900">
+          <a href="/astro/" class="hover:text-blue-600">Astro Blog</a>
+        </h1>
+        <p class="text-gray-600 mt-1">{t('site.poweredBy')}</p>
+      </div>
+    </header>
+
+    <nav class="bg-gray-100 border-b">
+      <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div>
+          <span class="font-semibold mr-3 text-sm">{t('site.frameworkSwitch')}</span>
+          <a href="/next/" class="text-blue-600 hover:underline text-sm mr-3">{t('framework.next')}</a>
+          <a href="/nuxt/" class="text-green-600 hover:underline text-sm mr-3">{t('framework.nuxt')}</a>
+          <a href="/svelte/" class="text-orange-600 hover:underline text-sm mr-3">{t('framework.svelte')}</a>
+          <span class="text-purple-600 font-semibold text-sm">Astro</span>
+        </div>
+        <a href="/astro/auth/login" class="text-blue-600 hover:underline text-sm">{t('nav.login')}</a>
+      </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="bg-white border-t mt-8">
+      <div class="max-w-4xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+        {t('site.copyright')}
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  .min-h-screen {
+    min-height: 100vh;
+  }
+</style>

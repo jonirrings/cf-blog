@@ -1,0 +1,37 @@
+{
+  "name": "next-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cf-blog/db": "workspace:*",
+    "@cf-blog/i18n": "workspace:*",
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-image": "catalog:",
+    "@tiptap/extension-link": "catalog:",
+    "@tiptap/extension-placeholder": "catalog:",
+    "@tiptap/react": "catalog:",
+    "@tiptap/starter-kit": "catalog:",
+    "clsx": "^2.1.1",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

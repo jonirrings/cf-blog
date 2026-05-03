@@ -1,0 +1,251 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+export const prerender = false;
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// i18n values for client-side script
+const i18nValues = {
+  user: {
+    name: t('user.name'),
+    role: t('user.role'),
+    status: t('comment.status'),
+    publisherApplication: t('user.publisherApplication'),
+    registrationDate: t('user.registrationDate'),
+    actions: t('common.actions'),
+    noUsers: t('user.noUsers'),
+    roleCommenter: t('user.role.commenter'),
+    rolePublisher: t('user.role.publisher'),
+    roleAdmin: t('user.role.admin'),
+    statusApproved: t('user.approved'),
+    actionApprove: t('user.approve'),
+    publisherApplicationApproved: t('user.publisherApplication') + ' - ' + t('comment.status.approved'),
+    publisherApplicationRejected: t('user.publisherApplication') + ' - ' + t('comment.status.rejected'),
+  },
+  common: {
+    all: t('filter.all'),
+    approve: t('common.confirm'),
+    reject: t('comment.reject'),
+  },
+  filter: {
+    pending: t('filter.pending'),
+    approved: t('filter.approved'),
+  },
+};
+---
+
+<AdminLayout title={t('user.management')}>
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{t('user.management')}</h1>
+
+    <!-- 过滤器 -->
+    <div class="mb-4 flex gap-2" id="user-filters">
+      <button data-filter="all" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-600">
+        {t('filter.all')} (<span class="count">0</span>)
+      </button>
+      <button data-filter="pending" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">
+        {t('filter.pending')} (<span class="count">0</span>)
+      </button>
+      <button data-filter="approved" class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">
+        {t('filter.approved')} (<span class="count">0</span>)
+      </button>
+    </div>
+
+    <!-- 用户列表 -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('user.name')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('user.role')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('comment.status')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('user.publisherApplication')}</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('user.registrationDate')}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{t('common.actions')}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200" id="users-table-body">
+          <tr>
+            <td colspan="6" class="px-6 py-8 text-center text-gray-500">{t('common.loading')}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script define:i18n={i18nValues}>
+    interface User {
+      id: number;
+      email: string;
+      name: string;
+      role: 'admin' | 'publisher' | 'commenter';
+      isApproved: boolean;
+      publisherApplicationStatus: 'none' | 'pending' | 'approved' | 'rejected';
+      createdAt: string;
+    }
+
+    let users: User[] = [];
+    let currentFilter = 'all';
+
+    async function fetchUsers() {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/users`);
+        const data = await res.json();
+        users = data.data?.list || [];
+        renderUsers();
+        updateFilterCounts();
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+      }
+    }
+
+    function getFilteredUsers() {
+      if (currentFilter === 'all') return users;
+      if (currentFilter === 'pending') return users.filter(u => !u.isApproved);
+      if (currentFilter === 'approved') return users.filter(u => u.isApproved);
+      return users;
+    }
+
+    function updateFilterCounts() {
+      const allCount = users.length;
+      const pendingCount = users.filter(u => !u.isApproved).length;
+      const approvedCount = users.filter(u => u.isApproved).length;
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const filter = btn.getAttribute('data-filter');
+        const count = filter === 'all' ? allCount : filter === 'pending' ? pendingCount : approvedCount;
+        const countEl = btn.querySelector('.count');
+        if (countEl) countEl.textContent = count.toString();
+      });
+    }
+
+    function renderUsers() {
+      const tbody = document.getElementById('users-table-body')!;
+      const filtered = getFilteredUsers();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">${i18n.user.noUsers}</td></tr>`;
+        return;
+      }
+
+      const locale = document.documentElement.lang || 'zh-CN';
+
+      tbody.innerHTML = filtered.map(user => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4">
+            <div>
+              <div class="text-sm font-medium text-gray-900">${user.name}</div>
+              <div class="text-sm text-gray-500">${user.email}</div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <select
+              value="${user.role}"
+              onchange="handleRoleChange(${user.id}, this.value)"
+              class="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="commenter">${i18n.user.roleCommenter}</option>
+              <option value="publisher">${i18n.user.rolePublisher}</option>
+              <option value="admin">${i18n.user.roleAdmin}</option>
+            </select>
+          </td>
+          <td class="px-6 py-4">
+            ${user.isApproved
+              ? `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">${i18n.user.statusApproved}</span>`
+              : `<button onclick="handleApproveUser(${user.id})" class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200">${i18n.user.actionApprove}</button>`
+            }
+          </td>
+          <td class="px-6 py-4">
+            ${getUserPublisherAppHtml(user)}
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-500">${new Date(user.createdAt).toLocaleDateString(locale)}</td>
+          <td class="px-6 py-4 text-right"></td>
+        </tr>
+      `).join('');
+    }
+
+    function getUserPublisherAppHtml(user: User) {
+      if (user.publisherApplicationStatus === 'none') return '-';
+      if (user.publisherApplicationStatus === 'pending') {
+        return `<div class="flex gap-2">
+          <button onclick="handlePublisherApplication(${user.id}, true)" class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200">${i18n.common.approve}</button>
+          <button onclick="handlePublisherApplication(${user.id}, false)" class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">${i18n.common.reject}</button>
+        </div>`;
+      }
+      if (user.publisherApplicationStatus === 'approved') {
+        return `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">${i18n.user.publisherApplicationApproved}</span>`;
+      }
+      return `<span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">${i18n.user.publisherApplicationRejected}</span>`;
+    }
+
+    async function handleApproveUser(id: number) {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/users/${id}/approve`, { method: 'POST' });
+        if (res.ok) {
+          users = users.map(u => u.id === id ? { ...u, isApproved: true } : u);
+          renderUsers();
+          updateFilterCounts();
+        }
+      } catch (err) {
+        console.error('Approve user failed:', err);
+      }
+    }
+
+    async function handleRoleChange(id: number, newRole: 'admin' | 'publisher' | 'commenter') {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/users/${id}/role`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: newRole }),
+        });
+        if (res.ok) {
+          users = users.map(u => u.id === id ? { ...u, role: newRole } : u);
+        }
+      } catch (err) {
+        console.error('Role change failed:', err);
+      }
+    }
+
+    async function handlePublisherApplication(id: number, approve: boolean) {
+      try {
+        const apiBaseUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+        const res = await fetch(`${apiBaseUrl}/api/users/${id}/publisher-application`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approve }),
+        });
+        if (res.ok) {
+          users = users.map(u =>
+            u.id === id
+              ? { ...u, publisherApplicationStatus: approve ? 'approved' : 'rejected', role: approve ? 'publisher' : u.role }
+              : u
+          );
+          renderUsers();
+          updateFilterCounts();
+        }
+      } catch (err) {
+        console.error('Publisher application failed:', err);
+      }
+    }
+
+    // Filter button handlers
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.className = 'filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200';
+        });
+        btn.className = 'filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-100 text-blue-600';
+        currentFilter = btn.getAttribute('data-filter') || 'all';
+        renderUsers();
+      });
+    });
+
+    fetchUsers();
+  </script>
+</AdminLayout>

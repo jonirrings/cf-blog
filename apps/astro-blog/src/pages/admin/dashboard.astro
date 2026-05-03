@@ -1,0 +1,122 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getLocaleFromRequest, getT } from '../../lib/i18n';
+
+export const prerender = false;
+
+interface Stats {
+  totalPosts: number;
+  publishedPosts: number;
+  draftPosts: number;
+  totalComments: number;
+  pendingComments: number;
+  totalUsers: number;
+  pendingUsers: number;
+  totalViews: number;
+}
+
+const locale = getLocaleFromRequest(Astro.request);
+const t = getT(locale);
+
+// 从 API 获取统计数据
+let stats: Stats | null = null;
+
+try {
+  const apiUrl = import.meta.env.PUBLIC_API_URL || 'http://localhost:8788';
+  const res = await fetch(`${apiUrl}/api/stats`);
+  const data = await res.json();
+  if (data.success && data.data) {
+    stats = data.data;
+  }
+} catch (err) {
+  console.error('Failed to fetch stats:', err);
+}
+---
+
+<AdminLayout title={t('admin.dashboard')}>
+  <div class="space-y-8">
+    <h1 class="text-2xl font-bold text-gray-900">{t('admin.dashboard')}</h1>
+
+    <!-- 统计卡片 -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500">{t('stats.totalPosts')}</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">{stats?.totalPosts || 0}</p>
+            <p class="mt-1 text-sm text-gray-400">
+              {stats?.publishedPosts || 0} {t('post.status.published')} · {stats?.draftPosts || 0} {t('post.status.draft')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500">{t('stats.totalComments')}</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">{stats?.totalComments || 0}</p>
+            <p class="mt-1 text-sm text-gray-400">{stats?.pendingComments || 0} {t('comment.pending')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500">{t('stats.totalUsers')}</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">{stats?.totalUsers || 0}</p>
+            <p class="mt-1 text-sm text-gray-400">{stats?.pendingUsers || 0} {t('user.pending')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-gray-500">{t('stats.totalViews')}</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">{stats?.totalViews || 0}</p>
+            <p class="mt-1 text-sm text-gray-400">{t('stats.totalViews.sub')}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快速操作 -->
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">{t('admin.quickActions')}</h2>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <a href="/astro/admin/posts/new" class="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+          <h3 class="font-medium text-gray-900">{t('post.new')}</h3>
+          <p class="mt-1 text-sm text-gray-500">{t('admin.quickActions.newPost')}</p>
+        </a>
+        <a href="/astro/admin/comments" class="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+          <h3 class="font-medium text-gray-900">{t('admin.approveComments')}</h3>
+          <p class="mt-1 text-sm text-gray-500">{t('admin.quickActions.approveComments')}</p>
+        </a>
+        <a href="/astro/admin/users" class="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
+          <h3 class="font-medium text-gray-900">{t('admin.userManagement')}</h3>
+          <p class="mt-1 text-sm text-gray-500">{t('admin.quickActions.userManagement')}</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- 最近活动 -->
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">{t('admin.recentActivity')}</h2>
+      <div class="bg-white rounded-lg shadow">
+        <div class="divide-y divide-gray-200">
+          {[1, 2, 3, 4, 5].map((hour) => (
+            <div class="px-6 py-4 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-900">{t('admin.activity.newPost')}</p>
+                <p class="text-sm text-gray-500">{hour} {t('admin.activity.time.hour')}</p>
+              </div>
+              <span class="text-sm text-blue-600">{t('common.view')}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
